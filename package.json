@@ -11,10 +11,10 @@
   },
   "private": true,
   "devDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.60.1",
-    "@tailwindcss/oxide-linux-x64-gnu": "^4.2.2",
+    "@rollup/rollup-linux-arm64-gnu": "^4.60.1",
+    "@tailwindcss/oxide-linux-arm64-gnu": "^4.2.2",
     "concurrently": "^9.2.1",
-    "lightningcss-linux-x64-gnu": "^1.32.0",
+    "lightningcss-linux-arm64-gnu": "^1.32.0",
     "prettier": "^3.8.1",
     "typescript": "~5.9.2"
   }
