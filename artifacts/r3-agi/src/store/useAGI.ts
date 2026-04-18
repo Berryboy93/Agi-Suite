@@ -24,7 +24,6 @@ interface AGIState {
   logs: LogEntry[];
   prios: PrioItem[];
   chatMessages: { role: 'user' | 'assistant'; content: string }[];
-  apiKey: string;
   agentSuiteOpen: boolean;
 
   setView: (view: string) => void;
@@ -37,7 +36,6 @@ interface AGIState {
   togglePrio: (i: number) => void;
   addChatMessage: (role: 'user' | 'assistant', content: string) => void;
   clearChat: () => void;
-  setApiKey: (key: string) => void;
   toggleAgentSuite: () => void;
 }
 
@@ -119,7 +117,6 @@ export const useAGI = create<AGIState>((set, get) => ({
   logs: [{ ts: 'SESSION', tag: 'INIT', cls: 'lt-cmd', text: 'AGI Command Center v3.1.0 loaded — PRD v4.1 · 2026-04-16' }],
   prios: loadPrios(),
   chatMessages: [],
-  apiKey: '',
   agentSuiteOpen: false,
 
   setView: (view) => {
@@ -164,8 +161,6 @@ export const useAGI = create<AGIState>((set, get) => ({
     set({ chatMessages: [] });
     get().addLog('CLEAR', 'Chat cleared', 'lt-cmd');
   },
-
-  setApiKey: (key) => set({ apiKey: key }),
 
   toggleAgentSuite: () => set(s => ({ agentSuiteOpen: !s.agentSuiteOpen })),
 }));

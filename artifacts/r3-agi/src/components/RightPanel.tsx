@@ -1,9 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAGI } from '../store/useAGI';
 
-const ANTHROPIC_KEY_PREFIX = ['sk', 'ant'].join('-') + '-';
-const KEY_PLACEHOLDER = `${ANTHROPIC_KEY_PREFIX}...`;
-
 const SYSTEM_PROMPT = `You are the AGI Command Agent for R3 v4, an AI-native Digital Audio Workstation.
 
 ═══ IDENTITY ═══
@@ -213,26 +210,19 @@ function inlineMarkdown(text: string): React.ReactNode {
 }
 
 export function RightPanel() {
-  const { activePanelMode, setPanelMode, chatMessages, addChatMessage, clearChat, apiKey, setApiKey, logs, clearLog, focusBanner } = useAGI();
+  const { activePanelMode, setPanelMode, chatMessages, addChatMessage, clearChat, logs, clearLog, focusBanner } = useAGI();
   const [input, setInput] = useState('');
   const [typing, setTyping] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
-  const [keyStatus, setKeyStatus] = useState<'ok' | 'bad'>('bad');
-  const [shakeKey, setShakeKey] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const logEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [chatMessages, typing, streamingContent]);
   useEffect(() => { logEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [logs]);
 
-  function onKeyInput(v: string) {
-    setApiKey(v);
-    setKeyStatus(v.startsWith(ANTHROPIC_KEY_PREFIX) && v.length > 20 ? 'ok' : 'bad');
-  }
-
   async function sendMessage(text?: string) {
     const t = (text ?? input).trim();
-    if (!t || keyStatus !== 'ok') return;
+    if (!t) return;
     setInput('');
     addChatMessage('user', t);
     setTyping(true);
@@ -251,21 +241,16 @@ export function RightPanel() {
     }
 
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
+      const res = await fetch('/api/agent/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true',
-        },
-        body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1500, system: SYSTEM_PROMPT, messages: msgs, stream: true }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ system: SYSTEM_PROMPT, messages: msgs }),
       });
 
       if (!res.ok) {
         setTyping(false);
         const err = await res.json().catch(() => ({}));
-        addChatMessage('assistant', '⚠ API Error: ' + (err?.error?.message || 'HTTP ' + res.status));
+        addChatMessage('assistant', '⚠ API Error: ' + (err?.error || 'HTTP ' + res.status));
         return;
       }
 
@@ -291,11 +276,12 @@ export function RightPanel() {
           if (data === '[DONE]') { streamDone = true; break; }
           try {
             const parsed = JSON.parse(data);
-            if (parsed.type === 'content_block_delta' && parsed.delta?.type === 'text_delta') {
-              accumulated += parsed.delta.text;
+            if (parsed.type === 'text_delta') {
+              accumulated += parsed.text;
               setStreamingContent(accumulated);
-            } else if (parsed.type === 'message_stop' || parsed.type === 'error') {
+            } else if (parsed.type === 'error') {
               streamDone = true;
+              addChatMessage('assistant', '⚠ ' + parsed.message);
               break;
             }
           } catch {
@@ -315,12 +301,7 @@ export function RightPanel() {
   }
 
   function quickSend(text: string) {
-    if (keyStatus === 'ok') {
-      sendMessage(text);
-    } else {
-      setShakeKey(true);
-      setTimeout(() => setShakeKey(false), 400);
-    }
+    sendMessage(text);
   }
 
   function exportChat() {
@@ -374,24 +355,6 @@ export function RightPanel() {
 
       {activePanelMode === 'chat' && (
         <div style={{ display: 'flex', flex: 1, flexDirection: 'column', overflow: 'hidden' }}>
-          <div style={{ padding: '7px 11px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 7, flexShrink: 0, background: 'var(--surface)' }}>
-            <span style={{ fontSize: 9, color: 'var(--dim)', letterSpacing: 1, flexShrink: 0 }}>KEY</span>
-            <input
-              type="password"
-              placeholder={KEY_PLACEHOLDER}
-              value={apiKey}
-              onChange={e => onKeyInput(e.target.value)}
-              className={shakeKey ? 'shake' : ''}
-              style={{
-                flex: 1, background: 'transparent', border: '1px solid var(--border)', borderRadius: 2,
-                color: 'var(--text2)', fontFamily: 'var(--mono)', fontSize: 11, padding: '4px 8px', outline: 'none',
-              }}
-            />
-            <span style={{ fontSize: 9, color: keyStatus === 'ok' ? 'var(--good)' : 'var(--bad)' }}>
-              {keyStatus === 'ok' ? '✓ SET' : '✗ UNSET'}
-            </span>
-          </div>
-
           <div style={{ flex: 1, overflowY: 'auto', padding: 12, display: 'flex', flexDirection: 'column', gap: 9 }}>
             <div style={{ animation: 'fadeUp .18s ease both' }}>
               <div style={{ fontSize: 8, letterSpacing: 2, textTransform: 'uppercase' as const, color: 'var(--acid)', marginBottom: 3 }}>R3 AGI AGENT</div>
@@ -465,12 +428,10 @@ export function RightPanel() {
               <button onClick={exportChat} style={{ fontFamily: 'var(--mono)', fontSize: 9, letterSpacing: 1, padding: '4px 9px', borderRadius: 2, border: '1px solid var(--bor2)', cursor: 'pointer', background: 'transparent', color: 'var(--text2)', textTransform: 'uppercase' as const }}>Export</button>
               <button
                 onClick={() => sendMessage()}
-                disabled={keyStatus !== 'ok'}
                 style={{
                   marginLeft: 'auto', fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: 1,
-                  padding: '6px 12px', borderRadius: 2, border: 'none', cursor: keyStatus === 'ok' ? 'pointer' : 'not-allowed',
+                  padding: '6px 12px', borderRadius: 2, border: 'none', cursor: 'pointer',
                   background: 'var(--accent)', color: '#000', fontWeight: 700, textTransform: 'uppercase' as const,
-                  opacity: keyStatus === 'ok' ? 1 : .3,
                 }}
               >
                 Send ↵

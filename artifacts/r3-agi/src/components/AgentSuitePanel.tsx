@@ -768,10 +768,9 @@ interface ChatPanelProps {
   agent: AgentDef;
   messages: { role: string; content: string }[];
   setMessages: (msgs: { role: string; content: string }[] | ((prev: { role: string; content: string }[]) => { role: string; content: string }[])) => void;
-  apiKey: string;
 }
 
-function ChatPanel({ agent, messages, setMessages, apiKey }: ChatPanelProps) {
+function ChatPanel({ agent, messages, setMessages }: ChatPanelProps) {
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
   const [awaitingFirst, setAwaitingFirst] = useState(false);
@@ -786,11 +785,7 @@ function ChatPanel({ agent, messages, setMessages, apiKey }: ChatPanelProps) {
   const send = useCallback(async (text?: string) => {
     const content = (text ?? input).trim();
     if (!content || busy) return;
-    if (!apiKey || apiKey.length < 20) {
-      setError('API key not set — enter your key in the main AGI Agent panel on the right.');
-      return;
-    }
-    setInput('');
+setInput('');
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
     setError(null);
     const updated = [...messages, { role: 'user', content }];
@@ -798,18 +793,10 @@ function ChatPanel({ agent, messages, setMessages, apiKey }: ChatPanelProps) {
     setBusy(true);
     setAwaitingFirst(true);
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
+      const res = await fetch('/api/agent/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 1500,
-          stream: true,
           system: agent.systemPrompt,
           messages: updated.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })),
         }),
@@ -834,13 +821,13 @@ function ChatPanel({ agent, messages, setMessages, apiKey }: ChatPanelProps) {
           const raw = line.slice(6).trim();
           if (raw === '[DONE]') break;
           try {
-            const ev = JSON.parse(raw) as { type: string; delta?: { type: string; text: string } };
-            if (ev.type === 'content_block_delta' && ev.delta?.type === 'text_delta') {
+            const ev = JSON.parse(raw) as { type: string; text?: string };
+            if (ev.type === 'text_delta') {
               setMessages(prev => {
                 const next = [...prev];
                 const last = next[next.length - 1];
                 if (last?.role === 'assistant') {
-                  next[next.length - 1] = { ...last, content: last.content + ev.delta!.text };
+                  next[next.length - 1] = { ...last, content: last.content + (ev as unknown as { text: string }).text };
                 }
                 return next;
               });
@@ -854,7 +841,7 @@ function ChatPanel({ agent, messages, setMessages, apiKey }: ChatPanelProps) {
       setBusy(false);
       setAwaitingFirst(false);
     }
-  }, [input, busy, messages, agent.systemPrompt, apiKey, setMessages]);
+  }, [input, busy, messages, agent.systemPrompt, setMessages]);
 
   const onKey = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
@@ -953,7 +940,7 @@ interface AgentSuitePanelProps {
 }
 
 export function AgentSuitePanel({ isOpen, onClose }: AgentSuitePanelProps) {
-  const { apiKey } = useAGI();
+
   const [activeId, setActiveId] = useState('wire');
   const [convos, setConvos] = useState<Record<string, { role: string; content: string }[]>>(loadConvos);
   const activeAgent = AGENTS.find(a => a.id === activeId)!;
@@ -1088,7 +1075,6 @@ export function AgentSuitePanel({ isOpen, onClose }: AgentSuitePanelProps) {
             agent={activeAgent}
             messages={msgs}
             setMessages={setMsgs}
-            apiKey={apiKey}
           />
         </div>
       </div>

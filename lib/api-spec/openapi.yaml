@@ -12,6 +12,8 @@ tags:
     description: Health operations
   - name: metrics
     description: Live metrics and session tracking
+  - name: agent
+    description: Server-side AI agent proxy
 paths:
   /healthz:
     get:
@@ -68,6 +70,24 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MetricsPayload"
+  /agent/chat:
+    post:
+      operationId: agentChat
+      tags: [agent]
+      summary: Proxy streaming AI chat to Anthropic
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentChatRequest"
+      responses:
+        "200":
+          description: SSE stream of text deltas
+          content:
+            text/event-stream:
+              schema:
+                type: string
 components:
   schemas:
     HealthStatus:
@@ -87,6 +107,26 @@ components:
       required:
         - activeUsers
         - totalSubscribers
+    AgentChatRequest:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            type: object
+            properties:
+              role:
+                type: string
+                enum: [user, assistant]
+              content:
+                type: string
+            required: [role, content]
+        system:
+          type: string
+        max_tokens:
+          type: integer
+      required:
+        - messages
     HeartbeatRequest:
       type: object
       properties:
