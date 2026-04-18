@@ -1,0 +1,7 @@
+node_modules/
+dist/
+*.mjs.map
+.env
+.env.*
+!.env.example
+tsconfig.tsbuildinfo

@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "dev": "pnpm --filter api-server dev & pnpm --filter r3-agi dev",
+    "dev": "concurrently -n api,agi -c blue,green \"pnpm --filter @workspace/api-server dev\" \"pnpm --filter @workspace/r3-agi dev\"",
     "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
     "build": "pnpm run typecheck && pnpm -r --if-present run build",
     "typecheck:libs": "tsc --build",
@@ -13,6 +13,7 @@
   "devDependencies": {
     "@rollup/rollup-linux-x64-gnu": "^4.60.1",
     "@tailwindcss/oxide-linux-x64-gnu": "^4.2.2",
+    "concurrently": "^9.2.1",
     "lightningcss-linux-x64-gnu": "^1.32.0",
     "prettier": "^3.8.1",
     "typescript": "~5.9.2"
