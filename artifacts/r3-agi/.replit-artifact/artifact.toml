@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "R3 AGI Command Center"
+version = "1.0.0"
+id = "artifacts/r3-agi"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 20335
+
+[services.development]
+run = "pnpm --filter @workspace/r3-agi run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/r3-agi", "run", "build" ]
+publicDir = "artifacts/r3-agi/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20335"
+BASE_PATH = "/"
