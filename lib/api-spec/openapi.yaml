@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: metrics
+    description: Live metrics and session tracking
 paths:
   /healthz:
     get:
@@ -24,6 +26,48 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /metrics:
+    get:
+      operationId: getMetrics
+      tags: [metrics]
+      summary: Get current metrics snapshot
+      responses:
+        "200":
+          description: Current metrics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetricsPayload"
+  /metrics/stream:
+    get:
+      operationId: streamMetrics
+      tags: [metrics]
+      summary: SSE stream of live metrics
+      responses:
+        "200":
+          description: Event stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+  /metrics/heartbeat:
+    post:
+      operationId: heartbeat
+      tags: [metrics]
+      summary: Register active session heartbeat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HeartbeatRequest"
+      responses:
+        "200":
+          description: Heartbeat acknowledged
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetricsPayload"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +77,20 @@ components:
           type: string
       required:
         - status
-
+    MetricsPayload:
+      type: object
+      properties:
+        activeUsers:
+          type: integer
+        totalSubscribers:
+          type: integer
+      required:
+        - activeUsers
+        - totalSubscribers
+    HeartbeatRequest:
+      type: object
+      properties:
+        sessionId:
+          type: string
+      required:
+        - sessionId
