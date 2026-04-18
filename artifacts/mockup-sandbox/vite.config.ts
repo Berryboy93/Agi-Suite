@@ -28,11 +28,7 @@ if (!basePath) {
 
 export default defineConfig({
   base: basePath,
-  plugins: [
-    mockupPreviewPlugin(),
-    react(),
-    tailwindcss(),
-  ],
+  plugins: [mockupPreviewPlugin(), react(), tailwindcss()],
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "src"),

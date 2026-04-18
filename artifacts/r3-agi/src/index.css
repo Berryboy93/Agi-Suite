@@ -1,29 +1,39 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;600;700;800&display=swap");
 
 :root {
-  --bg:      #09090b; /* Zinc-950 */
+  --bg: #09090b; /* Zinc-950 */
   --surface: #18181b; /* Zinc-900 */
-  --sur2:    #27272a; /* Zinc-800 */
-  --border:  rgba(39, 39, 42, 0.5); /* Zinc-800/50 — 6% opacity */
-  --bor2:    rgba(63, 63, 70, 0.5);  /* Zinc-700/50 */
-  --accent:  #a3e635; /* Acid Green — consolidated primary signal */
-  --acid:    #a3e635; /* alias */
-  --red:     #ff3d71;
-  --violet:  #8b5cf6;
-  --dim:     #52525b; /* Zinc-600 */
-  --text:    #f4f4f5; /* Zinc-100 */
-  --text2:   #71717a; /* Zinc-500 */
-  --warn:    #f59e0b;
-  --good:    #a3e635;
-  --bad:     #ff3d71;
-  --done:    #10b981;
-  --mono:    'JetBrains Mono', monospace;
-  --sans:    'Inter', sans-serif;
+  --sur2: #27272a; /* Zinc-800 */
+  --border: rgba(39, 39, 42, 0.5); /* Zinc-800/50 — 6% opacity */
+  --bor2: rgba(63, 63, 70, 0.5); /* Zinc-700/50 */
+  --accent: #a3e635; /* Acid Green — consolidated primary signal */
+  --acid: #a3e635; /* alias */
+  --red: #ff3d71;
+  --violet: #8b5cf6;
+  --dim: #52525b; /* Zinc-600 */
+  --text: #f4f4f5; /* Zinc-100 */
+  --text2: #71717a; /* Zinc-500 */
+  --warn: #f59e0b;
+  --good: #a3e635;
+  --bad: #ff3d71;
+  --done: #10b981;
+  --mono: "JetBrains Mono", monospace;
+  --sans: "Inter", sans-serif;
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-html, body { height: 100%; overflow: hidden; }
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
 
 body {
   background: var(--bg);
@@ -33,12 +43,12 @@ body {
 }
 
 body::before {
-  content: '';
+  content: "";
   position: fixed;
   inset: 0;
   background-image:
-    linear-gradient(rgba(163,230,53,.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(163,230,53,.015) 1px, transparent 1px);
+    linear-gradient(rgba(163, 230, 53, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(163, 230, 53, 0.015) 1px, transparent 1px);
   background-size: 40px 40px;
   pointer-events: none;
   z-index: 0;
@@ -46,15 +56,25 @@ body::before {
 }
 
 @keyframes gridDrift {
-  0% { background-position: 0 0; }
-  100% { background-position: 40px 40px; }
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 40px 40px;
+  }
 }
 
 body::after {
-  content: '';
+  content: "";
   position: fixed;
   inset: 0;
-  background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,.05) 3px, rgba(0,0,0,.05) 4px);
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0, 0, 0, 0.05) 3px,
+    rgba(0, 0, 0, 0.05) 4px
+  );
   pointer-events: none;
   z-index: 0;
 }
@@ -69,27 +89,47 @@ body::after {
 }
 
 /* ── SCROLLBAR ── */
-::-webkit-scrollbar { width: 3px; height: 3px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--bor2); border-radius: 3px; }
+::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--bor2);
+  border-radius: 3px;
+}
 
 /* ── CODE ── */
 code {
   font-family: var(--mono);
-  font-size: .9em;
-  background: rgba(163,230,53,.07);
-  border: 1px solid rgba(163,230,53,.15);
+  font-size: 0.9em;
+  background: rgba(163, 230, 53, 0.07);
+  border: 1px solid rgba(163, 230, 53, 0.15);
   padding: 1px 5px;
   border-radius: 2px;
   color: var(--accent);
 }
-code.bad { background: rgba(255,61,113,.07); border-color: rgba(255,61,113,.15); color: var(--bad); }
-code.ok  { background: rgba(163,230,53,.07);  border-color: rgba(163,230,53,.15);  color: var(--good); }
-code.vi  { background: rgba(139,92,246,.07);  border-color: rgba(139,92,246,.15);  color: var(--violet); }
+code.bad {
+  background: rgba(255, 61, 113, 0.07);
+  border-color: rgba(255, 61, 113, 0.15);
+  color: var(--bad);
+}
+code.ok {
+  background: rgba(163, 230, 53, 0.07);
+  border-color: rgba(163, 230, 53, 0.15);
+  color: var(--good);
+}
+code.vi {
+  background: rgba(139, 92, 246, 0.07);
+  border-color: rgba(139, 92, 246, 0.15);
+  color: var(--violet);
+}
 
 /* ── PRE ── */
 pre {
-  background: rgba(0,0,0,.5);
+  background: rgba(0, 0, 0, 0.5);
   border: 1px solid var(--border);
   border-radius: 3px;
   padding: 11px;
@@ -101,7 +141,11 @@ pre {
 }
 
 /* ── TABLE ── */
-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
 th {
   text-align: left;
   padding: 6px 9px;
@@ -112,63 +156,131 @@ th {
   font-size: 9px;
   text-transform: uppercase;
 }
-td { padding: 7px 9px; border-bottom: 1px solid var(--border); }
-tr:last-child td { border-bottom: none; }
+td {
+  padding: 7px 9px;
+  border-bottom: 1px solid var(--border);
+}
+tr:last-child td {
+  border-bottom: none;
+}
 
 /* ── PULSE ANIMATION ── */
 @keyframes pulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--good); }
-  50%       { opacity: .3; box-shadow: 0 0 18px var(--good); }
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 6px var(--good);
+  }
+  50% {
+    opacity: 0.3;
+    box-shadow: 0 0 18px var(--good);
+  }
 }
 
 /* ── SHIMMER ── */
 @keyframes shimmer {
-  0%   { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 /* ── ARROW PULSE ── */
 @keyframes arrowPulse {
-  0%, 100% { color: var(--dim); }
-  50%      { color: var(--accent); }
+  0%,
+  100% {
+    color: var(--dim);
+  }
+  50% {
+    color: var(--accent);
+  }
 }
 
 /* ── FADE UP ── */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ── BLINK ── */
 @keyframes blink {
-  0%, 80%, 100% { transform: scale(1); opacity: .2; }
-  40%           { transform: scale(1.4); opacity: 1; }
+  0%,
+  80%,
+  100% {
+    transform: scale(1);
+    opacity: 0.2;
+  }
+  40% {
+    transform: scale(1.4);
+    opacity: 1;
+  }
 }
 
 /* ── SHAKE ── */
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  20%      { transform: translateX(-4px); }
-  40%      { transform: translateX(4px); }
-  60%      { transform: translateX(-3px); }
-  80%      { transform: translateX(3px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-4px);
+  }
+  40% {
+    transform: translateX(4px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
 }
-.shake { animation: shake .35s ease; border-color: var(--bad) !important; }
+.shake {
+  animation: shake 0.35s ease;
+  border-color: var(--bad) !important;
+}
 
 /* ── VIEW ENTER (center panel transition) ── */
 @keyframes viewEnter {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ── SLA PULSE (LLPTE live indicator) ── */
 @keyframes slaPulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 4px var(--accent); }
-  50%       { opacity: .5; box-shadow: 0 0 12px var(--accent); }
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 4px var(--accent);
+  }
+  50% {
+    opacity: 0.5;
+    box-shadow: 0 0 12px var(--accent);
+  }
 }
 
 /* ── COUNTER UP ── */
 @keyframes countUp {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

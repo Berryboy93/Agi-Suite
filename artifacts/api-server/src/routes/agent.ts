@@ -5,7 +5,11 @@ const router = Router();
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 router.post("/agent/chat", async (req: Request, res: Response) => {
-  const { messages, system, max_tokens = 1500 } = req.body as {
+  const {
+    messages,
+    system,
+    max_tokens = 1500,
+  } = req.body as {
     messages: { role: "user" | "assistant"; content: string }[];
     system?: string;
     max_tokens?: number;
@@ -17,7 +21,9 @@ router.post("/agent/chat", async (req: Request, res: Response) => {
   }
 
   if (!process.env.ANTHROPIC_API_KEY) {
-    res.status(503).json({ error: "ANTHROPIC_API_KEY not configured on server" });
+    res
+      .status(503)
+      .json({ error: "ANTHROPIC_API_KEY not configured on server" });
     return;
   }
 
@@ -45,12 +51,34 @@ router.post("/agent/chat", async (req: Request, res: Response) => {
     });
 
     stream.on("error", (err: Error) => {
-      res.write(`data: ${JSON.stringify({ type: "error", message: err.message })}\n\n`);
-      res.end();
+      // Ignore abort errors — expected when client disconnects
+      if (
+        err.message?.includes("aborted") ||
+        err.constructor?.name === "APIUserAbortError"
+      ) {
+        return;
+      }
+      try {
+        res.write(
+          `data: ${JSON.stringify({ type: "error", message: err.message })}\n\n`,
+        );
+        res.end();
+      } catch {
+        /* ignore */
+      }
     });
 
+    // abort is a distinct event from error in the Anthropic SDK.
+    // Without this listener, _emit('abort') calls Promise.reject() intentionally,
+    // producing an unhandled rejection that kills the process on client disconnect.
+    stream.on("abort", () => {});
+
     req.on("close", () => {
-      stream.abort();
+      try {
+        stream.abort();
+      } catch {
+        /* ignore */
+      }
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Internal error";

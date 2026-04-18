@@ -1,0 +1,4 @@
+{
+  "pre-push": "pnpm typecheck",
+  "pre-commit": "pnpm exec prettier --check ."
+}

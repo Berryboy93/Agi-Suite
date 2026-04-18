@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
-import { useAGI } from '../store/useAGI';
+import { useState, useRef, useEffect } from "react";
+import { useAGI } from "../store/useAGI";
 
 const SYSTEM_PROMPT = `You are the AGI Command Agent for R3 v4, an AI-native Digital Audio Workstation.
 
@@ -124,66 +124,189 @@ P5: Consolidate 9 phantom dirs (client/src/store is LIVE — active imports, do 
 Stack pins: TS 5.9.3 · Three.js 0.128.0 · Stripe 20.4.1 · ws 8.20.0 · Zod 3.25.76 · Node 22.x`;
 
 const quickPrompts = [
-  { label: 'Apply migration P0', text: 'Walk me through applying migration 0005 to Railway safely' },
-  { label: 'Wire aiDecisionLog P1', text: 'Write the exact TypeScript to wire aiDecisionLog writes into session-metrics.service.ts' },
-  { label: 'Fix presets.ts any P2', text: 'Fix the 4 as any casts in server/routes/presets.ts with proper Drizzle types' },
-  { label: 'Fix console.log P2', text: 'How do I replace console.log in server/index.ts:300-308 with morgan?' },
-  { label: 'Mix Suggestions P3', text: 'What is the correct architecture for Mix Suggestion System backend? Which router?' },
-  { label: 'Fix test runner P4', text: 'Fix vitest.config.ts to output actual test results' },
-  { label: 'LLPTE pipeline', text: 'Explain the LLPTE pipeline node order and what each package does' },
+  {
+    label: "Apply migration P0",
+    text: "Walk me through applying migration 0005 to Railway safely",
+  },
+  {
+    label: "Wire aiDecisionLog P1",
+    text: "Write the exact TypeScript to wire aiDecisionLog writes into session-metrics.service.ts",
+  },
+  {
+    label: "Fix presets.ts any P2",
+    text: "Fix the 4 as any casts in server/routes/presets.ts with proper Drizzle types",
+  },
+  {
+    label: "Fix console.log P2",
+    text: "How do I replace console.log in server/index.ts:300-308 with morgan?",
+  },
+  {
+    label: "Mix Suggestions P3",
+    text: "What is the correct architecture for Mix Suggestion System backend? Which router?",
+  },
+  {
+    label: "Fix test runner P4",
+    text: "Fix vitest.config.ts to output actual test results",
+  },
+  {
+    label: "LLPTE pipeline",
+    text: "Explain the LLPTE pipeline node order and what each package does",
+  },
 ];
 
 const memItems = [
-  { key: 'Codebase', val: <>TSC: <code>0 errors</code> · Routers: <code>11/11</code> · MVP: <code>3/4</code></> },
-  { key: 'P0 Blocker', val: <>Migration <code>0005_overjoyed_gambit.sql</code> NOT applied to Railway. Demo acceptance rate = 0.</> },
-  { key: 'Hard Guards Remaining', val: <><code className="bad">5×any</code> routes/presets.ts · <code className="bad">5×console.log</code> server/index.ts:300-308</> },
-  { key: 'LLPTE Contract', val: <>10ms p50 · 847 edges · 0.8ms tick · spectralAnalyzer in <code>llpte-signal</code></> },
-  { key: 'Fixes This Session', val: <>authStore.ts stored token · billing.ts removed · App.tsx import · git credentials</> },
-  { key: 'Stack Rules', val: <>Wouter (NOT react-router) · Zustand (NOT Redux) · Stripe ONLY (NOT LemonSqueezy)</> },
-  { key: 'Tiers', val: <><code>explorer</code> · <code>creator</code> · <code>pro_artist</code> — never "free", "Pro", "Studio"</> },
+  {
+    key: "Codebase",
+    val: (
+      <>
+        TSC: <code>0 errors</code> · Routers: <code>11/11</code> · MVP:{" "}
+        <code>3/4</code>
+      </>
+    ),
+  },
+  {
+    key: "P0 Blocker",
+    val: (
+      <>
+        Migration <code>0005_overjoyed_gambit.sql</code> NOT applied to Railway.
+        Demo acceptance rate = 0.
+      </>
+    ),
+  },
+  {
+    key: "Hard Guards Remaining",
+    val: (
+      <>
+        <code className="bad">5×any</code> routes/presets.ts ·{" "}
+        <code className="bad">5×console.log</code> server/index.ts:300-308
+      </>
+    ),
+  },
+  {
+    key: "LLPTE Contract",
+    val: (
+      <>
+        10ms p50 · 847 edges · 0.8ms tick · spectralAnalyzer in{" "}
+        <code>llpte-signal</code>
+      </>
+    ),
+  },
+  {
+    key: "Fixes This Session",
+    val: (
+      <>
+        authStore.ts stored token · billing.ts removed · App.tsx import · git
+        credentials
+      </>
+    ),
+  },
+  {
+    key: "Stack Rules",
+    val: (
+      <>
+        Wouter (NOT react-router) · Zustand (NOT Redux) · Stripe ONLY (NOT
+        LemonSqueezy)
+      </>
+    ),
+  },
+  {
+    key: "Tiers",
+    val: (
+      <>
+        <code>explorer</code> · <code>creator</code> · <code>pro_artist</code> —
+        never "free", "Pro", "Studio"
+      </>
+    ),
+  },
 ];
 
 function renderMarkdown(text: string): React.ReactNode[] {
-  const lines = text.split('\n');
+  const lines = text.split("\n");
   const nodes: React.ReactNode[] = [];
   let i = 0;
   while (i < lines.length) {
     const line = lines[i];
-    if (line.startsWith('```')) {
+    if (line.startsWith("```")) {
       const lang = line.slice(3).trim();
       const codeLines: string[] = [];
       i++;
-      while (i < lines.length && !lines[i].startsWith('```')) {
+      while (i < lines.length && !lines[i].startsWith("```")) {
         codeLines.push(lines[i]);
         i++;
       }
       nodes.push(
-        <pre key={nodes.length} style={{ background: 'rgba(0,0,0,.6)', border: '1px solid var(--border)', borderRadius: 3, padding: '10px 12px', fontSize: 10, lineHeight: 1.7, color: '#7a9eb8', margin: '6px 0', overflowX: 'auto' }}>
-          {lang && <div style={{ fontSize: 8, color: 'var(--dim)', marginBottom: 5, letterSpacing: 1 }}>{lang.toUpperCase()}</div>}
-          {codeLines.join('\n')}
-        </pre>
+        <pre
+          key={nodes.length}
+          style={{
+            background: "rgba(0,0,0,.6)",
+            border: "1px solid var(--border)",
+            borderRadius: 3,
+            padding: "10px 12px",
+            fontSize: 10,
+            lineHeight: 1.7,
+            color: "#7a9eb8",
+            margin: "6px 0",
+            overflowX: "auto",
+          }}
+        >
+          {lang && (
+            <div
+              style={{
+                fontSize: 8,
+                color: "var(--dim)",
+                marginBottom: 5,
+                letterSpacing: 1,
+              }}
+            >
+              {lang.toUpperCase()}
+            </div>
+          )}
+          {codeLines.join("\n")}
+        </pre>,
       );
-    } else if (line.startsWith('- ') || line.startsWith('* ')) {
+    } else if (line.startsWith("- ") || line.startsWith("* ")) {
       const listItems: string[] = [];
-      while (i < lines.length && (lines[i].startsWith('- ') || lines[i].startsWith('* '))) {
+      while (
+        i < lines.length &&
+        (lines[i].startsWith("- ") || lines[i].startsWith("* "))
+      ) {
         listItems.push(lines[i].slice(2));
         i++;
       }
       nodes.push(
-        <ul key={nodes.length} style={{ listStyle: 'none', padding: 0, margin: '4px 0' }}>
+        <ul
+          key={nodes.length}
+          style={{ listStyle: "none", padding: 0, margin: "4px 0" }}
+        >
           {listItems.map((item, idx) => (
-            <li key={idx} style={{ display: 'flex', gap: 6, alignItems: 'flex-start', marginBottom: 2 }}>
-              <span style={{ color: 'var(--acid)', flexShrink: 0, marginTop: 1 }}>·</span>
+            <li
+              key={idx}
+              style={{
+                display: "flex",
+                gap: 6,
+                alignItems: "flex-start",
+                marginBottom: 2,
+              }}
+            >
+              <span
+                style={{ color: "var(--acid)", flexShrink: 0, marginTop: 1 }}
+              >
+                ·
+              </span>
               <span>{inlineMarkdown(item)}</span>
             </li>
           ))}
-        </ul>
+        </ul>,
       );
       continue;
-    } else if (line.trim() === '') {
+    } else if (line.trim() === "") {
       nodes.push(<div key={nodes.length} style={{ height: 4 }} />);
     } else {
-      nodes.push(<div key={nodes.length} style={{ lineHeight: 1.7 }}>{inlineMarkdown(line)}</div>);
+      nodes.push(
+        <div key={nodes.length} style={{ lineHeight: 1.7 }}>
+          {inlineMarkdown(line)}
+        </div>,
+      );
     }
     i++;
   }
@@ -198,10 +321,29 @@ function inlineMarkdown(text: string): React.ReactNode {
   while ((m = regex.exec(text)) !== null) {
     if (m.index > last) parts.push(text.slice(last, m.index));
     const raw = m[0];
-    if (raw.startsWith('`')) {
-      parts.push(<code key={m.index} style={{ fontFamily: 'var(--mono)', fontSize: '0.88em', background: 'rgba(163,230,53,.08)', border: '1px solid rgba(163,230,53,.18)', padding: '1px 5px', borderRadius: 2, color: 'var(--accent)' }}>{raw.slice(1, -1)}</code>);
-    } else if (raw.startsWith('**')) {
-      parts.push(<strong key={m.index} style={{ color: '#fff', fontWeight: 700 }}>{raw.slice(2, -2)}</strong>);
+    if (raw.startsWith("`")) {
+      parts.push(
+        <code
+          key={m.index}
+          style={{
+            fontFamily: "var(--mono)",
+            fontSize: "0.88em",
+            background: "rgba(163,230,53,.08)",
+            border: "1px solid rgba(163,230,53,.18)",
+            padding: "1px 5px",
+            borderRadius: 2,
+            color: "var(--accent)",
+          }}
+        >
+          {raw.slice(1, -1)}
+        </code>,
+      );
+    } else if (raw.startsWith("**")) {
+      parts.push(
+        <strong key={m.index} style={{ color: "#fff", fontWeight: 700 }}>
+          {raw.slice(2, -2)}
+        </strong>,
+      );
     }
     last = m.index + raw.length;
   }
@@ -210,54 +352,80 @@ function inlineMarkdown(text: string): React.ReactNode {
 }
 
 export function RightPanel() {
-  const { activePanelMode, setPanelMode, chatMessages, addChatMessage, clearChat, logs, clearLog, focusBanner } = useAGI();
-  const [input, setInput] = useState('');
+  const {
+    activePanelMode,
+    setPanelMode,
+    chatMessages,
+    addChatMessage,
+    clearChat,
+    logs,
+    clearLog,
+    focusBanner,
+  } = useAGI();
+  const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
-  const [streamingContent, setStreamingContent] = useState('');
+  const [streamingContent, setStreamingContent] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const logEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [chatMessages, typing, streamingContent]);
-  useEffect(() => { logEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [logs]);
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMessages, typing, streamingContent]);
+  useEffect(() => {
+    logEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [logs]);
 
   async function sendMessage(text?: string) {
     const t = (text ?? input).trim();
     if (!t) return;
-    setInput('');
-    addChatMessage('user', t);
+    setInput("");
+    addChatMessage("user", t);
     setTyping(true);
-    setStreamingContent('');
+    setStreamingContent("");
 
     const msgs = [
-      ...chatMessages.map(m => ({ role: m.role === 'assistant' ? 'assistant' : 'user' as const, content: m.content })),
-      { role: 'user' as const, content: t },
+      ...chatMessages.map((m) => ({
+        role: m.role === "assistant" ? "assistant" : ("user" as const),
+        content: m.content,
+      })),
+      { role: "user" as const, content: t },
     ];
 
-    if (focusBanner && focusBanner !== 'Agent focused on current view') {
+    if (focusBanner && focusBanner !== "Agent focused on current view") {
       msgs.unshift(
-        { role: 'user', content: `[CONTEXT FOCUS: ${focusBanner}] Please keep this context in mind.` },
-        { role: 'assistant', content: 'Understood. I am focused on: ' + focusBanner + '. How can I help?' }
+        {
+          role: "user",
+          content: `[CONTEXT FOCUS: ${focusBanner}] Please keep this context in mind.`,
+        },
+        {
+          role: "assistant",
+          content:
+            "Understood. I am focused on: " + focusBanner + ". How can I help?",
+        },
       );
     }
 
     try {
-      const res = await fetch('/api/agent/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/agent/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ system: SYSTEM_PROMPT, messages: msgs }),
       });
 
       if (!res.ok) {
         setTyping(false);
         const err = await res.json().catch(() => ({}));
-        addChatMessage('assistant', '⚠ API Error: ' + (err?.error || 'HTTP ' + res.status));
+        addChatMessage(
+          "assistant",
+          "⚠ API Error: " + (err?.error || "HTTP " + res.status),
+        );
         return;
       }
 
       const reader = res.body!.getReader();
       const decoder = new TextDecoder();
-      let accumulated = '';
-      let lineBuffer = '';
+      let accumulated = "";
+      let lineBuffer = "";
       let streamDone = false;
 
       while (!streamDone) {
@@ -267,21 +435,24 @@ export function RightPanel() {
           break;
         }
         lineBuffer += decoder.decode(value, { stream: true });
-        const lines = lineBuffer.split('\n');
-        lineBuffer = lines.pop() ?? '';
+        const lines = lineBuffer.split("\n");
+        lineBuffer = lines.pop() ?? "";
         for (const line of lines) {
           const trimmed = line.trim();
-          if (!trimmed.startsWith('data: ')) continue;
+          if (!trimmed.startsWith("data: ")) continue;
           const data = trimmed.slice(6).trim();
-          if (data === '[DONE]') { streamDone = true; break; }
+          if (data === "[DONE]") {
+            streamDone = true;
+            break;
+          }
           try {
             const parsed = JSON.parse(data);
-            if (parsed.type === 'text_delta') {
+            if (parsed.type === "text_delta") {
               accumulated += parsed.text;
               setStreamingContent(accumulated);
-            } else if (parsed.type === 'error') {
+            } else if (parsed.type === "error") {
               streamDone = true;
-              addChatMessage('assistant', '⚠ ' + parsed.message);
+              addChatMessage("assistant", "⚠ " + parsed.message);
               break;
             }
           } catch {
@@ -291,12 +462,15 @@ export function RightPanel() {
       }
 
       setTyping(false);
-      setStreamingContent('');
-      addChatMessage('assistant', accumulated || '(empty response)');
+      setStreamingContent("");
+      addChatMessage("assistant", accumulated || "(empty response)");
     } catch (e: unknown) {
       setTyping(false);
-      setStreamingContent('');
-      addChatMessage('assistant', '⚠ Network error: ' + (e instanceof Error ? e.message : String(e)));
+      setStreamingContent("");
+      addChatMessage(
+        "assistant",
+        "⚠ Network error: " + (e instanceof Error ? e.message : String(e)),
+      );
     }
   }
 
@@ -305,47 +479,124 @@ export function RightPanel() {
   }
 
   function exportChat() {
-    const text = chatMessages.map(m => `[${m.role.toUpperCase()}]\n${m.content}`).join('\n\n---\n\n');
-    const blob = new Blob([text], { type: 'text/plain' });
-    const a = document.createElement('a');
+    const text = chatMessages
+      .map((m) => `[${m.role.toUpperCase()}]\n${m.content}`)
+      .join("\n\n---\n\n");
+    const blob = new Blob([text], { type: "text/plain" });
+    const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = 'r3v4-agent-session-' + new Date().toISOString().slice(0, 10) + '.txt';
+    a.download =
+      "r3v4-agent-session-" + new Date().toISOString().slice(0, 10) + ".txt";
     a.click();
   }
 
-  const panelModes = ['chat', 'log', 'memory'];
-  const panelLabels = ['Chat', 'Session Log', 'Memory'];
+  const panelModes = ["chat", "log", "memory"];
+  const panelLabels = ["Chat", "Session Log", "Memory"];
 
-  const tagColors: Record<string, { bg: string; color: string; border: string }> = {
-    'lt-cmd': { bg: 'rgba(163,230,53,.1)', color: 'var(--accent)', border: '1px solid rgba(163,230,53,.2)' },
-    'lt-fix': { bg: 'rgba(163,230,53,.07)', color: 'var(--accent)', border: '1px solid rgba(163,230,53,.18)' },
-    'lt-p0':  { bg: 'rgba(255,61,113,.12)', color: 'var(--bad)', border: '1px solid rgba(255,61,113,.2)' },
+  const tagColors: Record<
+    string,
+    { bg: string; color: string; border: string }
+  > = {
+    "lt-cmd": {
+      bg: "rgba(163,230,53,.1)",
+      color: "var(--accent)",
+      border: "1px solid rgba(163,230,53,.2)",
+    },
+    "lt-fix": {
+      bg: "rgba(163,230,53,.07)",
+      color: "var(--accent)",
+      border: "1px solid rgba(163,230,53,.18)",
+    },
+    "lt-p0": {
+      bg: "rgba(255,61,113,.12)",
+      color: "var(--bad)",
+      border: "1px solid rgba(255,61,113,.2)",
+    },
   };
 
   const msgBubbleStyle = (role: string) => ({
-    background: role === 'user' ? 'rgba(163,230,53,.03)' : 'rgba(255,255,255,.03)',
-    border: `1px solid ${role === 'user' ? 'rgba(163,230,53,.12)' : 'var(--border)'}`,
-    borderRadius: 3, padding: '9px 11px', fontSize: 11, lineHeight: 1.7, color: 'var(--text)', wordBreak: 'break-word' as const,
+    background:
+      role === "user" ? "rgba(163,230,53,.03)" : "rgba(255,255,255,.03)",
+    border: `1px solid ${role === "user" ? "rgba(163,230,53,.12)" : "var(--border)"}`,
+    borderRadius: 3,
+    padding: "9px 11px",
+    fontSize: 11,
+    lineHeight: 1.7,
+    color: "var(--text)",
+    wordBreak: "break-word" as const,
   });
 
   return (
-    <aside style={{ borderLeft: '1px solid var(--border)', display: 'flex', flexDirection: 'column', background: 'var(--bg)', height: '100%', overflow: 'hidden' }}>
-      <div style={{ padding: '10px 13px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 7, flexShrink: 0, background: 'var(--surface)' }}>
-        <span style={{ color: 'var(--acid)' }}>⬡</span>
-        <span style={{ fontFamily: 'var(--sans)', fontSize: 12, fontWeight: 700, color: '#fff' }}>AGI Agent</span>
-        <span style={{ marginLeft: 'auto', fontSize: 8, letterSpacing: 1, color: 'var(--accent)', background: 'rgba(163,230,53,.07)', border: '1px solid rgba(163,230,53,.18)', padding: '2px 6px', borderRadius: 2 }}>claude-sonnet-4-6</span>
+    <aside
+      style={{
+        borderLeft: "1px solid var(--border)",
+        display: "flex",
+        flexDirection: "column",
+        background: "var(--bg)",
+        height: "100%",
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          padding: "10px 13px",
+          borderBottom: "1px solid var(--border)",
+          display: "flex",
+          alignItems: "center",
+          gap: 7,
+          flexShrink: 0,
+          background: "var(--surface)",
+        }}
+      >
+        <span style={{ color: "var(--acid)" }}>⬡</span>
+        <span
+          style={{
+            fontFamily: "var(--sans)",
+            fontSize: 12,
+            fontWeight: 700,
+            color: "#fff",
+          }}
+        >
+          AGI Agent
+        </span>
+        <span
+          style={{
+            marginLeft: "auto",
+            fontSize: 8,
+            letterSpacing: 1,
+            color: "var(--accent)",
+            background: "rgba(163,230,53,.07)",
+            border: "1px solid rgba(163,230,53,.18)",
+            padding: "2px 6px",
+            borderRadius: 2,
+          }}
+        >
+          claude-sonnet-4-6
+        </span>
       </div>
 
-      <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', flexShrink: 0, background: 'var(--surface)' }}>
+      <div
+        style={{
+          display: "flex",
+          borderBottom: "1px solid var(--border)",
+          flexShrink: 0,
+          background: "var(--surface)",
+        }}
+      >
         {panelModes.map((m, i) => (
           <div
             key={m}
             onClick={() => setPanelMode(m)}
             style={{
-              flex: 1, padding: '6px 0', textAlign: 'center', fontSize: 9, letterSpacing: 1, textTransform: 'uppercase' as const,
-              cursor: 'pointer',
-              color: activePanelMode === m ? 'var(--acid)' : 'var(--text2)',
-              borderBottom: `2px solid ${activePanelMode === m ? 'var(--acid)' : 'transparent'}`,
+              flex: 1,
+              padding: "6px 0",
+              textAlign: "center",
+              fontSize: 9,
+              letterSpacing: 1,
+              textTransform: "uppercase" as const,
+              cursor: "pointer",
+              color: activePanelMode === m ? "var(--acid)" : "var(--text2)",
+              borderBottom: `2px solid ${activePanelMode === m ? "var(--acid)" : "transparent"}`,
             }}
           >
             {panelLabels[i]}
@@ -353,38 +604,117 @@ export function RightPanel() {
         ))}
       </div>
 
-      {activePanelMode === 'chat' && (
-        <div style={{ display: 'flex', flex: 1, flexDirection: 'column', overflow: 'hidden' }}>
-          <div style={{ flex: 1, overflowY: 'auto', padding: 12, display: 'flex', flexDirection: 'column', gap: 9 }}>
-            <div style={{ animation: 'fadeUp .18s ease both' }}>
-              <div style={{ fontSize: 8, letterSpacing: 2, textTransform: 'uppercase' as const, color: 'var(--acid)', marginBottom: 3 }}>R3 AGI AGENT</div>
-              <div style={{ ...msgBubbleStyle('assistant'), whiteSpace: 'pre-wrap' }}>
+      {activePanelMode === "chat" && (
+        <div
+          style={{
+            display: "flex",
+            flex: 1,
+            flexDirection: "column",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              flex: 1,
+              overflowY: "auto",
+              padding: 12,
+              display: "flex",
+              flexDirection: "column",
+              gap: 9,
+            }}
+          >
+            <div style={{ animation: "fadeUp .18s ease both" }}>
+              <div
+                style={{
+                  fontSize: 8,
+                  letterSpacing: 2,
+                  textTransform: "uppercase" as const,
+                  color: "var(--acid)",
+                  marginBottom: 3,
+                }}
+              >
+                R3 AGI AGENT
+              </div>
+              <div
+                style={{
+                  ...msgBubbleStyle("assistant"),
+                  whiteSpace: "pre-wrap",
+                }}
+              >
                 {`R3 v4 Command Agent online — PRD v4.0 + session context loaded.\n\nContext active:\n• 11 routers wired · aiDecisionLog schema done\n• P0: migration 0005 pending Railway apply\n• LLPTE: 10ms p50 · 847 edges · 0.8ms tick\n• authStore.ts restored · billing.ts removed\n• Tiers: explorer · creator · pro_artist (Stripe only)\n\nSwitch views to focus agent context. Enter key above.`}
               </div>
             </div>
             {chatMessages.map((m, i) => (
-              <div key={i} style={{ animation: 'fadeUp .18s ease both' }}>
-                <div style={{ fontSize: 8, letterSpacing: 2, textTransform: 'uppercase' as const, color: m.role === 'user' ? 'var(--text2)' : 'var(--acid)', marginBottom: 3 }}>
-                  {m.role === 'user' ? 'YOU' : 'R3 AGI AGENT'}
+              <div key={i} style={{ animation: "fadeUp .18s ease both" }}>
+                <div
+                  style={{
+                    fontSize: 8,
+                    letterSpacing: 2,
+                    textTransform: "uppercase" as const,
+                    color: m.role === "user" ? "var(--text2)" : "var(--acid)",
+                    marginBottom: 3,
+                  }}
+                >
+                  {m.role === "user" ? "YOU" : "R3 AGI AGENT"}
                 </div>
                 <div style={msgBubbleStyle(m.role)}>
-                  {m.role === 'assistant' ? renderMarkdown(m.content) : m.content}
+                  {m.role === "assistant"
+                    ? renderMarkdown(m.content)
+                    : m.content}
                 </div>
               </div>
             ))}
             {(typing || streamingContent) && (
-              <div style={{ animation: 'fadeUp .18s ease both' }}>
-                <div style={{ fontSize: 8, letterSpacing: 2, textTransform: 'uppercase' as const, color: 'var(--acid)', marginBottom: 3 }}>R3 AGI AGENT</div>
-                <div style={msgBubbleStyle('assistant')}>
+              <div style={{ animation: "fadeUp .18s ease both" }}>
+                <div
+                  style={{
+                    fontSize: 8,
+                    letterSpacing: 2,
+                    textTransform: "uppercase" as const,
+                    color: "var(--acid)",
+                    marginBottom: 3,
+                  }}
+                >
+                  R3 AGI AGENT
+                </div>
+                <div style={msgBubbleStyle("assistant")}>
                   {streamingContent ? (
                     <>
                       {renderMarkdown(streamingContent)}
-                      <span style={{ display: 'inline-block', width: 7, height: 11, background: 'var(--acid)', opacity: 0.8, animation: 'blink 1s ease-in-out infinite', verticalAlign: 'text-bottom', marginLeft: 2, borderRadius: 1 }} />
+                      <span
+                        style={{
+                          display: "inline-block",
+                          width: 7,
+                          height: 11,
+                          background: "var(--acid)",
+                          opacity: 0.8,
+                          animation: "blink 1s ease-in-out infinite",
+                          verticalAlign: "text-bottom",
+                          marginLeft: 2,
+                          borderRadius: 1,
+                        }}
+                      />
                     </>
                   ) : (
-                    <div style={{ display: 'flex', gap: 3, alignItems: 'center', padding: '3px 0' }}>
-                      {[0, .22, .44].map((d, i) => (
-                        <div key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--acid)', animation: `blink 1.3s ${d}s infinite ease-in-out` }} />
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: 3,
+                        alignItems: "center",
+                        padding: "3px 0",
+                      }}
+                    >
+                      {[0, 0.22, 0.44].map((d, i) => (
+                        <div
+                          key={i}
+                          style={{
+                            width: 5,
+                            height: 5,
+                            borderRadius: "50%",
+                            background: "var(--acid)",
+                            animation: `blink 1.3s ${d}s infinite ease-in-out`,
+                          }}
+                        />
                       ))}
                     </div>
                   )}
@@ -394,18 +724,41 @@ export function RightPanel() {
             <div ref={messagesEndRef} />
           </div>
 
-          <div style={{ padding: 9, borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0, background: 'var(--surface)' }}>
-            <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 4 }}>
-              {quickPrompts.map(q => (
+          <div
+            style={{
+              padding: 9,
+              borderTop: "1px solid var(--border)",
+              display: "flex",
+              flexDirection: "column",
+              gap: 6,
+              flexShrink: 0,
+              background: "var(--surface)",
+            }}
+          >
+            <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 4 }}>
+              {quickPrompts.map((q) => (
                 <button
                   key={q.label}
                   onClick={() => quickSend(q.text)}
                   style={{
-                    fontSize: 9, padding: '3px 7px', border: '1px solid var(--bor2)', borderRadius: 2, color: 'var(--text2)',
-                    cursor: 'pointer', background: 'transparent', fontFamily: 'var(--mono)', transition: 'all .12s',
+                    fontSize: 9,
+                    padding: "3px 7px",
+                    border: "1px solid var(--bor2)",
+                    borderRadius: 2,
+                    color: "var(--text2)",
+                    cursor: "pointer",
+                    background: "transparent",
+                    fontFamily: "var(--mono)",
+                    transition: "all .12s",
                   }}
-                  onMouseEnter={e => { (e.target as HTMLElement).style.borderColor = 'var(--acid)'; (e.target as HTMLElement).style.color = 'var(--acid)'; }}
-                  onMouseLeave={e => { (e.target as HTMLElement).style.borderColor = 'var(--bor2)'; (e.target as HTMLElement).style.color = 'var(--text2)'; }}
+                  onMouseEnter={(e) => {
+                    (e.target as HTMLElement).style.borderColor = "var(--acid)";
+                    (e.target as HTMLElement).style.color = "var(--acid)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.target as HTMLElement).style.borderColor = "var(--bor2)";
+                    (e.target as HTMLElement).style.color = "var(--text2)";
+                  }}
                 >
                   {q.label}
                 </button>
@@ -413,25 +766,79 @@ export function RightPanel() {
             </div>
             <textarea
               value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); sendMessage(); } }}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                  e.preventDefault();
+                  sendMessage();
+                }
+              }}
               placeholder="Ask about patches, architecture, or codebase..."
               rows={3}
               style={{
-                width: '100%', background: 'rgba(0,0,0,.4)', border: '1px solid var(--bor2)', borderRadius: 3,
-                color: 'var(--text)', fontFamily: 'var(--mono)', fontSize: 11, padding: '8px 10px', resize: 'none' as const,
-                outline: 'none', minHeight: 58,
+                width: "100%",
+                background: "rgba(0,0,0,.4)",
+                border: "1px solid var(--bor2)",
+                borderRadius: 3,
+                color: "var(--text)",
+                fontFamily: "var(--mono)",
+                fontSize: 11,
+                padding: "8px 10px",
+                resize: "none" as const,
+                outline: "none",
+                minHeight: 58,
               }}
             />
-            <div style={{ display: 'flex', gap: 7, alignItems: 'center' }}>
-              <button onClick={clearChat} style={{ fontFamily: 'var(--mono)', fontSize: 9, letterSpacing: 1, padding: '4px 9px', borderRadius: 2, border: '1px solid var(--bor2)', cursor: 'pointer', background: 'transparent', color: 'var(--text2)', textTransform: 'uppercase' as const }}>Clear</button>
-              <button onClick={exportChat} style={{ fontFamily: 'var(--mono)', fontSize: 9, letterSpacing: 1, padding: '4px 9px', borderRadius: 2, border: '1px solid var(--bor2)', cursor: 'pointer', background: 'transparent', color: 'var(--text2)', textTransform: 'uppercase' as const }}>Export</button>
+            <div style={{ display: "flex", gap: 7, alignItems: "center" }}>
+              <button
+                onClick={clearChat}
+                style={{
+                  fontFamily: "var(--mono)",
+                  fontSize: 9,
+                  letterSpacing: 1,
+                  padding: "4px 9px",
+                  borderRadius: 2,
+                  border: "1px solid var(--bor2)",
+                  cursor: "pointer",
+                  background: "transparent",
+                  color: "var(--text2)",
+                  textTransform: "uppercase" as const,
+                }}
+              >
+                Clear
+              </button>
+              <button
+                onClick={exportChat}
+                style={{
+                  fontFamily: "var(--mono)",
+                  fontSize: 9,
+                  letterSpacing: 1,
+                  padding: "4px 9px",
+                  borderRadius: 2,
+                  border: "1px solid var(--bor2)",
+                  cursor: "pointer",
+                  background: "transparent",
+                  color: "var(--text2)",
+                  textTransform: "uppercase" as const,
+                }}
+              >
+                Export
+              </button>
               <button
                 onClick={() => sendMessage()}
                 style={{
-                  marginLeft: 'auto', fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: 1,
-                  padding: '6px 12px', borderRadius: 2, border: 'none', cursor: 'pointer',
-                  background: 'var(--accent)', color: '#000', fontWeight: 700, textTransform: 'uppercase' as const,
+                  marginLeft: "auto",
+                  fontFamily: "var(--mono)",
+                  fontSize: 10,
+                  letterSpacing: 1,
+                  padding: "6px 12px",
+                  borderRadius: 2,
+                  border: "none",
+                  cursor: "pointer",
+                  background: "var(--accent)",
+                  color: "#000",
+                  fontWeight: 700,
+                  textTransform: "uppercase" as const,
                 }}
               >
                 Send ↵
@@ -441,33 +848,133 @@ export function RightPanel() {
         </div>
       )}
 
-      {activePanelMode === 'log' && (
-        <div style={{ display: 'flex', flex: 1, flexDirection: 'column', overflow: 'hidden' }}>
-          <div style={{ flex: 1, overflowY: 'auto', padding: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {activePanelMode === "log" && (
+        <div
+          style={{
+            display: "flex",
+            flex: 1,
+            flexDirection: "column",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              flex: 1,
+              overflowY: "auto",
+              padding: 12,
+              display: "flex",
+              flexDirection: "column",
+              gap: 8,
+            }}
+          >
             {logs.map((log, i) => {
-              const tc = tagColors[log.cls] ?? tagColors['lt-cmd'];
+              const tc = tagColors[log.cls] ?? tagColors["lt-cmd"];
               return (
-                <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 10, padding: '6px 0', borderBottom: '1px solid var(--border)' }}>
-                  <span style={{ color: 'var(--dim)', flexShrink: 0, fontSize: 9, marginTop: 1 }}>{log.ts}</span>
-                  <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 2, flexShrink: 0, ...tc }}>{log.tag}</span>
-                  <span style={{ color: 'var(--text2)', flex: 1 }}>{log.text}</span>
+                <div
+                  key={i}
+                  style={{
+                    display: "flex",
+                    gap: 8,
+                    alignItems: "flex-start",
+                    fontSize: 10,
+                    padding: "6px 0",
+                    borderBottom: "1px solid var(--border)",
+                  }}
+                >
+                  <span
+                    style={{
+                      color: "var(--dim)",
+                      flexShrink: 0,
+                      fontSize: 9,
+                      marginTop: 1,
+                    }}
+                  >
+                    {log.ts}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 9,
+                      padding: "1px 5px",
+                      borderRadius: 2,
+                      flexShrink: 0,
+                      ...tc,
+                    }}
+                  >
+                    {log.tag}
+                  </span>
+                  <span style={{ color: "var(--text2)", flex: 1 }}>
+                    {log.text}
+                  </span>
                 </div>
               );
             })}
             <div ref={logEndRef} />
           </div>
-          <div style={{ padding: 9, borderTop: '1px solid var(--border)', flexShrink: 0, background: 'var(--surface)' }}>
-            <button onClick={clearLog} style={{ width: '100%', fontFamily: 'var(--mono)', fontSize: 9, letterSpacing: 1, padding: '4px 9px', borderRadius: 2, border: '1px solid var(--bor2)', cursor: 'pointer', background: 'transparent', color: 'var(--text2)', textTransform: 'uppercase' as const }}>Clear Log</button>
+          <div
+            style={{
+              padding: 9,
+              borderTop: "1px solid var(--border)",
+              flexShrink: 0,
+              background: "var(--surface)",
+            }}
+          >
+            <button
+              onClick={clearLog}
+              style={{
+                width: "100%",
+                fontFamily: "var(--mono)",
+                fontSize: 9,
+                letterSpacing: 1,
+                padding: "4px 9px",
+                borderRadius: 2,
+                border: "1px solid var(--bor2)",
+                cursor: "pointer",
+                background: "transparent",
+                color: "var(--text2)",
+                textTransform: "uppercase" as const,
+              }}
+            >
+              Clear Log
+            </button>
           </div>
         </div>
       )}
 
-      {activePanelMode === 'memory' && (
-        <div style={{ flex: 1, overflowY: 'auto', padding: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {memItems.map(item => (
-            <div key={item.key} style={{ padding: 9, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 3 }}>
-              <div style={{ fontSize: 9, letterSpacing: 2, color: 'var(--dim)', textTransform: 'uppercase' as const, marginBottom: 4 }}>{item.key}</div>
-              <div style={{ fontSize: 11, color: 'var(--text)' }}>{item.val}</div>
+      {activePanelMode === "memory" && (
+        <div
+          style={{
+            flex: 1,
+            overflowY: "auto",
+            padding: 12,
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+          }}
+        >
+          {memItems.map((item) => (
+            <div
+              key={item.key}
+              style={{
+                padding: 9,
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
+                borderRadius: 3,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 9,
+                  letterSpacing: 2,
+                  color: "var(--dim)",
+                  textTransform: "uppercase" as const,
+                  marginBottom: 4,
+                }}
+              >
+                {item.key}
+              </div>
+              <div style={{ fontSize: 11, color: "var(--text)" }}>
+                {item.val}
+              </div>
             </div>
           ))}
         </div>

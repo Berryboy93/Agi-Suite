@@ -14,14 +14,20 @@ function loadPersisted(): number {
   try {
     const raw = fs.readFileSync(PERSIST_FILE, "utf-8");
     const data = JSON.parse(raw) as { totalSubscribers?: number };
-    return typeof data.totalSubscribers === "number" ? data.totalSubscribers : 147;
+    return typeof data.totalSubscribers === "number"
+      ? data.totalSubscribers
+      : 147;
   } catch {
     return 147;
   }
 }
 
 function savePersisted(n: number) {
-  try { fs.writeFileSync(PERSIST_FILE, JSON.stringify({ totalSubscribers: n })); } catch { /* ignore */ }
+  try {
+    fs.writeFileSync(PERSIST_FILE, JSON.stringify({ totalSubscribers: n }));
+  } catch {
+    /* ignore */
+  }
 }
 
 let totalSubscribers = loadPersisted();
@@ -36,7 +42,11 @@ function pruneStale() {
 function broadcast() {
   const payload = `data: ${JSON.stringify({ activeUsers: activeSessions.size, totalSubscribers })}\n\n`;
   for (const client of sseClients) {
-    try { (client as Response & { write: (s: string) => void }).write(payload); } catch { sseClients.delete(client); }
+    try {
+      (client as Response & { write: (s: string) => void }).write(payload);
+    } catch {
+      sseClients.delete(client);
+    }
   }
 }
 
@@ -53,12 +63,19 @@ router.get("/metrics/stream", (req: Request, res: Response) => {
   res.flushHeaders();
 
   pruneStale();
-  res.write(`data: ${JSON.stringify({ activeUsers: activeSessions.size, totalSubscribers })}\n\n`);
+  res.write(
+    `data: ${JSON.stringify({ activeUsers: activeSessions.size, totalSubscribers })}\n\n`,
+  );
 
   sseClients.add(res);
 
   const keepAlive = setInterval(() => {
-    try { res.write(": ping\n\n"); } catch { clearInterval(keepAlive); sseClients.delete(res); }
+    try {
+      res.write(": ping\n\n");
+    } catch {
+      clearInterval(keepAlive);
+      sseClients.delete(res);
+    }
   }, 20_000);
 
   req.on("close", () => {

@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 export interface LogEntry {
   ts: string;
@@ -23,7 +23,7 @@ interface AGIState {
   focusBanner: string | null;
   logs: LogEntry[];
   prios: PrioItem[];
-  chatMessages: { role: 'user' | 'assistant'; content: string }[];
+  chatMessages: { role: "user" | "assistant"; content: string }[];
   agentSuiteOpen: boolean;
 
   setView: (view: string) => void;
@@ -34,75 +34,94 @@ interface AGIState {
   addLog: (tag: string, text: string, cls?: string) => void;
   clearLog: () => void;
   togglePrio: (i: number) => void;
-  addChatMessage: (role: 'user' | 'assistant', content: string) => void;
+  addChatMessage: (role: "user" | "assistant", content: string) => void;
   clearChat: () => void;
   toggleAgentSuite: () => void;
 }
 
 const INITIAL_PRIOS: PrioItem[] = [
   {
-    tag: 'P0', cls: 'pt-p0',
-    title: 'Apply migration 0005 to Railway production DB',
-    detail: 'aiDecisionLog table missing in prod. Demo acceptance rate = 0. GET URL: railway.app → PostgreSQL → Connect tab.',
+    tag: "P0",
+    cls: "pt-p0",
+    title: "Apply migration 0005 to Railway production DB",
+    detail:
+      "aiDecisionLog table missing in prod. Demo acceptance rate = 0. GET URL: railway.app → PostgreSQL → Connect tab.",
     cmd: 'DATABASE_URL="postgresql://postgres:PASS@ballast.proxy.rlwy.net:25291/railway" pnpm drizzle-kit migrate',
     done: false,
   },
   {
-    tag: 'P2', cls: 'pt-p2',
-    title: 'Fix server/routes/presets.ts — 4 Drizzle as any casts',
-    detail: 'Lines 10, 11, 16, 17. Type with InsertEffectPreset / InsertEffectChain. Hard guard violation.',
+    tag: "P2",
+    cls: "pt-p2",
+    title: "Fix server/routes/presets.ts — 4 Drizzle as any casts",
+    detail:
+      "Lines 10, 11, 16, 17. Type with InsertEffectPreset / InsertEffectChain. Hard guard violation.",
     done: false,
   },
   {
-    tag: 'P2', cls: 'pt-p2',
-    title: 'Replace console.log in server/index.ts:300-308',
-    detail: 'Hard guard: no console.log in committed code. Replace with morgan structured logger (already installed).',
+    tag: "P2",
+    cls: "pt-p2",
+    title: "Replace console.log in server/index.ts:300-308",
+    detail:
+      "Hard guard: no console.log in committed code. Replace with morgan structured logger (already installed).",
     done: false,
   },
   {
-    tag: 'P3', cls: 'pt-p3',
-    title: 'Mix Suggestion System — backend wiring (MVP item 4)',
-    detail: 'MixSuggestionsPanel.tsx built. tRPC procedure missing. Read server/services/ first. Use pro_artist tier for demo.',
+    tag: "P3",
+    cls: "pt-p3",
+    title: "Mix Suggestion System — backend wiring (MVP item 4)",
+    detail:
+      "MixSuggestionsPanel.tsx built. tRPC procedure missing. Read server/services/ first. Use pro_artist tier for demo.",
     done: false,
   },
   {
-    tag: 'P4', cls: 'pt-p4',
-    title: 'Migration 0006 — materialized views',
-    detail: 'mv_user_session_averages + mv_ai_acceptance_rates required for Time Savings baseline + confidence calibration.',
+    tag: "P4",
+    cls: "pt-p4",
+    title: "Migration 0006 — materialized views",
+    detail:
+      "mv_user_session_averages + mv_ai_acceptance_rates required for Time Savings baseline + confidence calibration.",
     done: false,
   },
   {
-    tag: 'P4', cls: 'pt-p4',
-    title: 'Fix vitest.config.ts — add package test include pattern',
-    detail: "pnpm test returns no output. Add: include: ['packages/*/tests/*.test.ts', 'packages/*/src/**/*.test.ts']",
+    tag: "P4",
+    cls: "pt-p4",
+    title: "Fix vitest.config.ts — add package test include pattern",
+    detail:
+      "pnpm test returns no output. Add: include: ['packages/*/tests/*.test.ts', 'packages/*/src/**/*.test.ts']",
     done: false,
   },
   {
-    tag: 'P5', cls: 'pt-p5',
-    title: 'Consolidate 9 phantom directories',
-    detail: 'client/src/store is LIVE — has active imports. Do NOT delete without migrating first. 9 dirs total.',
+    tag: "P5",
+    cls: "pt-p5",
+    title: "Consolidate 9 phantom directories",
+    detail:
+      "client/src/store is LIVE — has active imports. Do NOT delete without migrating first. 9 dirs total.",
     done: false,
   },
 ];
 
 function loadPrios(): PrioItem[] {
   try {
-    const s = sessionStorage.getItem('r3-prios-v2');
+    const s = sessionStorage.getItem("r3-prios-v2");
     if (s) {
       const d: boolean[] = JSON.parse(s);
       return INITIAL_PRIOS.map((p, i) => ({ ...p, done: d[i] ?? p.done }));
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return INITIAL_PRIOS;
 }
 
 function savePrios(prios: PrioItem[]) {
-  sessionStorage.setItem('r3-prios-v2', JSON.stringify(prios.map(p => p.done)));
+  sessionStorage.setItem(
+    "r3-prios-v2",
+    JSON.stringify(prios.map((p) => p.done)),
+  );
 }
 
-function makeLog(tag: string, text: string, cls = 'lt-cmd'): LogEntry {
+function makeLog(tag: string, text: string, cls = "lt-cmd"): LogEntry {
   return {
-    ts: new Date().toLocaleTimeString('en-US', { hour12: false }),
+    ts: new Date().toLocaleTimeString("en-US", { hour12: false }),
     tag,
     cls,
     text: text.substring(0, 80),
@@ -110,18 +129,25 @@ function makeLog(tag: string, text: string, cls = 'lt-cmd'): LogEntry {
 }
 
 export const useAGI = create<AGIState>((set, get) => ({
-  activeView: 'overview',
-  activePatchTab: 'all',
-  activePanelMode: 'chat',
+  activeView: "overview",
+  activePatchTab: "all",
+  activePanelMode: "chat",
   focusBanner: null,
-  logs: [{ ts: 'SESSION', tag: 'INIT', cls: 'lt-cmd', text: 'AGI Command Center v3.1.0 loaded — PRD v4.1 · 2026-04-16' }],
+  logs: [
+    {
+      ts: "SESSION",
+      tag: "INIT",
+      cls: "lt-cmd",
+      text: "AGI Command Center v3.1.0 loaded — PRD v4.1 · 2026-04-16",
+    },
+  ],
   prios: loadPrios(),
   chatMessages: [],
   agentSuiteOpen: false,
 
   setView: (view) => {
     set({ activeView: view });
-    get().addLog('NAV', 'Viewing: ' + view, 'lt-cmd');
+    get().addLog("NAV", "Viewing: " + view, "lt-cmd");
   },
 
   setPatchTab: (tab) => set({ activePatchTab: tab }),
@@ -130,37 +156,46 @@ export const useAGI = create<AGIState>((set, get) => ({
 
   setFocus: (msg) => {
     set({ focusBanner: msg });
-    get().addLog('FOCUS', msg, 'lt-fix');
+    get().addLog("FOCUS", msg, "lt-fix");
   },
 
   clearFocus: () => set({ focusBanner: null }),
 
-  addLog: (tag, text, cls = 'lt-cmd') => {
-    set(s => ({ logs: [...s.logs, makeLog(tag, text, cls)] }));
+  addLog: (tag, text, cls = "lt-cmd") => {
+    set((s) => ({ logs: [...s.logs, makeLog(tag, text, cls)] }));
   },
 
   clearLog: () => {
-    set({ logs: [makeLog('CLEAR', 'Log cleared', 'lt-cmd')] });
+    set({ logs: [makeLog("CLEAR", "Log cleared", "lt-cmd")] });
   },
 
   togglePrio: (i) => {
-    const prios = get().prios.map((p, idx) => idx === i ? { ...p, done: !p.done } : p);
+    const prios = get().prios.map((p, idx) =>
+      idx === i ? { ...p, done: !p.done } : p,
+    );
     savePrios(prios);
     const p = prios[i];
-    get().addLog(p.tag, p.done ? 'DONE: ' + p.title.substring(0, 50) : 'REOPENED: ' + p.title.substring(0, 50), p.done ? 'lt-fix' : 'lt-p0');
+    get().addLog(
+      p.tag,
+      p.done
+        ? "DONE: " + p.title.substring(0, 50)
+        : "REOPENED: " + p.title.substring(0, 50),
+      p.done ? "lt-fix" : "lt-p0",
+    );
     set({ prios });
   },
 
   addChatMessage: (role, content) => {
-    set(s => ({ chatMessages: [...s.chatMessages, { role, content }] }));
-    if (role === 'user') get().addLog('QUERY', content.substring(0, 60), 'lt-cmd');
-    else get().addLog('AGENT', content.substring(0, 60), 'lt-fix');
+    set((s) => ({ chatMessages: [...s.chatMessages, { role, content }] }));
+    if (role === "user")
+      get().addLog("QUERY", content.substring(0, 60), "lt-cmd");
+    else get().addLog("AGENT", content.substring(0, 60), "lt-fix");
   },
 
   clearChat: () => {
     set({ chatMessages: [] });
-    get().addLog('CLEAR', 'Chat cleared', 'lt-cmd');
+    get().addLog("CLEAR", "Chat cleared", "lt-cmd");
   },
 
-  toggleAgentSuite: () => set(s => ({ agentSuiteOpen: !s.agentSuiteOpen })),
+  toggleAgentSuite: () => set((s) => ({ agentSuiteOpen: !s.agentSuiteOpen })),
 }));

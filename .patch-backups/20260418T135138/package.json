@@ -1,0 +1,23 @@
+{
+  "name": "workspace",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "dev": "concurrently -n api,agi -c blue,green \"pnpm --filter @workspace/api-server dev\" \"pnpm --filter @workspace/r3-agi dev\"",
+    "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
+    "build": "pnpm run typecheck && pnpm -r --if-present run build",
+    "typecheck:libs": "tsc --build",
+    "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck",
+    "prepare": "simple-git-hooks"
+  },
+  "private": true,
+  "devDependencies": {
+    "@rollup/rollup-linux-arm64-gnu": "^4.60.1",
+    "@tailwindcss/oxide-linux-arm64-gnu": "^4.2.2",
+    "concurrently": "^9.2.1",
+    "lightningcss-linux-arm64-gnu": "^1.32.0",
+    "prettier": "^3.8.1",
+    "typescript": "~5.9.2",
+    "simple-git-hooks": "^2.11.1"
+  }
+}

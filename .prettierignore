@@ -1,0 +1,10 @@
+# Generated
+pnpm-lock.yaml
+dist/
+node_modules/
+
+# Patch artifacts
+.patch-backups/
+
+# Auto-generated component files
+artifacts/mockup-sandbox/src/.generated/

@@ -1,24 +1,24 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { useAGI } from '../store/useAGI';
+import { useState, useRef, useEffect, useCallback } from "react";
+import { useAGI } from "../store/useAGI";
 
 // ─── Design Tokens (Wire.txt §5 — acid-techno palette) ────────────────────────
 const T = {
-  black:   '#060606',
-  acid:    '#a3e635',
-  cyan:    '#00F5FF',
-  violet:  '#8B5CF6',
-  amber:   '#F59E0B',
-  red:     '#EF4444',
-  emerald: '#10B981',
-  z950:    '#09090b',
-  z900:    '#18181b',
-  z800:    '#27272a',
-  z700:    '#3f3f46',
-  z600:    '#52525b',
-  z500:    '#71717a',
-  z400:    '#a1a1aa',
-  z300:    '#d4d4d8',
-  z100:    '#f4f4f5',
+  black: "#060606",
+  acid: "#a3e635",
+  cyan: "#00F5FF",
+  violet: "#8B5CF6",
+  amber: "#F59E0B",
+  red: "#EF4444",
+  emerald: "#10B981",
+  z950: "#09090b",
+  z900: "#18181b",
+  z800: "#27272a",
+  z700: "#3f3f46",
+  z600: "#52525b",
+  z500: "#71717a",
+  z400: "#a1a1aa",
+  z300: "#d4d4d8",
+  z100: "#f4f4f5",
 };
 
 interface AgentDef {
@@ -37,14 +37,18 @@ interface AgentDef {
 const AGENTS: AgentDef[] = [
   // ── PRIME ──────────────────────────────────────────────────────────────────
   {
-    id: 'wire', category: 'PRIME',
-    name: 'The Wire', role: 'Prime Directive & Session Contract',
-    icon: '⬡', color: T.acid, sources: ['Wire.txt §0 §16 §17 §19', 'CLAUDE.md'],
+    id: "wire",
+    category: "PRIME",
+    name: "The Wire",
+    role: "Prime Directive & Session Contract",
+    icon: "⬡",
+    color: T.acid,
+    sources: ["Wire.txt §0 §16 §17 §19", "CLAUDE.md"],
     quickActions: [
-      'What are the invariants that apply to every response?',
-      'What is the required response structure format?',
-      'List every hard stop condition.',
-      'What is the Final Principle?',
+      "What are the invariants that apply to every response?",
+      "What is the required response structure format?",
+      "List every hard stop condition.",
+      "What is the Final Principle?",
     ],
     systemPrompt: `You are The Wire — the supreme session contract authority for R3 v4. Your knowledge derives EXCLUSIVELY from Wire.txt and CLAUDE.md. Every claim must be traceable to a specific section.
 
@@ -81,14 +85,18 @@ ARTIFACT — CLAUDE.md HARD GUARDS (8, non-negotiable):
 Respond by citing §section or Guard #N. Flag hard stops before everything else.`,
   },
   {
-    id: 'constitution', category: 'PRIME',
-    name: 'Constitution', role: 'R3 v4 Hard Guards & Project Identity',
-    icon: '⚖', color: T.acid, sources: ['CLAUDE.md'],
+    id: "constitution",
+    category: "PRIME",
+    name: "Constitution",
+    role: "R3 v4 Hard Guards & Project Identity",
+    icon: "⚖",
+    color: T.acid,
+    sources: ["CLAUDE.md"],
     quickActions: [
-      'List all 8 Hard Guards with explanations.',
-      'What is the current MVP queue status?',
-      'What are the PRD gates before partnerships?',
-      'What are the auto-memory save vs. ignore rules?',
+      "List all 8 Hard Guards with explanations.",
+      "What is the current MVP queue status?",
+      "What are the PRD gates before partnerships?",
+      "What are the auto-memory save vs. ignore rules?",
     ],
     systemPrompt: `You are the Constitution — the definitive authority on R3 v4's project identity, hard guards, and roadmap. Knowledge derived EXCLUSIVELY from CLAUDE.md.
 
@@ -122,14 +130,18 @@ Cite the exact Hard Guard number (1–8) when flagging violations. Be the final 
 
   // ── AI PIPELINE ────────────────────────────────────────────────────────────
   {
-    id: 'llpte', category: 'AI PIPELINE',
-    name: 'LLPTE Oracle', role: 'Pipeline Rules, SLAs & Confidence Gating',
-    icon: '≋', color: T.violet, sources: ['llpte.md', 'Wire.txt §3'],
+    id: "llpte",
+    category: "AI PIPELINE",
+    name: "LLPTE Oracle",
+    role: "Pipeline Rules, SLAs & Confidence Gating",
+    icon: "≋",
+    color: T.violet,
+    sources: ["llpte.md", "Wire.txt §3"],
     quickActions: [
-      'State the full pipeline node order and each node\'s package.',
-      'Explain all 3 hard SLAs with current verified values.',
-      'Walk through the confidence gating logic with all 3 thresholds.',
-      'Describe the LLPTE throttle sequence when inference exceeds 25ms.',
+      "State the full pipeline node order and each node's package.",
+      "Explain all 3 hard SLAs with current verified values.",
+      "Walk through the confidence gating logic with all 3 thresholds.",
+      "Describe the LLPTE throttle sequence when inference exceeds 25ms.",
     ],
     systemPrompt: `You are the LLPTE Oracle — the definitive expert on R3 v4's LLPTE AI pipeline. Knowledge from llpte.md, Wire.txt §3, AI_MIXING.md, AUDIO_ARCHITECTURE.md.
 
@@ -201,14 +213,18 @@ THROTTLE SEQUENCE:
 Cite specific node name, package, SLA metric, or §3 subsection. State threshold values exactly.`,
   },
   {
-    id: 'arch', category: 'AI PIPELINE',
-    name: 'Arch Agent', role: 'P2P Directory Agent Architecture',
-    icon: '◈', color: T.violet, sources: ['agents.md'],
+    id: "arch",
+    category: "AI PIPELINE",
+    name: "Arch Agent",
+    role: "P2P Directory Agent Architecture",
+    icon: "◈",
+    color: T.violet,
+    sources: ["agents.md"],
     quickActions: [
-      'Describe all 5 layers of the agent runtime.',
-      'What is the only valid write path from the browser?',
-      'How does confidence gating apply at the agent layer?',
-      'Which two agents should be built first and why?',
+      "Describe all 5 layers of the agent runtime.",
+      "What is the only valid write path from the browser?",
+      "How does confidence gating apply at the agent layer?",
+      "Which two agents should be built first and why?",
     ],
     systemPrompt: `You are the Arch Agent — expert on R3 v4's peer-to-peer directory agent architecture. Knowledge derived EXCLUSIVELY from agents.md.
 
@@ -227,14 +243,18 @@ Cite Layer number and field name. Layer 5 is the only valid write path.`,
 
   // ── INTERFACE ──────────────────────────────────────────────────────────────
   {
-    id: 'design', category: 'INTERFACE',
-    name: 'Design Oracle', role: 'Acid-Techno Palette & UI Zone Specs',
-    icon: '◉', color: T.cyan, sources: ['Wire.txt §4 §5'],
+    id: "design",
+    category: "INTERFACE",
+    name: "Design Oracle",
+    role: "Acid-Techno Palette & UI Zone Specs",
+    icon: "◉",
+    color: T.cyan,
+    sources: ["Wire.txt §4 §5"],
     quickActions: [
-      'List every color token with its semantic role.',
-      'What colors are forbidden and why?',
-      'Specify Zone 4B — LLPTE Node Graph exactly.',
-      'What is the typography contract for numeric readouts?',
+      "List every color token with its semantic role.",
+      "What colors are forbidden and why?",
+      "Specify Zone 4B — LLPTE Node Graph exactly.",
+      "What is the typography contract for numeric readouts?",
     ],
     systemPrompt: `You are the Design Oracle — definitive authority on R3 v4's UI architecture and design system. Knowledge from Wire.txt §4 and §5.
 
@@ -262,14 +282,18 @@ ZONE 4B — LLPTE Node Graph:
 Every color change must be verified against the token table. Cite §4 zone or §5 token.`,
   },
   {
-    id: 'demo', category: 'INTERFACE',
-    name: 'Demo Director', role: 'Demo Integrity & Pre-Demo QA',
-    icon: '▶', color: T.cyan, sources: ['Wire.txt §15'],
+    id: "demo",
+    category: "INTERFACE",
+    name: "Demo Director",
+    role: "Demo Integrity & Pre-Demo QA",
+    icon: "▶",
+    color: T.cyan,
+    sources: ["Wire.txt §15"],
     quickActions: [
-      'List all 11 demo failure conditions.',
-      'Run me through the full pre-demo QA checklist.',
-      'What must the Pitch Shifter state be during demo?',
-      'What badge must be visible in top nav?',
+      "List all 11 demo failure conditions.",
+      "Run me through the full pre-demo QA checklist.",
+      "What must the Pitch Shifter state be during demo?",
+      "What badge must be visible in top nav?",
     ],
     systemPrompt: `You are the Demo Director — definitive authority on R3 v4's demo integrity requirements. Knowledge from Wire.txt §15.
 
@@ -302,14 +326,18 @@ Cite §15 item number. Flag any change that breaks a failure condition as a crit
 
   // ── DATA LAYER ─────────────────────────────────────────────────────────────
   {
-    id: 'schema', category: 'DATA LAYER',
-    name: 'Schema Architect', role: 'DB Schema, API & WebSocket Contracts',
-    icon: '⬠', color: T.amber, sources: ['Wire.txt §6 §7'],
+    id: "schema",
+    category: "DATA LAYER",
+    name: "Schema Architect",
+    role: "DB Schema, API & WebSocket Contracts",
+    icon: "⬠",
+    color: T.amber,
+    sources: ["Wire.txt §6 §7"],
     quickActions: [
-      'List all PostgreSQL tables and their columns.',
-      'What are the 5 time savings baselines?',
-      'List all WebSocket events — client→server and server→client.',
-      'What is the correct tRPC path? (historically there was a bug)',
+      "List all PostgreSQL tables and their columns.",
+      "What are the 5 time savings baselines?",
+      "List all WebSocket events — client→server and server→client.",
+      "What is the correct tRPC path? (historically there was a bug)",
     ],
     systemPrompt: `You are the Schema Architect — definitive expert on R3 v4's data architecture and API contracts. Knowledge from Wire.txt §6 and §7.
 
@@ -349,14 +377,18 @@ Server → Client: ai:suggestion, ai:levelingApplied, ai:transitionReady, llpte:
 Cite §6 table or §7 contract. Flag any tRPC path that is /trpc instead of /api/trpc.`,
   },
   {
-    id: 'auth', category: 'DATA LAYER',
-    name: 'Auth Guardian', role: 'Auth, Security & JWT Contracts',
-    icon: '⊕', color: T.red, sources: ['auth.md', 'Wire.txt §8'],
+    id: "auth",
+    category: "DATA LAYER",
+    name: "Auth Guardian",
+    role: "Auth, Security & JWT Contracts",
+    icon: "⊕",
+    color: T.red,
+    sources: ["auth.md", "Wire.txt §8"],
     quickActions: [
-      'What is the canonical auth store? What is forbidden?',
-      'Explain the hydrateFromToken session destruction bug.',
-      'What does the JWT payload contain? What is forbidden in it?',
-      'List all confirmed-fixed auth issues.',
+      "What is the canonical auth store? What is forbidden?",
+      "Explain the hydrateFromToken session destruction bug.",
+      "What does the JWT payload contain? What is forbidden in it?",
+      "List all confirmed-fixed auth issues.",
     ],
     systemPrompt: `You are the Auth Guardian — definitive expert on R3 v4's authentication and JWT contracts. Knowledge from auth.md and Wire.txt §8.
 
@@ -391,14 +423,18 @@ Cite rule section. Flag hydrateFromToken() called on every mount as a session de
 
   // ── BUILD ──────────────────────────────────────────────────────────────────
   {
-    id: 'stack', category: 'BUILD',
-    name: 'Stack Guard', role: 'Locked Versions & Canonical Designations',
-    icon: '⊗', color: T.emerald, sources: ['Wire.txt §2 §12 §13'],
+    id: "stack",
+    category: "BUILD",
+    name: "Stack Guard",
+    role: "Locked Versions & Canonical Designations",
+    icon: "⊗",
+    color: T.emerald,
+    sources: ["Wire.txt §2 §12 §13"],
     quickActions: [
-      'List all locked runtime and framework versions.',
-      'What Three.js version is pinned and what APIs are forbidden?',
-      'List all canonical file location designations.',
-      'What redundancy patterns must be eliminated?',
+      "List all locked runtime and framework versions.",
+      "What Three.js version is pinned and what APIs are forbidden?",
+      "List all canonical file location designations.",
+      "What redundancy patterns must be eliminated?",
     ],
     systemPrompt: `You are the Stack Guard — definitive authority on R3 v4's locked stack versions. Knowledge from Wire.txt §2, §12, §13, and README.
 
@@ -437,14 +473,18 @@ REDUNDANCY TO ELIMINATE:
 Cite §2 package row, §12 standard, §13 designation, or README section. Flag any version upgrade suggestion.`,
   },
   {
-    id: 'workflow', category: 'BUILD',
-    name: 'Workflow Guard', role: 'Session Workflow & Response Protocol',
-    icon: '⚡', color: T.emerald, sources: ['workflow.md'],
+    id: "workflow",
+    category: "BUILD",
+    name: "Workflow Guard",
+    role: "Session Workflow & Response Protocol",
+    icon: "⚡",
+    color: T.emerald,
+    sources: ["workflow.md"],
     quickActions: [
-      'When exactly can I skip the interview questions?',
-      'What must a verification plan include?',
-      'What does the self-review checklist cover?',
-      'Explain the Read-Before-Write Wire.txt protocol.',
+      "When exactly can I skip the interview questions?",
+      "What must a verification plan include?",
+      "What does the self-review checklist cover?",
+      "Explain the Read-Before-Write Wire.txt protocol.",
     ],
     systemPrompt: `You are the Workflow Guard — definitive enforcer of R3 v4's session workflow rules. Knowledge from workflow.md.
 
@@ -468,14 +508,18 @@ Read every file in the full import graph before any destructive action.
 Cite the exact rule number. State which rule is violated BEFORE providing any code.`,
   },
   {
-    id: 'patch', category: 'BUILD',
-    name: 'Patch Engineer', role: 'Change Delivery Protocol',
-    icon: '⌥', color: T.amber, sources: ['patch-scripts.md', 'Wire.txt §14'],
+    id: "patch",
+    category: "BUILD",
+    name: "Patch Engineer",
+    role: "Change Delivery Protocol",
+    icon: "⌥",
+    color: T.amber,
+    sources: ["patch-scripts.md", "Wire.txt §14"],
     quickActions: [
-      'List all 5 required patch script behaviors.',
-      'What is the script naming convention?',
-      'What are the 4 required fields for every change?',
-      'What output must dry-run print vs. apply?',
+      "List all 5 required patch script behaviors.",
+      "What is the script naming convention?",
+      "What are the 4 required fields for every change?",
+      "What output must dry-run print vs. apply?",
     ],
     systemPrompt: `You are the Patch Engineer — definitive expert on R3 v4's patch script standards. Knowledge from patch-scripts.md and Wire.txt §14.
 
@@ -498,14 +542,18 @@ Cite requirement number. Check against all 5 behaviors and 4 forbidden items.`,
 
   // ── QUALITY ────────────────────────────────────────────────────────────────
   {
-    id: 'testing', category: 'QUALITY',
-    name: 'Test Sentinel', role: 'Testing Standards & Definition of Done',
-    icon: '✓', color: T.emerald, sources: ['testing.md'],
+    id: "testing",
+    category: "QUALITY",
+    name: "Test Sentinel",
+    role: "Testing Standards & Definition of Done",
+    icon: "✓",
+    color: T.emerald,
+    sources: ["testing.md"],
     quickActions: [
-      'List all 7 required LLPTE test layers in order.',
-      'What are the 3 Definition of Done conditions?',
-      'Where must test files live? What is forbidden?',
-      'What are the 3 test style rules?',
+      "List all 7 required LLPTE test layers in order.",
+      "What are the 3 Definition of Done conditions?",
+      "Where must test files live? What is forbidden?",
+      "What are the 3 test style rules?",
     ],
     systemPrompt: `You are the Test Sentinel — definitive expert on R3 v4's testing standards. Knowledge from testing.md.
 
@@ -536,14 +584,18 @@ Fix: vitest.config.ts include pattern must be:
   (P4 item — pnpm test currently returns no output without this fix)`,
   },
   {
-    id: 'correctness', category: 'QUALITY',
-    name: 'Correctness Auditor', role: 'Edge Cases, Error Boundaries & Connection Points',
-    icon: '⟁', color: T.red, sources: ['Wire.txt §9 §10 §11'],
+    id: "correctness",
+    category: "QUALITY",
+    name: "Correctness Auditor",
+    role: "Edge Cases, Error Boundaries & Connection Points",
+    icon: "⟁",
+    color: T.red,
+    sources: ["Wire.txt §9 §10 §11"],
     quickActions: [
-      'What R3-specific edge cases must always be audited?',
-      'List all audio engine error handling specs.',
-      'What connection points need verification and what does each confirm?',
-      'What is never acceptable under error boundary rules?',
+      "What R3-specific edge cases must always be audited?",
+      "List all audio engine error handling specs.",
+      "What connection points need verification and what does each confirm?",
+      "What is never acceptable under error boundary rules?",
     ],
     systemPrompt: `You are the Correctness Auditor — definitive expert on R3 v4's correctness standards. Knowledge from Wire.txt §9, §10, §11.
 
@@ -566,14 +618,18 @@ Cite §9 edge case, §10 boundary type, or §11 error category.`,
 
   // ── STRATEGY ───────────────────────────────────────────────────────────────
   {
-    id: 'skills', category: 'STRATEGY',
-    name: 'Skill Advisor', role: 'Skill Discovery & Automation',
-    icon: '⬟', color: T.cyan, sources: ['SKILL.md'],
+    id: "skills",
+    category: "STRATEGY",
+    name: "Skill Advisor",
+    role: "Skill Discovery & Automation",
+    icon: "⬟",
+    color: T.cyan,
+    sources: ["SKILL.md"],
     quickActions: [
-      'What 5 fields are required for every skill recommendation?',
-      'Recommend the highest-value skill to build right now.',
-      'Write a complete SKILL.md for the patch-gen skill.',
-      'What makes a good trigger description? (max chars?)',
+      "What 5 fields are required for every skill recommendation?",
+      "Recommend the highest-value skill to build right now.",
+      "Write a complete SKILL.md for the patch-gen skill.",
+      "What makes a good trigger description? (max chars?)",
     ],
     systemPrompt: `You are the Skill Advisor — definitive expert on building Claude Skills for R3 v4. Knowledge from SKILL.md.
 
@@ -594,14 +650,18 @@ HIGH-VALUE SKILL CANDIDATES (derive from project state):
 Each recommendation must include all 5 fields. Trigger descriptions must be ≤250 chars.`,
   },
   {
-    id: 'prd', category: 'STRATEGY',
-    name: 'PRD Enforcer', role: 'Product Requirements & MVP Gates',
-    icon: '◫', color: T.amber, sources: ['R3v4_PRD_v4.1'],
+    id: "prd",
+    category: "STRATEGY",
+    name: "PRD Enforcer",
+    role: "Product Requirements & MVP Gates",
+    icon: "◫",
+    color: T.amber,
+    sources: ["R3v4_PRD_v4.1"],
     quickActions: [
-      'What are the 3 PRD gates before partnership talks?',
-      'List all 4 MVP items and their current status.',
-      'What is the business model and pricing structure?',
-      'What are the 3 target user personas?',
+      "What are the 3 PRD gates before partnership talks?",
+      "List all 4 MVP items and their current status.",
+      "What is the business model and pricing structure?",
+      "What are the 3 target user personas?",
     ],
     systemPrompt: `You are the PRD Enforcer — definitive authority on R3 v4's product requirements and live priority queue. Knowledge from R3v4_PRD_v4.1 and PRIORITIES.md (last updated 2026-04-16).
 
@@ -665,22 +725,63 @@ One-sentence pitch: R3 makes professional-quality mixing accessible to anyone wi
   },
 ];
 
-const CATEGORIES = ['PRIME', 'AI PIPELINE', 'INTERFACE', 'DATA LAYER', 'BUILD', 'QUALITY', 'STRATEGY'];
+const CATEGORIES = [
+  "PRIME",
+  "AI PIPELINE",
+  "INTERFACE",
+  "DATA LAYER",
+  "BUILD",
+  "QUALITY",
+  "STRATEGY",
+];
 
 // ─── Markdown renderer ────────────────────────────────────────────────────────
 function renderMessage(text: string, accentColor: string): React.ReactNode[] {
   const parts = text.split(/(```[\s\S]*?```|`[^`]+`)/g);
   return parts.map((part, i) => {
-    if (part.startsWith('```')) {
-      const lines = part.slice(3, -3).split('\n');
+    if (part.startsWith("```")) {
+      const lines = part.slice(3, -3).split("\n");
       const lang = lines[0].trim();
-      const code = lines.slice(1).join('\n');
+      const code = lines.slice(1).join("\n");
       return (
-        <div key={i} style={{ margin: '8px 0', borderRadius: 6, border: `1px solid ${T.z700}`, overflow: 'hidden' }}>
+        <div
+          key={i}
+          style={{
+            margin: "8px 0",
+            borderRadius: 6,
+            border: `1px solid ${T.z700}`,
+            overflow: "hidden",
+          }}
+        >
           {lang && (
-            <div style={{ padding: '4px 10px', background: T.z800, borderBottom: `1px solid ${T.z700}`, fontSize: 10, color: accentColor, fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.08em' }}>{lang}</div>
+            <div
+              style={{
+                padding: "4px 10px",
+                background: T.z800,
+                borderBottom: `1px solid ${T.z700}`,
+                fontSize: 10,
+                color: accentColor,
+                fontFamily: "'JetBrains Mono', monospace",
+                letterSpacing: "0.08em",
+              }}
+            >
+              {lang}
+            </div>
           )}
-          <pre style={{ margin: 0, padding: '10px 12px', fontFamily: "'JetBrains Mono', monospace", fontSize: 12, lineHeight: 1.6, color: T.z100, overflowX: 'auto', whiteSpace: 'pre' }}><code>{code}</code></pre>
+          <pre
+            style={{
+              margin: 0,
+              padding: "10px 12px",
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: 12,
+              lineHeight: 1.6,
+              color: T.z100,
+              overflowX: "auto",
+              whiteSpace: "pre",
+            }}
+          >
+            <code>{code}</code>
+          </pre>
         </div>
       );
     }
@@ -688,12 +789,29 @@ function renderMessage(text: string, accentColor: string): React.ReactNode[] {
     return (
       <span key={i}>
         {inlineParts.map((ip, j) => {
-          if (ip.startsWith('`') && ip.endsWith('`')) {
+          if (ip.startsWith("`") && ip.endsWith("`")) {
             return (
-              <code key={j} style={{ background: T.z800, border: `1px solid ${T.z700}`, borderRadius: 3, padding: '1px 5px', fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: accentColor }}>{ip.slice(1, -1)}</code>
+              <code
+                key={j}
+                style={{
+                  background: T.z800,
+                  border: `1px solid ${T.z700}`,
+                  borderRadius: 3,
+                  padding: "1px 5px",
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: 12,
+                  color: accentColor,
+                }}
+              >
+                {ip.slice(1, -1)}
+              </code>
             );
           }
-          return <span key={j} style={{ whiteSpace: 'pre-wrap' }}>{ip}</span>;
+          return (
+            <span key={j} style={{ whiteSpace: "pre-wrap" }}>
+              {ip}
+            </span>
+          );
         })}
       </span>
     );
@@ -701,7 +819,15 @@ function renderMessage(text: string, accentColor: string): React.ReactNode[] {
 }
 
 // ─── Quick Action Chip ────────────────────────────────────────────────────────
-function QuickChip({ label, color, onClick }: { label: string; color: string; onClick: () => void }) {
+function QuickChip({
+  label,
+  color,
+  onClick,
+}: {
+  label: string;
+  color: string;
+  onClick: () => void;
+}) {
   const [hov, setHov] = useState(false);
   return (
     <button
@@ -710,19 +836,33 @@ function QuickChip({ label, color, onClick }: { label: string; color: string; on
       onMouseLeave={() => setHov(false)}
       style={{
         background: hov ? `${color}18` : `${color}0A`,
-        border: `1px solid ${hov ? color + '60' : color + '30'}`,
-        borderRadius: 20, padding: '4px 12px', fontSize: 11,
-        color: hov ? color : T.z400, cursor: 'pointer',
-        fontFamily: "'JetBrains Mono', monospace", whiteSpace: 'nowrap',
-        transition: 'all 0.15s', letterSpacing: '0.02em', flexShrink: 0,
+        border: `1px solid ${hov ? color + "60" : color + "30"}`,
+        borderRadius: 20,
+        padding: "4px 12px",
+        fontSize: 11,
+        color: hov ? color : T.z400,
+        cursor: "pointer",
+        fontFamily: "'JetBrains Mono', monospace",
+        whiteSpace: "nowrap",
+        transition: "all 0.15s",
+        letterSpacing: "0.02em",
+        flexShrink: 0,
       }}
-    >{label}</button>
+    >
+      {label}
+    </button>
   );
 }
 
 // ─── Message Bubble ───────────────────────────────────────────────────────────
-function Bubble({ msg, agent }: { msg: { role: string; content: string }; agent: AgentDef }) {
-  const isUser = msg.role === 'user';
+function Bubble({
+  msg,
+  agent,
+}: {
+  msg: { role: string; content: string };
+  agent: AgentDef;
+}) {
+  const isUser = msg.role === "user";
   const [copied, setCopied] = useState(false);
   const copy = () => {
     navigator.clipboard.writeText(msg.content);
@@ -730,20 +870,74 @@ function Bubble({ msg, agent }: { msg: { role: string; content: string }; agent:
     setTimeout(() => setCopied(false), 1500);
   };
   return (
-    <div style={{ display: 'flex', flexDirection: isUser ? 'row-reverse' : 'row', gap: 10, marginBottom: 18, alignItems: 'flex-start' }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: isUser ? "row-reverse" : "row",
+        gap: 10,
+        marginBottom: 18,
+        alignItems: "flex-start",
+      }}
+    >
       {!isUser && (
-        <div style={{ width: 30, height: 30, borderRadius: '50%', background: `${agent.color}15`, border: `1px solid ${agent.color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, color: agent.color, flexShrink: 0, boxShadow: `0 0 12px ${agent.color}30`, fontFamily: 'monospace' }}>{agent.icon}</div>
+        <div
+          style={{
+            width: 30,
+            height: 30,
+            borderRadius: "50%",
+            background: `${agent.color}15`,
+            border: `1px solid ${agent.color}40`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 13,
+            color: agent.color,
+            flexShrink: 0,
+            boxShadow: `0 0 12px ${agent.color}30`,
+            fontFamily: "monospace",
+          }}
+        >
+          {agent.icon}
+        </div>
       )}
-      <div style={{ maxWidth: '78%', position: 'relative' }}>
-        <div style={{ background: isUser ? `${T.z800}CC` : `${agent.color}0C`, border: `1px solid ${isUser ? T.z700 : agent.color + '30'}`, borderRadius: isUser ? '14px 4px 14px 14px' : '4px 14px 14px 14px', padding: '10px 14px', fontSize: 13, lineHeight: 1.7, color: T.z100, fontFamily: 'Inter, sans-serif' }}>
+      <div style={{ maxWidth: "78%", position: "relative" }}>
+        <div
+          style={{
+            background: isUser ? `${T.z800}CC` : `${agent.color}0C`,
+            border: `1px solid ${isUser ? T.z700 : agent.color + "30"}`,
+            borderRadius: isUser ? "14px 4px 14px 14px" : "4px 14px 14px 14px",
+            padding: "10px 14px",
+            fontSize: 13,
+            lineHeight: 1.7,
+            color: T.z100,
+            fontFamily: "Inter, sans-serif",
+          }}
+        >
           {isUser ? (
-            <span style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</span>
+            <span style={{ whiteSpace: "pre-wrap" }}>{msg.content}</span>
           ) : (
             renderMessage(msg.content, agent.color)
           )}
         </div>
         {!isUser && (
-          <button onClick={copy} style={{ position: 'absolute', top: 6, right: 6, background: 'transparent', border: 'none', color: copied ? agent.color : T.z600, cursor: 'pointer', fontSize: 10, fontFamily: "'JetBrains Mono', monospace", padding: '2px 5px', transition: 'color 0.15s' }}>{copied ? '✓ copied' : 'copy'}</button>
+          <button
+            onClick={copy}
+            style={{
+              position: "absolute",
+              top: 6,
+              right: 6,
+              background: "transparent",
+              border: "none",
+              color: copied ? agent.color : T.z600,
+              cursor: "pointer",
+              fontSize: 10,
+              fontFamily: "'JetBrains Mono', monospace",
+              padding: "2px 5px",
+              transition: "color 0.15s",
+            }}
+          >
+            {copied ? "✓ copied" : "copy"}
+          </button>
         )}
       </div>
     </div>
@@ -752,11 +946,53 @@ function Bubble({ msg, agent }: { msg: { role: string; content: string }; agent:
 
 function TypingDots({ agent }: { agent: AgentDef }) {
   return (
-    <div style={{ display: 'flex', gap: 10, marginBottom: 18, alignItems: 'center' }}>
-      <div style={{ width: 30, height: 30, borderRadius: '50%', background: `${agent.color}15`, border: `1px solid ${agent.color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, color: agent.color, flexShrink: 0, fontFamily: 'monospace' }}>{agent.icon}</div>
-      <div style={{ background: `${agent.color}0C`, border: `1px solid ${agent.color}30`, borderRadius: '4px 14px 14px 14px', padding: '12px 16px', display: 'flex', gap: 5 }}>
-        {[0, 1, 2].map(i => (
-          <div key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: agent.color, animation: `agentBlink 1.2s ease-in-out ${i * 0.2}s infinite` }} />
+    <div
+      style={{
+        display: "flex",
+        gap: 10,
+        marginBottom: 18,
+        alignItems: "center",
+      }}
+    >
+      <div
+        style={{
+          width: 30,
+          height: 30,
+          borderRadius: "50%",
+          background: `${agent.color}15`,
+          border: `1px solid ${agent.color}40`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 13,
+          color: agent.color,
+          flexShrink: 0,
+          fontFamily: "monospace",
+        }}
+      >
+        {agent.icon}
+      </div>
+      <div
+        style={{
+          background: `${agent.color}0C`,
+          border: `1px solid ${agent.color}30`,
+          borderRadius: "4px 14px 14px 14px",
+          padding: "12px 16px",
+          display: "flex",
+          gap: 5,
+        }}
+      >
+        {[0, 1, 2].map((i) => (
+          <div
+            key={i}
+            style={{
+              width: 5,
+              height: 5,
+              borderRadius: "50%",
+              background: agent.color,
+              animation: `agentBlink 1.2s ease-in-out ${i * 0.2}s infinite`,
+            }}
+          />
         ))}
       </div>
     </div>
@@ -767,11 +1003,17 @@ function TypingDots({ agent }: { agent: AgentDef }) {
 interface ChatPanelProps {
   agent: AgentDef;
   messages: { role: string; content: string }[];
-  setMessages: (msgs: { role: string; content: string }[] | ((prev: { role: string; content: string }[]) => { role: string; content: string }[])) => void;
+  setMessages: (
+    msgs:
+      | { role: string; content: string }[]
+      | ((
+          prev: { role: string; content: string }[],
+        ) => { role: string; content: string }[]),
+  ) => void;
 }
 
 function ChatPanel({ agent, messages, setMessages }: ChatPanelProps) {
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [awaitingFirst, setAwaitingFirst] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -779,158 +1021,385 @@ function ChatPanel({ agent, messages, setMessages }: ChatPanelProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, awaitingFirst]);
 
-  const send = useCallback(async (text?: string) => {
-    const content = (text ?? input).trim();
-    if (!content || busy) return;
-setInput('');
-    if (textareaRef.current) textareaRef.current.style.height = 'auto';
-    setError(null);
-    const updated = [...messages, { role: 'user', content }];
-    setMessages(updated);
-    setBusy(true);
-    setAwaitingFirst(true);
-    try {
-      const res = await fetch('/api/agent/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          system: agent.systemPrompt,
-          messages: updated.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })),
-        }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error((err as { error?: { message?: string } })?.error?.message || `HTTP ${res.status}`);
-      }
-      setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
-      setAwaitingFirst(false);
-      const reader = res.body!.getReader();
-      const decoder = new TextDecoder();
-      let buf = '';
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buf += decoder.decode(value, { stream: true });
-        const lines = buf.split('\n');
-        buf = lines.pop() ?? '';
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
-          const raw = line.slice(6).trim();
-          if (raw === '[DONE]') break;
-          try {
-            const ev = JSON.parse(raw) as { type: string; text?: string };
-            if (ev.type === 'text_delta') {
-              setMessages(prev => {
-                const next = [...prev];
-                const last = next[next.length - 1];
-                if (last?.role === 'assistant') {
-                  next[next.length - 1] = { ...last, content: last.content + (ev as unknown as { text: string }).text };
-                }
-                return next;
-              });
-            }
-          } catch { /* ignore parse errors */ }
+  const send = useCallback(
+    async (text?: string) => {
+      const content = (text ?? input).trim();
+      if (!content || busy) return;
+      setInput("");
+      if (textareaRef.current) textareaRef.current.style.height = "auto";
+      setError(null);
+      const updated = [...messages, { role: "user", content }];
+      setMessages(updated);
+      setBusy(true);
+      setAwaitingFirst(true);
+      try {
+        const res = await fetch("/api/agent/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            system: agent.systemPrompt,
+            messages: updated.map((m) => ({
+              role: m.role as "user" | "assistant",
+              content: m.content,
+            })),
+          }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(
+            (err as { error?: { message?: string } })?.error?.message ||
+              `HTTP ${res.status}`,
+          );
         }
+        setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+        setAwaitingFirst(false);
+        const reader = res.body!.getReader();
+        const decoder = new TextDecoder();
+        let buf = "";
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buf += decoder.decode(value, { stream: true });
+          const lines = buf.split("\n");
+          buf = lines.pop() ?? "";
+          for (const line of lines) {
+            if (!line.startsWith("data: ")) continue;
+            const raw = line.slice(6).trim();
+            if (raw === "[DONE]") break;
+            try {
+              const ev = JSON.parse(raw) as { type: string; text?: string };
+              if (ev.type === "text_delta") {
+                setMessages((prev) => {
+                  const next = [...prev];
+                  const last = next[next.length - 1];
+                  if (last?.role === "assistant") {
+                    next[next.length - 1] = {
+                      ...last,
+                      content:
+                        last.content + (ev as unknown as { text: string }).text,
+                    };
+                  }
+                  return next;
+                });
+              }
+            } catch {
+              /* ignore parse errors */
+            }
+          }
+        }
+      } catch (e: unknown) {
+        setError(e instanceof Error ? e.message : String(e));
+      } finally {
+        setBusy(false);
+        setAwaitingFirst(false);
       }
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setBusy(false);
-      setAwaitingFirst(false);
-    }
-  }, [input, busy, messages, agent.systemPrompt, setMessages]);
+    },
+    [input, busy, messages, agent.systemPrompt, setMessages],
+  );
 
   const onKey = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      send();
+    }
   };
 
-  const clear = () => { setMessages([]); setError(null); };
+  const clear = () => {
+    setMessages([]);
+    setError(null);
+  };
   const isEmpty = messages.length === 0;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div style={{ padding: '14px 20px', borderBottom: `1px solid ${agent.color}25`, background: `${agent.color}06`, display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
-        <div style={{ width: 44, height: 44, borderRadius: '50%', background: `${agent.color}15`, border: `1.5px solid ${agent.color}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, color: agent.color, boxShadow: `0 0 20px ${agent.color}25`, fontFamily: 'monospace' }}>{agent.icon}</div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: agent.color, fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.04em' }}>{agent.name}</div>
-          <div style={{ fontSize: 11, color: T.z400, fontFamily: 'Inter, sans-serif', marginTop: 1 }}>{agent.role}</div>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <div
+        style={{
+          padding: "14px 20px",
+          borderBottom: `1px solid ${agent.color}25`,
+          background: `${agent.color}06`,
+          display: "flex",
+          alignItems: "center",
+          gap: 14,
+          flexShrink: 0,
+        }}
+      >
+        <div
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: "50%",
+            background: `${agent.color}15`,
+            border: `1.5px solid ${agent.color}50`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 20,
+            color: agent.color,
+            boxShadow: `0 0 20px ${agent.color}25`,
+            fontFamily: "monospace",
+          }}
+        >
+          {agent.icon}
         </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
+            style={{
+              fontSize: 15,
+              fontWeight: 700,
+              color: agent.color,
+              fontFamily: "'JetBrains Mono', monospace",
+              letterSpacing: "0.04em",
+            }}
+          >
+            {agent.name}
+          </div>
+          <div
+            style={{
+              fontSize: 11,
+              color: T.z400,
+              fontFamily: "Inter, sans-serif",
+              marginTop: 1,
+            }}
+          >
+            {agent.role}
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           {agent.sources.map((s, i) => (
-            <div key={i} style={{ fontSize: 9, padding: '2px 7px', background: T.z800, border: `1px solid ${T.z700}`, borderRadius: 10, color: T.z400, fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>{s}</div>
+            <div
+              key={i}
+              style={{
+                fontSize: 9,
+                padding: "2px 7px",
+                background: T.z800,
+                border: `1px solid ${T.z700}`,
+                borderRadius: 10,
+                color: T.z400,
+                fontFamily: "'JetBrains Mono', monospace",
+                letterSpacing: "0.06em",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {s}
+            </div>
           ))}
-          <button onClick={clear} style={{ background: 'transparent', border: `1px solid ${T.z700}`, borderRadius: 6, padding: '4px 10px', cursor: 'pointer', color: T.z600, fontSize: 10, fontFamily: "'JetBrains Mono', monospace", transition: 'all 0.15s', letterSpacing: '0.05em' }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = T.z500; (e.currentTarget as HTMLButtonElement).style.color = T.z300; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = T.z700; (e.currentTarget as HTMLButtonElement).style.color = T.z600; }}
-          >CLEAR</button>
+          <button
+            onClick={clear}
+            style={{
+              background: "transparent",
+              border: `1px solid ${T.z700}`,
+              borderRadius: 6,
+              padding: "4px 10px",
+              cursor: "pointer",
+              color: T.z600,
+              fontSize: 10,
+              fontFamily: "'JetBrains Mono', monospace",
+              transition: "all 0.15s",
+              letterSpacing: "0.05em",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.borderColor = T.z500;
+              (e.currentTarget as HTMLButtonElement).style.color = T.z300;
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.borderColor = T.z700;
+              (e.currentTarget as HTMLButtonElement).style.color = T.z600;
+            }}
+          >
+            CLEAR
+          </button>
         </div>
       </div>
 
-      <div style={{ padding: '10px 20px', borderBottom: `1px solid ${T.z800}`, display: 'flex', gap: 7, overflowX: 'auto', flexShrink: 0, scrollbarWidth: 'none' }}>
+      <div
+        style={{
+          padding: "10px 20px",
+          borderBottom: `1px solid ${T.z800}`,
+          display: "flex",
+          gap: 7,
+          overflowX: "auto",
+          flexShrink: 0,
+          scrollbarWidth: "none",
+        }}
+      >
         {agent.quickActions.map((qa, i) => (
-          <QuickChip key={i} label={qa} color={agent.color} onClick={() => send(qa)} />
+          <QuickChip
+            key={i}
+            label={qa}
+            color={agent.color}
+            onClick={() => send(qa)}
+          />
         ))}
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 20px 8px', scrollbarWidth: 'thin', scrollbarColor: `${agent.color}30 transparent` }}>
+      <div
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: "20px 20px 8px",
+          scrollbarWidth: "thin",
+          scrollbarColor: `${agent.color}30 transparent`,
+        }}
+      >
         {isEmpty && !awaitingFirst && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 14, textAlign: 'center', color: T.z600 }}>
-            <div style={{ fontSize: 52, color: agent.color, opacity: 0.2, fontFamily: 'monospace', textShadow: `0 0 40px ${agent.color}` }}>{agent.icon}</div>
-            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, lineHeight: 1.8 }}>
-              <div style={{ color: agent.color, opacity: 0.6, marginBottom: 4 }}>{agent.name}</div>
-              <div style={{ fontSize: 10, opacity: 0.4 }}>{agent.sources.join(' · ')}</div>
-              <div style={{ fontSize: 10, opacity: 0.35, marginTop: 6 }}>use a quick action above or type your question</div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "100%",
+              gap: 14,
+              textAlign: "center",
+              color: T.z600,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 52,
+                color: agent.color,
+                opacity: 0.2,
+                fontFamily: "monospace",
+                textShadow: `0 0 40px ${agent.color}`,
+              }}
+            >
+              {agent.icon}
+            </div>
+            <div
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 12,
+                lineHeight: 1.8,
+              }}
+            >
+              <div
+                style={{ color: agent.color, opacity: 0.6, marginBottom: 4 }}
+              >
+                {agent.name}
+              </div>
+              <div style={{ fontSize: 10, opacity: 0.4 }}>
+                {agent.sources.join(" · ")}
+              </div>
+              <div style={{ fontSize: 10, opacity: 0.35, marginTop: 6 }}>
+                use a quick action above or type your question
+              </div>
             </div>
           </div>
         )}
-        {messages.map((msg, i) => <Bubble key={i} msg={msg} agent={agent} />)}
+        {messages.map((msg, i) => (
+          <Bubble key={i} msg={msg} agent={agent} />
+        ))}
         {awaitingFirst && <TypingDots agent={agent} />}
         {error && (
-          <div style={{ background: `${T.red}12`, border: `1px solid ${T.red}40`, borderRadius: 8, padding: '8px 12px', color: '#FCA5A5', fontSize: 12, fontFamily: "'JetBrains Mono', monospace", marginBottom: 12 }}>⚠ {error}</div>
+          <div
+            style={{
+              background: `${T.red}12`,
+              border: `1px solid ${T.red}40`,
+              borderRadius: 8,
+              padding: "8px 12px",
+              color: "#FCA5A5",
+              fontSize: 12,
+              fontFamily: "'JetBrains Mono', monospace",
+              marginBottom: 12,
+            }}
+          >
+            ⚠ {error}
+          </div>
         )}
         <div ref={bottomRef} />
       </div>
 
-      <div style={{ padding: '12px 20px', borderTop: `1px solid ${T.z800}`, background: `${T.black}CC`, display: 'flex', gap: 10, alignItems: 'flex-end', flexShrink: 0 }}>
+      <div
+        style={{
+          padding: "12px 20px",
+          borderTop: `1px solid ${T.z800}`,
+          background: `${T.black}CC`,
+          display: "flex",
+          gap: 10,
+          alignItems: "flex-end",
+          flexShrink: 0,
+        }}
+      >
         <textarea
           ref={textareaRef}
           value={input}
-          onChange={e => setInput(e.target.value)}
+          onChange={(e) => setInput(e.target.value)}
           onKeyDown={onKey}
           placeholder={`Ask ${agent.name}…`}
           rows={1}
-          style={{ flex: 1, background: T.z900, border: `1px solid ${input ? agent.color + '50' : T.z700}`, borderRadius: 8, padding: '10px 12px', color: T.z100, fontSize: 13, fontFamily: 'Inter, sans-serif', resize: 'none', outline: 'none', lineHeight: 1.5, maxHeight: 120, overflowY: 'auto', transition: 'border-color 0.2s' }}
-          onInput={e => {
+          style={{
+            flex: 1,
+            background: T.z900,
+            border: `1px solid ${input ? agent.color + "50" : T.z700}`,
+            borderRadius: 8,
+            padding: "10px 12px",
+            color: T.z100,
+            fontSize: 13,
+            fontFamily: "Inter, sans-serif",
+            resize: "none",
+            outline: "none",
+            lineHeight: 1.5,
+            maxHeight: 120,
+            overflowY: "auto",
+            transition: "border-color 0.2s",
+          }}
+          onInput={(e) => {
             const t = e.target as HTMLTextAreaElement;
-            t.style.height = 'auto';
-            t.style.height = Math.min(t.scrollHeight, 120) + 'px';
+            t.style.height = "auto";
+            t.style.height = Math.min(t.scrollHeight, 120) + "px";
           }}
         />
         <button
           onClick={() => send()}
           disabled={!input.trim() || busy}
-          style={{ background: !input.trim() || busy ? T.z800 : agent.color, border: 'none', borderRadius: 8, padding: '10px 18px', cursor: !input.trim() || busy ? 'not-allowed' : 'pointer', color: !input.trim() || busy ? T.z600 : T.black, fontSize: 12, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, transition: 'all 0.2s', boxShadow: !input.trim() || busy ? 'none' : `0 0 16px ${agent.color}50`, letterSpacing: '0.05em' }}
-        >{busy ? '···' : 'SEND'}</button>
+          style={{
+            background: !input.trim() || busy ? T.z800 : agent.color,
+            border: "none",
+            borderRadius: 8,
+            padding: "10px 18px",
+            cursor: !input.trim() || busy ? "not-allowed" : "pointer",
+            color: !input.trim() || busy ? T.z600 : T.black,
+            fontSize: 12,
+            fontFamily: "'JetBrains Mono', monospace",
+            fontWeight: 700,
+            transition: "all 0.2s",
+            boxShadow:
+              !input.trim() || busy ? "none" : `0 0 16px ${agent.color}50`,
+            letterSpacing: "0.05em",
+          }}
+        >
+          {busy ? "···" : "SEND"}
+        </button>
       </div>
     </div>
   );
 }
 
 // ─── Conversation persistence ─────────────────────────────────────────────────
-const CONVO_STORAGE_KEY = 'r3-agent-convos-v1';
+const CONVO_STORAGE_KEY = "r3-agent-convos-v1";
 
 function loadConvos(): Record<string, { role: string; content: string }[]> {
   try {
     const raw = localStorage.getItem(CONVO_STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as Record<string, { role: string; content: string }[]>) : {};
-  } catch { return {}; }
+    return raw
+      ? (JSON.parse(raw) as Record<string, { role: string; content: string }[]>)
+      : {};
+  } catch {
+    return {};
+  }
 }
 
-function saveConvos(convos: Record<string, { role: string; content: string }[]>) {
-  try { localStorage.setItem(CONVO_STORAGE_KEY, JSON.stringify(convos)); } catch { /* ignore */ }
+function saveConvos(
+  convos: Record<string, { role: string; content: string }[]>,
+) {
+  try {
+    localStorage.setItem(CONVO_STORAGE_KEY, JSON.stringify(convos));
+  } catch {
+    /* ignore */
+  }
 }
 
 // ─── Agent Suite Panel ─────────────────────────────────────────────────────────
@@ -940,24 +1409,36 @@ interface AgentSuitePanelProps {
 }
 
 export function AgentSuitePanel({ isOpen, onClose }: AgentSuitePanelProps) {
+  const [activeId, setActiveId] = useState("wire");
+  const [convos, setConvos] =
+    useState<Record<string, { role: string; content: string }[]>>(loadConvos);
+  const activeAgent = AGENTS.find((a) => a.id === activeId)!;
 
-  const [activeId, setActiveId] = useState('wire');
-  const [convos, setConvos] = useState<Record<string, { role: string; content: string }[]>>(loadConvos);
-  const activeAgent = AGENTS.find(a => a.id === activeId)!;
-
-  const setMsgs = useCallback((msgs: { role: string; content: string }[] | ((prev: { role: string; content: string }[]) => { role: string; content: string }[])) => {
-    setConvos(prev => {
-      const updated = typeof msgs === 'function' ? msgs(prev[activeId] ?? []) : msgs;
-      const next = { ...prev, [activeId]: updated };
-      saveConvos(next);
-      return next;
-    });
-  }, [activeId]);
+  const setMsgs = useCallback(
+    (
+      msgs:
+        | { role: string; content: string }[]
+        | ((
+            prev: { role: string; content: string }[],
+          ) => { role: string; content: string }[]),
+    ) => {
+      setConvos((prev) => {
+        const updated =
+          typeof msgs === "function" ? msgs(prev[activeId] ?? []) : msgs;
+        const next = { ...prev, [activeId]: updated };
+        saveConvos(next);
+        return next;
+      });
+    },
+    [activeId],
+  );
 
   const msgs = convos[activeId] ?? [];
 
   const counts: Record<string, number> = {};
-  AGENTS.forEach(a => { counts[a.id] = (convos[a.id] ?? []).length; });
+  AGENTS.forEach((a) => {
+    counts[a.id] = (convos[a.id] ?? []).length;
+  });
 
   return (
     <>
@@ -975,48 +1456,130 @@ export function AgentSuitePanel({ isOpen, onClose }: AgentSuitePanelProps) {
       {isOpen && (
         <div
           onClick={onClose}
-          style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.25)' }}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 1000,
+            background: "rgba(0,0,0,0.25)",
+          }}
         />
       )}
 
       {/* Panel */}
       <div
-        className={isOpen ? 'agent-suite-panel' : ''}
+        className={isOpen ? "agent-suite-panel" : ""}
         style={{
-          position: 'fixed',
+          position: "fixed",
           top: 0,
           right: 0,
           bottom: 0,
           width: 680,
           zIndex: 1001,
-          display: 'flex',
-          background: 'rgba(6,6,6,0.82)',
-          backdropFilter: 'blur(18px)',
-          WebkitBackdropFilter: 'blur(18px)',
-          fontFamily: 'Inter, sans-serif',
-          boxShadow: '-8px 0 40px rgba(0,0,0,0.5)',
-          transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
-          transition: isOpen ? 'none' : 'transform 0.25s cubic-bezier(0.4,0,0.6,1)',
-          pointerEvents: isOpen ? 'auto' : 'none',
+          display: "flex",
+          background: "rgba(6,6,6,0.82)",
+          backdropFilter: "blur(18px)",
+          WebkitBackdropFilter: "blur(18px)",
+          fontFamily: "Inter, sans-serif",
+          boxShadow: "-8px 0 40px rgba(0,0,0,0.5)",
+          transform: isOpen ? "translateX(0)" : "translateX(100%)",
+          transition: isOpen
+            ? "none"
+            : "transform 0.25s cubic-bezier(0.4,0,0.6,1)",
+          pointerEvents: isOpen ? "auto" : "none",
           borderLeft: `1px solid rgba(255,255,255,0.06)`,
         }}
       >
         {/* Sidebar */}
-        <div className="agent-suite-scrollbar" style={{ width: 200, flexShrink: 0, background: 'rgba(24,24,27,0.6)', borderRight: `1px solid rgba(255,255,255,0.05)`, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+        <div
+          className="agent-suite-scrollbar"
+          style={{
+            width: 200,
+            flexShrink: 0,
+            background: "rgba(24,24,27,0.6)",
+            borderRight: `1px solid rgba(255,255,255,0.05)`,
+            display: "flex",
+            flexDirection: "column",
+            overflowY: "auto",
+          }}
+        >
           {/* Header */}
-          <div style={{ padding: '14px 14px 12px', borderBottom: `1px solid ${T.z800}`, flexShrink: 0 }}>
-            <div style={{ fontSize: 8, letterSpacing: '0.2em', color: T.z600, fontFamily: "'JetBrains Mono', monospace", marginBottom: 4 }}>R3 V4 · AGI AGENT SUITE</div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: T.acid, fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.06em', textShadow: `0 0 20px ${T.acid}60` }}>EXPERT AGENTS</div>
-            <div style={{ fontSize: 9, color: T.z600, fontFamily: "'JetBrains Mono', monospace", marginTop: 3, letterSpacing: '0.1em' }}>{AGENTS.length} AGENTS · ALL ARTIFACTS</div>
+          <div
+            style={{
+              padding: "14px 14px 12px",
+              borderBottom: `1px solid ${T.z800}`,
+              flexShrink: 0,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 8,
+                letterSpacing: "0.2em",
+                color: T.z600,
+                fontFamily: "'JetBrains Mono', monospace",
+                marginBottom: 4,
+              }}
+            >
+              R3 V4 · AGI AGENT SUITE
+            </div>
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 700,
+                color: T.acid,
+                fontFamily: "'JetBrains Mono', monospace",
+                letterSpacing: "0.06em",
+                textShadow: `0 0 20px ${T.acid}60`,
+              }}
+            >
+              EXPERT AGENTS
+            </div>
+            <div
+              style={{
+                fontSize: 9,
+                color: T.z600,
+                fontFamily: "'JetBrains Mono', monospace",
+                marginTop: 3,
+                letterSpacing: "0.1em",
+              }}
+            >
+              {AGENTS.length} AGENTS · ALL ARTIFACTS
+            </div>
           </div>
 
           {/* Close button */}
-          <div style={{ padding: '8px 10px', borderBottom: `1px solid ${T.z800}`, flexShrink: 0 }}>
+          <div
+            style={{
+              padding: "8px 10px",
+              borderBottom: `1px solid ${T.z800}`,
+              flexShrink: 0,
+            }}
+          >
             <button
               onClick={onClose}
-              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', background: 'transparent', border: `1px solid ${T.z700}`, borderRadius: 6, cursor: 'pointer', color: T.z400, fontSize: 10, fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.06em', transition: 'all 0.15s' }}
-              onMouseEnter={e => { (e.currentTarget).style.borderColor = T.red + '60'; (e.currentTarget).style.color = T.red; }}
-              onMouseLeave={e => { (e.currentTarget).style.borderColor = T.z700; (e.currentTarget).style.color = T.z400; }}
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "6px 8px",
+                background: "transparent",
+                border: `1px solid ${T.z700}`,
+                borderRadius: 6,
+                cursor: "pointer",
+                color: T.z400,
+                fontSize: 10,
+                fontFamily: "'JetBrains Mono', monospace",
+                letterSpacing: "0.06em",
+                transition: "all 0.15s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = T.red + "60";
+                e.currentTarget.style.color = T.red;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = T.z700;
+                e.currentTarget.style.color = T.z400;
+              }}
             >
               <span style={{ fontSize: 11 }}>✕</span>
               <span>CLOSE AGENT SUITE</span>
@@ -1024,31 +1587,132 @@ export function AgentSuitePanel({ isOpen, onClose }: AgentSuitePanelProps) {
           </div>
 
           {/* Agent categories */}
-          <div style={{ flex: 1, padding: '8px 6px', overflowY: 'auto' }}>
-            {CATEGORIES.map(cat => {
-              const catAgents = AGENTS.filter(a => a.category === cat);
+          <div style={{ flex: 1, padding: "8px 6px", overflowY: "auto" }}>
+            {CATEGORIES.map((cat) => {
+              const catAgents = AGENTS.filter((a) => a.category === cat);
               if (catAgents.length === 0) return null;
               return (
                 <div key={cat} style={{ marginBottom: 6 }}>
-                  <div style={{ fontSize: 9, letterSpacing: '0.15em', color: T.z600, padding: '6px 8px 4px', fontFamily: "'JetBrains Mono', monospace" }}>{cat}</div>
-                  {catAgents.map(agent => {
+                  <div
+                    style={{
+                      fontSize: 9,
+                      letterSpacing: "0.15em",
+                      color: T.z600,
+                      padding: "6px 8px 4px",
+                      fontFamily: "'JetBrains Mono', monospace",
+                    }}
+                  >
+                    {cat}
+                  </div>
+                  {catAgents.map((agent) => {
                     const isActive = agent.id === activeId;
                     const msgCount = counts[agent.id];
                     return (
                       <button
                         key={agent.id}
                         onClick={() => setActiveId(agent.id)}
-                        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '8px 8px', background: isActive ? `${agent.color}12` : 'transparent', border: `1px solid ${isActive ? agent.color + '40' : 'transparent'}`, borderRadius: 7, cursor: 'pointer', marginBottom: 2, transition: 'all 0.12s', position: 'relative' }}
-                        onMouseEnter={e => { if (!isActive) { (e.currentTarget).style.background = `${T.z800}80`; (e.currentTarget).style.borderColor = T.z700; } }}
-                        onMouseLeave={e => { if (!isActive) { (e.currentTarget).style.background = 'transparent'; (e.currentTarget).style.borderColor = 'transparent'; } }}
+                        style={{
+                          width: "100%",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 9,
+                          padding: "8px 8px",
+                          background: isActive
+                            ? `${agent.color}12`
+                            : "transparent",
+                          border: `1px solid ${isActive ? agent.color + "40" : "transparent"}`,
+                          borderRadius: 7,
+                          cursor: "pointer",
+                          marginBottom: 2,
+                          transition: "all 0.12s",
+                          position: "relative",
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isActive) {
+                            e.currentTarget.style.background = `${T.z800}80`;
+                            e.currentTarget.style.borderColor = T.z700;
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isActive) {
+                            e.currentTarget.style.background = "transparent";
+                            e.currentTarget.style.borderColor = "transparent";
+                          }
+                        }}
                       >
-                        {isActive && <div style={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 2, background: agent.color, borderRadius: 1, boxShadow: `0 0 6px ${agent.color}` }} />}
-                        <div style={{ width: 26, height: 26, borderRadius: '50%', background: isActive ? `${agent.color}20` : T.z800, border: `1px solid ${isActive ? agent.color + '50' : T.z700}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: isActive ? agent.color : T.z500, flexShrink: 0, fontFamily: 'monospace', transition: 'all 0.12s', boxShadow: isActive ? `0 0 8px ${agent.color}40` : 'none' }}>{agent.icon}</div>
-                        <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
-                          <div style={{ fontSize: 12, fontWeight: 600, color: isActive ? agent.color : T.z400, fontFamily: 'Inter, sans-serif', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', transition: 'color 0.12s' }}>{agent.name}</div>
+                        {isActive && (
+                          <div
+                            style={{
+                              position: "absolute",
+                              left: 0,
+                              top: "18%",
+                              bottom: "18%",
+                              width: 2,
+                              background: agent.color,
+                              borderRadius: 1,
+                              boxShadow: `0 0 6px ${agent.color}`,
+                            }}
+                          />
+                        )}
+                        <div
+                          style={{
+                            width: 26,
+                            height: 26,
+                            borderRadius: "50%",
+                            background: isActive ? `${agent.color}20` : T.z800,
+                            border: `1px solid ${isActive ? agent.color + "50" : T.z700}`,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: 11,
+                            color: isActive ? agent.color : T.z500,
+                            flexShrink: 0,
+                            fontFamily: "monospace",
+                            transition: "all 0.12s",
+                            boxShadow: isActive
+                              ? `0 0 8px ${agent.color}40`
+                              : "none",
+                          }}
+                        >
+                          {agent.icon}
+                        </div>
+                        <div
+                          style={{ flex: 1, minWidth: 0, textAlign: "left" }}
+                        >
+                          <div
+                            style={{
+                              fontSize: 12,
+                              fontWeight: 600,
+                              color: isActive ? agent.color : T.z400,
+                              fontFamily: "Inter, sans-serif",
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              transition: "color 0.12s",
+                            }}
+                          >
+                            {agent.name}
+                          </div>
                         </div>
                         {msgCount > 0 && (
-                          <div style={{ fontSize: 9, minWidth: 16, height: 16, borderRadius: 8, padding: '0 4px', background: `${agent.color}25`, border: `1px solid ${agent.color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: agent.color, fontFamily: "'JetBrains Mono', monospace" }}>{msgCount}</div>
+                          <div
+                            style={{
+                              fontSize: 9,
+                              minWidth: 16,
+                              height: 16,
+                              borderRadius: 8,
+                              padding: "0 4px",
+                              background: `${agent.color}25`,
+                              border: `1px solid ${agent.color}40`,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              color: agent.color,
+                              fontFamily: "'JetBrains Mono', monospace",
+                            }}
+                          >
+                            {msgCount}
+                          </div>
                         )}
                       </button>
                     );
@@ -1059,17 +1723,42 @@ export function AgentSuitePanel({ isOpen, onClose }: AgentSuitePanelProps) {
           </div>
 
           {/* Footer */}
-          <div style={{ padding: '10px 14px', borderTop: `1px solid ${T.z800}`, flexShrink: 0 }}>
-            <div style={{ fontSize: 8, color: T.z600, fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.08em', lineHeight: 1.8 }}>
-              ARTIFACT-BOUND · NO HALLUCINATION<br />
-              Wire.txt · CLAUDE.md · llpte.md<br />
+          <div
+            style={{
+              padding: "10px 14px",
+              borderTop: `1px solid ${T.z800}`,
+              flexShrink: 0,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 8,
+                color: T.z600,
+                fontFamily: "'JetBrains Mono', monospace",
+                letterSpacing: "0.08em",
+                lineHeight: 1.8,
+              }}
+            >
+              ARTIFACT-BOUND · NO HALLUCINATION
+              <br />
+              Wire.txt · CLAUDE.md · llpte.md
+              <br />
               agents.md · auth.md · workflow.md
             </div>
           </div>
         </div>
 
         {/* Chat area */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'rgba(9,9,11,0.55)', minWidth: 0, overflow: 'hidden' }}>
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            background: "rgba(9,9,11,0.55)",
+            minWidth: 0,
+            overflow: "hidden",
+          }}
+        >
           <ChatPanel
             key={activeId}
             agent={activeAgent}
@@ -1083,7 +1772,13 @@ export function AgentSuitePanel({ isOpen, onClose }: AgentSuitePanelProps) {
 }
 
 // ─── Toggle Button ────────────────────────────────────────────────────────────
-export function AgentSuiteToggle({ onClick, isOpen }: { onClick: () => void; isOpen: boolean }) {
+export function AgentSuiteToggle({
+  onClick,
+  isOpen,
+}: {
+  onClick: () => void;
+  isOpen: boolean;
+}) {
   const [hov, setHov] = useState(false);
 
   return (
@@ -1093,27 +1788,31 @@ export function AgentSuiteToggle({ onClick, isOpen }: { onClick: () => void; isO
       onMouseLeave={() => setHov(false)}
       title="Open Expert Agent Suite"
       style={{
-        position: 'fixed',
+        position: "fixed",
         bottom: 24,
         right: 24,
         zIndex: 999,
         width: 52,
         height: 52,
-        borderRadius: '50%',
+        borderRadius: "50%",
         background: isOpen ? T.acid : hov ? `${T.acid}20` : `${T.z900}`,
-        border: `1.5px solid ${isOpen ? T.acid : hov ? T.acid + '80' : T.z700}`,
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        border: `1.5px solid ${isOpen ? T.acid : hov ? T.acid + "80" : T.z700}`,
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         fontSize: 20,
         color: isOpen ? T.black : hov ? T.acid : T.z400,
-        transition: 'all 0.2s',
-        boxShadow: isOpen ? `0 0 24px ${T.acid}60` : hov ? `0 0 16px ${T.acid}30` : '0 4px 16px rgba(0,0,0,0.4)',
-        fontFamily: 'monospace',
+        transition: "all 0.2s",
+        boxShadow: isOpen
+          ? `0 0 24px ${T.acid}60`
+          : hov
+            ? `0 0 16px ${T.acid}30`
+            : "0 4px 16px rgba(0,0,0,0.4)",
+        fontFamily: "monospace",
       }}
     >
-      {isOpen ? '✕' : '⬡'}
+      {isOpen ? "✕" : "⬡"}
     </button>
   );
 }
