@@ -35,10 +35,10 @@ cd r3v4/Agi-Suite   # or wherever the workspace root lives
 pnpm install
 ```
 
-Create `.env` in `artifacts/api-server/`:
+Create `.env` in `apps/api-server/`:
 
 ```env
-PORT=8080
+PORT=3001
 ANTHROPIC_API_KEY=sk-ant-...
 DATABASE_URL=postgresql://user:pass@host:5432/dbname
 NODE_ENV=development
@@ -55,7 +55,7 @@ This starts both services concurrently:
 | Service                | URL                   |
 | ---------------------- | --------------------- |
 | Frontend (Vite)        | http://localhost:5173 |
-| API server (tsx watch) | http://localhost:8080 |
+| API server (tsx watch) | http://localhost:3001 |
 
 ### Other commands
 
@@ -72,10 +72,9 @@ pnpm build          # Production build (typecheck + all packages)
 
 ```
 Agi-Suite/
-├── artifacts/
+├── apps/
 │   ├── api-server/         # Express backend
-│   ├── r3-agi/             # React 19 frontend
-│   └── mockup-sandbox/     # UI component development sandbox
+│   └── r3-agi/             # React 19 frontend
 ├── lib/
 │   ├── api-spec/           # OpenAPI spec (source of truth)
 │   ├── api-zod/            # Generated Zod validators

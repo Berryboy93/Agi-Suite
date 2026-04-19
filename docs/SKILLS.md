@@ -185,7 +185,7 @@ server restarted. No file watching — manual kill and restart required.
 
 ### Fix
 
-Replace the dev script in `artifacts/api-server/package.json`:
+Replace the dev script in `apps/api-server/package.json`:
 
 ```json
 {
@@ -332,7 +332,6 @@ node_modules/
 .patch-backups/
 
 # Auto-generated component files
-artifacts/mockup-sandbox/src/.generated/
 ```
 
 ### Fix — .gitignore (separate concern)
@@ -364,7 +363,7 @@ mishandle them. No need to add `pnpm-workspace.yaml` to `.prettierignore`.
 ### Metrics stream
 
 ```bash
-curl -N http://localhost:8080/api/metrics/stream
+curl -N http://localhost:3001/api/metrics/stream
 ```
 
 Expected output:
@@ -381,7 +380,7 @@ Press Ctrl+C to stop. `-N` disables buffering so chunks appear as they arrive.
 ### Agent chat (single turn)
 
 ```bash
-curl -N -X POST http://localhost:8080/api/agent/chat \
+curl -N -X POST http://localhost:3001/api/agent/chat \
   -H "Content-Type: application/json" \
   -d '{"messages":[{"role":"user","content":"Hello"}]}'
 ```
@@ -398,7 +397,7 @@ data: [DONE]
 ### Heartbeat
 
 ```bash
-curl -X POST http://localhost:8080/api/metrics/heartbeat \
+curl -X POST http://localhost:3001/api/metrics/heartbeat \
   -H "Content-Type: application/json" \
   -d '{"sessionId":"test-session-123"}'
 ```
@@ -429,7 +428,7 @@ of the target string before writing. This prevents silent corruption if the file
 has drifted from the expected state.
 
 ```python
-path = Path("/home/r3v/Agi-Suite/artifacts/api-server/src/routes/agent.ts")
+path = Path("/home/r3v/Agi-Suite/apps/api-server/src/routes/agent.ts")
 content = path.read_text()
 count = content.count(old)
 assert count == 1, f"Expected 1 match, got {count} — file may have changed"

@@ -87,7 +87,7 @@ The three-horizon evolution:
 
 As of 2026-04-18, Agi-Suite is a functioning two-service monorepo with the following capabilities:
 
-**Frontend (`artifacts/r3-agi`)**
+**Frontend (`apps/r3-agi`)**
 
 - Multi-panel React 19 SPA with sidebar navigation
 - 12 active view panels covering all major operational domains
@@ -95,7 +95,7 @@ As of 2026-04-18, Agi-Suite is a functioning two-service monorepo with the follo
 - Embedded AI agent panel with full streaming chat (Claude Sonnet)
 - Real-time SSE connection to backend metrics stream
 
-**Backend (`artifacts/api-server`)**
+**Backend (`apps/api-server`)**
 
 - Express 5 API server with structured pino logging
 - Anthropic SDK streaming proxy — server-side, key never exposed to client
@@ -527,7 +527,7 @@ Vitest is configured. No tests exist. The shared library layer (`lib/`) is the m
 | `lib/api-zod`          | Unit — parse valid inputs, reject invalid, check error messages | P0       |
 | `lib/api-client-react` | Unit — mock fetch, test error handling, retry logic             | P1       |
 | `lib/db`               | Integration — schema constraints, query correctness             | P1       |
-| `artifacts/api-server` | Integration — route handlers with supertest                     | P2       |
+| `apps/api-server`      | Integration — route handlers with supertest                     | P2       |
 
 **Acceptance criteria:**
 
@@ -740,8 +740,8 @@ The long-horizon vision for the agent is full deploy authority — the ability t
 - Shared package versions managed via pnpm catalog in `pnpm-workspace.yaml`
 - All catalog-referenced packages use `"catalog:"` in `package.json`
 - No circular dependencies between packages
-- `lib/` packages do not import from `artifacts/`
-- `artifacts/` packages may import from `lib/`
+- `lib/` packages do not import from `apps/`
+- `apps/` packages may import from `lib/`
 
 ---
 
