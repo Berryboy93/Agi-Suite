@@ -1,0 +1,30 @@
+diff --git a/apply-phase2.sh b/apply-phase2.sh
+index 1111111..2222222 100644
+--- a/apply-phase2.sh
++++ b/apply-phase2.sh
+@@ -1,10 +1,18 @@
+ #!/usr/bin/env bash
+ 
+ echo "=== Phase 2 — Hardening ==="
+ 
+-# OLD (broken path)
+-STAGE=/home/r3v/../phase2-staging
++# FIX: use actual download location (portable + correct)
++STAGE="${STAGE:-$HOME/Downloads}"
++
++# Safety check: ensure staging directory exists
++if [ ! -d "$STAGE" ]; then
++  echo "❌ Phase2 staging folder not found: $STAGE"
++  echo "Expected files in: $HOME/Downloads"
++  exit 1
++fi
+ 
+ echo "→ Using STAGE: $STAGE"
+ 
+@@ -12,7 +20,7 @@ echo "→ FR-022 / FR-016: error responses + auth"
+ cp "$STAGE/openapi.yaml"              lib/api-spec/openapi.yaml
+ cp "$STAGE/auth.ts"                   artifacts/api-server/src/middlewares/auth.ts
+ cp "$STAGE/app.ts"                    artifacts/api-server/src/app.ts
+ cp "$STAGE/routes-index.ts"          artifacts/api-server/src/routes/index.ts
+ cp "$STAGE/db-schema.ts"             lib/db/src/schema/index.ts
+ cp "$STAGE/metrics.ts"               artifacts/api-server/src/routes/metrics.ts

@@ -1,0 +1,2 @@
+console.log("R3 AGI booted");
+document.getElementById("root")!.innerHTML = "R3 AGI ONLINE";

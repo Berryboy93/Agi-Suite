@@ -1,0 +1,427 @@
+# WIRE.txt — Agi-Suite Engineering Protocol
+# Referenced in CLAUDE.md and PRD.md. Required for all engineering tasks.
+# Version: 2.0 | Updated: 2026-04-18
+# Supersedes: Wire.txt v1.0 (R3 v4 general)
+# Scope: Agi-Suite monorepo (artifacts/api-server, artifacts/r3-agi, lib/*)
+---
+
+## Protocol Format
+
+Every engineering response must follow this structure:
+
+```
+FILES READ:
+  - path/to/file.ts (lines read, e.g. "full file, 84 lines" or "lines 120–180")
+
+FINDINGS:
+  - What the code actually does
+  - Bugs or issues found (with exact line references)
+  - Constraints identified
+  - SDK/library behavior that affects the fix
+
+CHANGES:
+  File: path/to/file.ts
+    Root cause:      Why this is broken
+    Fix rationale:   Why this specific fix is correct
+    Affected surface: Which other files, routes, or packages are touched
+    Regression check: What was verified after the change
+
+REMAINING AMBIGUITIES:
+  - What is still unclear
+  - What needs verification before closing
+  - What was deferred and why
+```
+
+No exceptions. A response that skips FILES READ and jumps to a fix has violated
+this protocol regardless of whether the fix is correct.
+
+---
+
+## Hard Rules
+
+### Before Every Write
+
+1. **Read the file first** — `cat -n` for line numbers, or request the user cat it
+2. **Confirm exact anchor text** before any Python replace or sed
+3. **Count occurrences** — anchor must appear exactly once (`content.count(old) == 1`)
+4. **State root cause** before writing the fix — not a description of the symptom,
+   the actual mechanical reason the bug exists
+5. **State fix rationale** — why this approach and not another
+6. **State affected surface** — every file, package, and route that changes behavior
+7. **Timestamped backup** before any destructive operation:
+   ```bash
+   cp file.ts file.ts.bak-$(date +%Y%m%d_%H%M%S)
+   ```
+   Or use the workspace backup system:
+   ```
+   ~/Agi-Suite/.patch-backups/<ISO_TIMESTAMP>/
+   ```
+
+### After Every Write
+
+1. Run `pnpm typecheck` — must be zero errors across all packages
+2. Verify the change landed: `grep -n "changed_text" file.ts`
+3. If typecheck fails — read the error, find root cause, fix before proceeding
+4. **Never leave a typecheck error and move on**
+5. For route changes: verify with `curl` against the running dev server (see SKILLS.md §A7)
+6. For SSE routes: test client disconnect behavior explicitly — do not assume abort is handled
+
+### Patch Discipline
+
+- Dry-run first (`python3 patch.py`), apply second (`python3 patch.py --apply`)
+- Python file writes over `sed` for all multi-line replacements
+- Use `assert content.count(old) == 1` before every write — no exceptions
+- Verify line count after Python writes — confirm no lines were dropped
+- Never use `sed` on content that may appear more than once in a file
+- Backup every file before writing, even for "trivial" changes
+
+### Backup Protocol
+
+- Before any destructive operation: timestamped backup
+- Backup naming: `filename.ext.bak-YYYYMMDD_HHMMSS`
+- Backup dirs naming: `.patch-backups/YYYYMMDDTHHMMSS/`
+- `.patch-backups/` is in `.gitignore` — backups are never committed
+- Clean up backups after confirming the fix is stable (`rm -rf .patch-backups/`)
+
+---
+
+## Triple-Check Procedure
+
+Before writing any code fix, verify three times:
+
+1. **Read** — Does the file contain exactly the text you expect to replace?
+2. **Count** — How many times does the anchor text appear? (Must be exactly 1)
+3. **Consequence** — What breaks if the replacement is wrong?
+
+If any answer is uncertain — read more of the file before proceeding.
+
+**For SDK/library behavior:** Read the actual source before assuming behavior.
+The Anthropic SDK abort/error event distinction (SKILLS.md §A1) is an example
+of a case where assumptions about a library's behavior were wrong in a
+process-crashing way. When a library's behavior is the root cause, fetch and
+read the relevant source before writing the fix.
+
+---
+
+## Agi-Suite Specific Rules
+
+### Monorepo package boundaries
+
+- `lib/` packages do not import from `artifacts/`
+- `artifacts/` packages may import from `lib/`
+- No circular dependencies across packages
+- When adding a new import, check both the import site AND the export site
+- If a type or function is added to a `lib/` package, re-run `pnpm typecheck`
+  across the full workspace — not just the package you edited
+
+### API contract discipline
+
+The OpenAPI spec in `lib/api-spec/openapi.yaml` is the single source of truth
+for all API contracts. When adding or modifying an endpoint:
+
+1. Update `lib/api-spec/openapi.yaml` first
+2. Run the code generator to update `lib/api-zod` and `lib/api-client-react`
+3. Implement the route in `artifacts/api-server/src/routes/`
+4. Wire the route in `artifacts/api-server/src/routes/index.ts`
+5. Verify typecheck passes across all four affected packages
+
+**Never write a Zod schema or React Query hook by hand for an API endpoint.**
+If the generator is not run, the contract will drift.
+
+### Anthropic SDK — streaming routes
+
+Every route that calls `client.messages.stream()` must have all three of these:
+
+```typescript
+// 1. Handle real API errors (rate limits, network failures)
+stream.on("error", (err: Error) => {
+  if (err.message?.includes("aborted") || err.constructor?.name === "APIUserAbortError") {
+    return;
+  }
+  // write error SSE event
+});
+
+// 2. Handle abort event — REQUIRED, distinct from error
+// Without this: _emit('abort') calls Promise.reject() → process crash on disconnect
+stream.on("abort", () => {});
+
+// 3. Clean up on client disconnect
+req.on("close", () => {
+  try { stream.abort(); } catch { /* ignore */ }
+});
+```
+
+Omitting the `abort` listener is a **process-crashing bug**. It is not caught
+by TypeScript and will not appear in any test — it only manifests when a real
+client disconnects mid-stream.
+
+See SKILLS.md §A1 for the full root cause analysis and SDK source reference.
+
+### esbuild bundle discipline
+
+When adding a new npm dependency to `artifacts/api-server`:
+
+1. Is it a production dependency that will be present in `node_modules` at runtime?
+   → Add it to the `external` array in `build.mjs`
+2. Is it a devDependency used only during build/development?
+   → Do not add to `external` — let esbuild bundle it
+3. After adding to `external`, run `pnpm --filter @workspace/api-server build`
+   and verify the bundle size did not increase unexpectedly
+
+Current externalized packages include `@anthropic-ai/sdk`. Any package of
+similar size that is always available at runtime should be externalized.
+
+### pnpm catalog discipline
+
+Before adding any dependency version to a `package.json`:
+
+1. Check the workspace catalog: `grep -A 60 "^catalog:" pnpm-workspace.yaml`
+2. If the package is in the catalog, use `"catalog:"` as the version specifier
+3. If not in the catalog, add it to the catalog first, then reference `"catalog:"`
+4. Never hardcode a version that differs from the catalog pin
+
+### Database migration discipline
+
+| Operation | Command | When |
+|---|---|---|
+| Local schema iteration | `pnpm --filter @workspace/db push` | Dev only |
+| Create migration file | `pnpm --filter @workspace/db generate` | Before any production change |
+| Apply migrations | `pnpm --filter @workspace/db migrate` | Production deploy |
+
+**Never use `push` in production.** After every `migrate`, verify the schema:
+```bash
+DATABASE_URL="postgresql://..." node -e "
+const {Pool} = require('pg');
+const pool = new Pool({connectionString: process.env.DATABASE_URL});
+pool.query(\"SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'\")
+  .then(r => { console.log(r.rows.map(x => x.table_name)); pool.end(); });
+"
+```
+
+### SSE route discipline
+
+Every SSE route must:
+
+1. Set all four headers before `res.flushHeaders()`:
+   ```typescript
+   res.setHeader("Content-Type", "text/event-stream");
+   res.setHeader("Cache-Control", "no-cache");
+   res.setHeader("Connection", "keep-alive");
+   res.setHeader("X-Accel-Buffering", "no");
+   res.flushHeaders();
+   ```
+2. Clean up all resources on `req.on("close")`
+3. Remove clients from any tracking Set on disconnect
+4. Not leave dangling `setInterval` handles after the connection closes
+
+---
+
+## Four-Part Change Accountability Framework
+
+Every change entry in CHANGES must include all four parts. No exceptions.
+
+```
+Root cause:      The mechanical reason the bug exists — not a symptom description.
+                 "The process crashed because APIUserAbortError was an unhandled
+                  rejection" not "the server was crashing on disconnect".
+
+Fix rationale:   Why this specific fix and not an alternative.
+                 "stream.on('abort', () => {}) satisfies the SDK's listeners?.length
+                  check and prevents Promise.reject() — stream.catch() does not exist
+                  on MessageStream" not "added abort handler".
+
+Affected surface: Every file, route, package, and runtime behavior that changes.
+                 "artifacts/api-server/src/routes/agent.ts — agent chat route no
+                  longer crashes the process on client disconnect".
+
+Regression check: What was verified after the change.
+                 "pnpm typecheck → 0 errors. curl -N POST /api/agent/chat,
+                  Ctrl+C mid-stream → server continues serving subsequent requests".
+```
+
+A change entry that says "fixed the crash" without all four parts is incomplete.
+
+---
+
+## Common Failure Modes (Agi-Suite)
+
+| Failure | Root Cause | Prevention |
+|---|---|---|
+| Server crash on client disconnect | Missing `stream.on("abort", () => {})` | See SKILLS.md §A1. Required on every stream route. |
+| Bundle size unexpectedly large | Production runtime package bundled by esbuild | Externalize packages present in `node_modules` at runtime (SKILLS.md §A2) |
+| pnpm install conflict | Hardcoded version conflicts with catalog pin | Always check catalog before specifying a version (SKILLS.md §A4) |
+| Hooks not installed on fresh clone | `simple-git-hooks` build not approved | Run `pnpm approve-builds` once per machine (SKILLS.md §A5) |
+| Prettier pre-commit blocks commit | Files not formatted | Run `pnpm exec prettier --write .` before staging |
+| TSC error after patch | Didn't run `pnpm typecheck` across all packages | Always run from workspace root, not from a single package |
+| SSE clients leak memory | Client removed from tracking Set only on `req.close`, not on write error | Wrap all `res.write()` calls in try/catch; remove client on any error |
+| `sed` duplicates content | Pattern matched twice | Use Python with `assert content.count(old) == 1` |
+| Python slice drops closing braces | Off-by-one on line indices | Verify line count in output. Use `.rstrip()` + append |
+| Anchor not found | File changed since last read | Re-read file immediately before each write |
+| Import added but not wired | Two separate edits required | Always check both import AND usage site |
+| Export added but not imported | Forgot the consuming file | Grep for all import sites before declaring done |
+| Migration appears to succeed but didn't | `drizzle-kit migrate` gives no explicit confirmation | Always verify schema after every migrate (SKILLS.md §A9) |
+| `.prettierignore` doesn't stop git tracking | These are independent systems | Files needing git exclusion go in `.gitignore` too (SKILLS.md §A6) |
+
+---
+
+## Verification Checklist (Before Closing Any Task)
+
+```
+Core
+  [ ] pnpm typecheck → zero errors (run from workspace root)
+  [ ] grep -n "changed_text" file.ts → change confirmed present
+  [ ] No unintended duplicate content
+  [ ] No missing closing braces or type exports
+
+API / Routes
+  [ ] New or modified endpoint responds correctly to curl
+  [ ] Error paths return JSON (not HTML from Express default handler)
+  [ ] SSE routes clean up on client disconnect (no memory leak)
+  [ ] Streaming routes have abort listener (not just error listener)
+
+Database
+  [ ] Schema changes have a generated migration file committed
+  [ ] Migration verified against running DB after apply
+  [ ] push was not used in production
+
+Build
+  [ ] pnpm --filter @workspace/api-server build → no warnings on bundle size
+  [ ] New runtime dependencies are in the external array in build.mjs
+  [ ] New packages use catalog: version specifier if in the catalog
+
+Git
+  [ ] Backup cleaned up or noted
+  [ ] git add -A && git commit triggers pre-commit hook (prettier check passes)
+  [ ] Pre-push hook (typecheck) passes on push
+  [ ] .patch-backups/ not committed (in .gitignore)
+
+Structural changes
+  [ ] pnpm typecheck across all 9 workspace projects passes
+  [ ] No circular imports introduced between packages
+  [ ] API contract changes reflected in openapi.yaml + regenerated downstream
+```
+
+---
+
+## Example Wire.txt Responses
+
+### Example 1 — Bug fix (route crash on disconnect)
+
+```
+FILES READ:
+  - artifacts/api-server/src/routes/agent.ts (full file, 68 lines)
+  - node_modules/@anthropic-ai/sdk/src/lib/MessageStream.ts (lines 1–120, 280–310)
+
+FINDINGS:
+  - stream.on("error", handler) is present — handles real API errors
+  - stream.on("abort", ...) is missing entirely
+  - MessageStream._emit('abort') at line 290: if no abort listeners and
+    #catchingPromiseCreated is false → calls Promise.reject(error) intentionally
+  - This produces an unhandled rejection → Node exits with code 1
+  - stream.catch() does not exist — MessageStream is not a Promise
+
+CHANGES:
+  File: artifacts/api-server/src/routes/agent.ts (line 52)
+  + stream.on("abort", () => {});
+
+  Root cause:      MessageStream._emit('abort') calls Promise.reject(error) when
+                   no abort listeners are registered. This is intentional SDK
+                   behavior designed to force abort handling. The error listener
+                   does not cover the abort path — they are separate event types.
+
+  Fix rationale:   stream.on("abort", () => {}) satisfies listeners?.length > 0,
+                   preventing the SDK from calling Promise.reject(). One line.
+                   stream.catch() was considered but does not exist on MessageStream.
+                   stream.done().catch() was considered but sets #catchingPromiseCreated
+                   which changes stream lifecycle behavior unnecessarily.
+
+  Affected surface: artifacts/api-server/src/routes/agent.ts — agent chat route
+                   no longer crashes the process on client disconnect. All other
+                   active requests continue to be served.
+
+  Regression check: pnpm typecheck → 0 errors.
+                   curl -N -X POST /api/agent/chat with messages → streams correctly.
+                   Ctrl+C mid-stream → server logs nothing, continues serving.
+                   Subsequent heartbeat requests return 200 → process is alive.
+
+REMAINING AMBIGUITIES:
+  - None. Fix is complete and verified.
+```
+
+### Example 2 — New dependency added
+
+```
+FILES READ:
+  - artifacts/api-server/package.json (full file, 28 lines)
+  - artifacts/api-server/build.mjs (external array, lines 24–80)
+  - pnpm-workspace.yaml (catalog section, lines 38–60)
+
+FINDINGS:
+  - @anthropic-ai/sdk is in package.json dependencies but NOT in build.mjs external array
+  - It is not in the pnpm workspace catalog
+  - Current bundle: 2.0mb (esbuild warning threshold)
+  - SDK is ~1.8mb; bundling it inflates the output with no runtime benefit
+
+CHANGES:
+  File: artifacts/api-server/build.mjs (external array)
+  + "@anthropic-ai/sdk",   // before "*.node"
+
+  Root cause:      esbuild bundles all non-external imports. @anthropic-ai/sdk
+                   is a production dependency — it will be in node_modules at
+                   Railway runtime. There is no reason to bundle it.
+
+  Fix rationale:   Externalizing removes ~1.8mb from the bundle. Railway installs
+                   production dependencies before starting the server, so the
+                   package is always available. No code changes required.
+
+  Affected surface: artifacts/api-server/dist/index.mjs — bundle size drops
+                   from ~2.0mb to ~200kb. Railway deploy time reduced. No
+                   runtime behavior changes.
+
+  Regression check: pnpm --filter @workspace/api-server build → bundle listed
+                   as ~200kb, no size warning. pnpm dev → server starts, agent
+                   chat endpoint responds correctly (SDK loaded from node_modules).
+
+REMAINING AMBIGUITIES:
+  - Other large production dependencies (pg, drizzle-orm) should be audited
+    for the same externalization opportunity. Deferred — not blocking.
+```
+
+---
+
+## Zero-Ambiguity Policy
+
+If a task requires reading a file that cannot be accessed from the current
+environment (e.g. files on the user's machine when working remotely), the
+correct response is:
+
+```
+Cannot proceed. Need to read [file] before writing the fix.
+Run: cat ~/Agi-Suite/path/to/file.ts
+Paste the output and I will continue.
+```
+
+Never write a fix based on assumed file contents. Never guess at line numbers.
+Never assume a library behaves as documented without reading the source when
+the behavior is the root cause of a bug.
+
+---
+
+## Protocol Violations
+
+The following are protocol violations. If caught, stop, re-read the file,
+and restart the fix from the FILES READ step.
+
+- Writing a fix without reading the file first
+- Using `sed` on a pattern that may appear more than once
+- Claiming a fix is complete without running `pnpm typecheck`
+- Leaving a TypeScript error in place and continuing
+- Writing a CHANGES entry without all four accountability parts
+- Assuming SDK behavior without reading the source when the SDK is the root cause
+- Using `push` instead of `migrate` for a production database change
+- Hardcoding a dependency version that differs from the workspace catalog
+
+---
+
+*This protocol is the minimum bar. It does not cap thoroughness — it floors it.*
+*Every session. Every file. Every fix.*

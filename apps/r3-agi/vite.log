@@ -1,0 +1,10 @@
+
+> @workspace/r3-agi@0.0.0 dev /home/r3v/Agi-Suite/apps/r3-agi
+> vite --host
+
+
+  VITE v7.3.2  ready in 462 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: http://100.115.92.199:5173/
+ ELIFECYCLE  Command failed with exit code 143.

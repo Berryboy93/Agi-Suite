@@ -3,11 +3,12 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
+    "format": "prettier --write .",
     "dev": "concurrently -n api,agi -c blue,green \"pnpm --filter @workspace/api-server dev\" \"pnpm --filter @workspace/r3-agi dev\"",
     "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
     "build": "pnpm run typecheck && pnpm -r --if-present run build",
     "typecheck:libs": "tsc --build",
-    "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck",
+    "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./apps/**\" --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck",
     "prepare": "simple-git-hooks",
     "test": "vitest run --workspace vitest.workspace.ts",
     "test:watch": "vitest --workspace vitest.workspace.ts"
@@ -19,8 +20,9 @@
     "concurrently": "^9.2.1",
     "lightningcss-linux-arm64-gnu": "^1.32.0",
     "prettier": "^3.8.1",
-    "typescript": "~5.9.2",
     "simple-git-hooks": "^2.11.1",
+    "ts-morph": "^28.0.0",
+    "typescript": "~5.9.3",
     "vitest": "^3.2.0"
   }
 }
