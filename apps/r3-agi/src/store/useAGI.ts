@@ -39,6 +39,31 @@ interface AGIState {
   toggleAgentSuite: () => void;
 }
 
+// ─── Chat persistence (localStorage) ─────────────────────────────────────────
+const CHAT_KEY = "r3-chat-v1";
+const CHAT_CAP = 50;
+
+function loadChat(): { role: "user" | "assistant"; content: string }[] {
+  try {
+    const s = localStorage.getItem(CHAT_KEY);
+    if (s) {
+      const parsed = JSON.parse(s);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch {
+    /* ignore — storage unavailable or data corrupted */
+  }
+  return [];
+}
+
+function saveChat(msgs: { role: "user" | "assistant"; content: string }[]) {
+  try {
+    localStorage.setItem(CHAT_KEY, JSON.stringify(msgs));
+  } catch {
+    /* ignore — storage quota exceeded */
+  }
+}
+
 const INITIAL_PRIOS: PrioItem[] = [
   {
     tag: "P0",
@@ -142,7 +167,7 @@ export const useAGI = create<AGIState>((set, get) => ({
     },
   ],
   prios: loadPrios(),
-  chatMessages: [],
+  chatMessages: loadChat(),
   agentSuiteOpen: false,
 
   setView: (view) => {
@@ -186,13 +211,18 @@ export const useAGI = create<AGIState>((set, get) => ({
   },
 
   addChatMessage: (role, content) => {
-    set((s) => ({ chatMessages: [...s.chatMessages, { role, content }] }));
+    set((s) => {
+      const msgs = [...s.chatMessages, { role, content }].slice(-CHAT_CAP);
+      saveChat(msgs);
+      return { chatMessages: msgs };
+    });
     if (role === "user")
       get().addLog("QUERY", content.substring(0, 60), "lt-cmd");
     else get().addLog("AGENT", content.substring(0, 60), "lt-fix");
   },
 
   clearChat: () => {
+    localStorage.removeItem(CHAT_KEY);
     set({ chatMessages: [] });
     get().addLog("CLEAR", "Chat cleared", "lt-cmd");
   },

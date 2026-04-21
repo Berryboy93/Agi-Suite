@@ -1,6 +1,0 @@
-packages:
-  - "apps/*"
-  - "lib/*"
-  - "lib/integrations/*"
-  - "scripts"
-  - "artifacts/*"
