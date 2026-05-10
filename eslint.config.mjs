@@ -33,6 +33,7 @@ export default [
       // Plain JS tools — not TypeScript, skip type-aware linting
       "tools/**/*.js",
       "ecosystem.config.cjs",
+      "tools/fix/**",
     ],
   },
 
@@ -46,7 +47,15 @@ export default [
         // For each file being linted, ESLint resolves the nearest tsconfig.json
         // in the file's ancestor directories. Each workspace package's own
         // tsconfig is used for type-aware rules on files within that package.
-        projectService: true,
+        projectService: {
+          // r3-agi tsconfig.json uses composite references (tsconfig.app.json /
+          // tsconfig.node.json) rather than direct includes. projectService:true
+          // does not follow references, so every src file fails as "not found".
+          // allowDefaultProject falls back to the root tsconfig for any file
+          // the project service cannot resolve.
+          allowDefaultProject: ["**/*.ts", "**/*.tsx"],
+          defaultProject: "./tsconfig.json",
+        },
         tsconfigRootDir: __dirname,
       },
     },
