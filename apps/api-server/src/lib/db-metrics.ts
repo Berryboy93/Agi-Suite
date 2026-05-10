@@ -32,6 +32,7 @@
 
 import { db, metricsKv } from "@workspace/db";
 import { eq } from "drizzle-orm";
+import { logger } from "./logger.js";
 
 /** Read a metric value by key. Returns null if not found or DB unavailable. */
 export async function readMetric(key: string): Promise<string | null> {
@@ -59,6 +60,6 @@ export function writeMetric(key: string, value: string): void {
       set: { value },
     })
     .catch((err: unknown) => {
-      console.warn("[db-metrics] write failed:", (err as Error)?.message);
+      logger.warn({ err: err as Error }, "[db-metrics] write failed");
     });
 }
