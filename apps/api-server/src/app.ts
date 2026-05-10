@@ -1,4 +1,9 @@
-import express, { type Express } from "express";
+import express, {
+  type Express,
+  type Request,
+  type Response,
+  type NextFunction,
+} from "express";
 import cors from "cors";
 import { requireAuth } from "./middleware/auth.js";
 import pinoHttp from "pino-http";
@@ -74,9 +79,9 @@ app.use("/api", router);
 app.use(
   (
     err: Error & { status?: number; code?: string },
-    _req: import("express").Request,
-    res: import("express").Response,
-    _next: import("express").NextFunction,
+    _req: Request,
+    res: Response,
+    _next: NextFunction,
   ) => {
     const status = err.status ?? 500;
     const code =

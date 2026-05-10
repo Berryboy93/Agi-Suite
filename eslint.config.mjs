@@ -83,6 +83,11 @@ export default [
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
+      // react-hooks v7 adds set-state-in-effect + purity rules that flag
+      // legitimate init patterns (setState on mount, Math.random in useMemo).
+      // Shadcn UI components and standard hook patterns trigger these.
+      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/purity": "off",
     },
   },
   // ── Prettier compat — must be last ───────────────────────────────────────

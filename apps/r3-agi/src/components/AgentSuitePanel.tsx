@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useAGI } from "../store/useAGI";
 
 // ─── Design Tokens (Wire.txt §5 — acid-techno palette) ────────────────────────
 const T = {

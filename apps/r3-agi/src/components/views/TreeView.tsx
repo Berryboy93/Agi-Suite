@@ -2,7 +2,7 @@ import { Card } from "../ui/Card";
 
 const ac = "var(--accent)";
 const acid = "var(--acid)";
-const vi = "var(--violet)";
+const _vi = "var(--violet)";
 const done = "var(--done)";
 const warn = "var(--warn)";
 const d2 = "var(--text2)";
