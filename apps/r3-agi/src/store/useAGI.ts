@@ -163,7 +163,7 @@ export const useAGI = create<AGIState>((set, get) => ({
       ts: "SESSION",
       tag: "INIT",
       cls: "lt-cmd",
-      text: "AGI Command Center v3.1.0 loaded — PRD v4.1 · 2026-04-16",
+      text: "AGI Command Center v3.1.0 loaded — PRD v4.1 · 2026-04-28",
     },
   ],
   prios: loadPrios(),

@@ -327,7 +327,7 @@ export function OverviewView() {
           },
           {
             label: "Session",
-            val: "2026-04-16",
+            val: new Date().toISOString().split("T")[0],
             sub: "Last priorities update",
             color: "var(--text)",
           },
@@ -378,8 +378,8 @@ export function OverviewView() {
       <Card
         title={
           <>
-            <span style={{ color: "var(--acid)" }}>⚡</span> Codebase State —
-            2026-04-16
+            <span style={{ color: "var(--acid)" }}>⚡</span> Codebase State —{" "}
+            {new Date().toISOString().split("T")[0]}
           </>
         }
       >

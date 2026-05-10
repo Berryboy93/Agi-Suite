@@ -274,6 +274,68 @@ export function Header() {
           </div>
         </div>
 
+        {metrics.totalSessions > 0 && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "3px 10px",
+              borderRadius: 3,
+              background: "rgba(139,92,246,.06)",
+              border: "1px solid rgba(139,92,246,.18)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <span
+                style={{
+                  fontSize: 9,
+                  letterSpacing: "0.1em",
+                  color: "var(--dim)",
+                  fontFamily: "var(--mono)",
+                }}
+              >
+                SAVED
+              </span>
+              <span
+                style={{
+                  fontFamily: "var(--mono)",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: "#8B5CF6",
+                }}
+              >
+                {metrics.totalSavedSeconds.toLocaleString()}s
+              </span>
+            </div>
+            <div
+              style={{ width: 1, height: 10, background: "var(--border)" }}
+            />
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <span
+                style={{
+                  fontSize: 9,
+                  letterSpacing: "0.1em",
+                  color: "var(--dim)",
+                  fontFamily: "var(--mono)",
+                }}
+              >
+                SESSIONS
+              </span>
+              <span
+                style={{
+                  fontFamily: "var(--mono)",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: "var(--text2)",
+                }}
+              >
+                {metrics.totalSessions.toLocaleString()}
+              </span>
+            </div>
+          </div>
+        )}
+
         <span
           style={{
             fontSize: 9,

@@ -1,8 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface Metrics {
   activeUsers: number;
   totalSubscribers: number;
+  totalSessions: number;
+  totalSavedSeconds: number;
+  avgSavedSeconds: number;
 }
 
 const SESSION_KEY = "r3-agi-session-id";
@@ -20,11 +23,14 @@ export function useMetrics() {
   const [metrics, setMetrics] = useState<Metrics>({
     activeUsers: 0,
     totalSubscribers: 0,
+    totalSessions: 0,
+    totalSavedSeconds: 0,
+    avgSavedSeconds: 0,
   });
   const [connected, setConnected] = useState(false);
   const sessionId = useRef(getSessionId());
 
-  async function heartbeat() {
+  const heartbeat = useCallback(async () => {
     try {
       const res = await fetch("/api/metrics/heartbeat", {
         method: "POST",
@@ -35,21 +41,27 @@ export function useMetrics() {
     } catch {
       setConnected(false);
     }
-  }
+  }, []); // sessionId.current is a stable ref — safe empty deps
 
   useEffect(() => {
-    heartbeat();
-    const hbInterval = setInterval(heartbeat, 30_000);
+    void heartbeat();
+    const hbInterval = setInterval(() => {
+      void heartbeat();
+    }, 30_000);
 
     const es = new EventSource("/api/metrics/stream");
-    es.onopen = () => setConnected(true);
-    es.onerror = () => setConnected(false);
+    es.onopen = () => {
+      setConnected(true);
+    };
+    es.onerror = () => {
+      setConnected(false);
+    };
     es.onmessage = (e) => {
       try {
         setMetrics(JSON.parse(e.data) as Metrics);
         setConnected(true);
       } catch {
-        /* ignore */
+        /* ignore malformed frame */
       }
     };
 
@@ -57,7 +69,7 @@ export function useMetrics() {
       clearInterval(hbInterval);
       es.close();
     };
-  }, []);
+  }, [heartbeat]);
 
   return { metrics, connected };
 }
