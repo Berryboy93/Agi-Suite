@@ -40,6 +40,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MetricsPayload"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
   /metrics/stream:
     get:
       operationId: streamMetrics
@@ -52,6 +54,8 @@ paths:
             text/event-stream:
               schema:
                 type: string
+        "401":
+          $ref: "#/components/responses/Unauthorized"
   /metrics/heartbeat:
     post:
       operationId: heartbeat
@@ -70,6 +74,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MetricsPayload"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
   /agent/chat:
     post:
       operationId: agentChat
@@ -88,6 +96,12 @@ paths:
             text/event-stream:
               schema:
                 type: string
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
 components:
   schemas:
     HealthStatus:
@@ -134,3 +148,33 @@ components:
           type: string
       required:
         - sessionId
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+        requestId:
+          type: string
+      required:
+        - error
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    ServiceUnavailable:
+      description: Service unavailable
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
