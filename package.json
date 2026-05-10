@@ -4,25 +4,36 @@
   "license": "MIT",
   "scripts": {
     "format": "prettier --write .",
-    "dev": "concurrently -n api,agi -c blue,green \"pnpm --filter @workspace/api-server dev\" \"pnpm --filter @workspace/r3-agi dev\"",
+    "predev": "fuser -k 3001/tcp 5176/tcp 2>/dev/null; true",
+    "dev": "concurrently --kill-others --kill-others-on-fail -n api,agi -c blue,green \"pnpm --filter @workspace/api-server dev\" \"pnpm --filter @workspace/r3-agi dev\"",
     "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
     "build": "pnpm run typecheck && pnpm -r --if-present run build",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./apps/**\" --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck",
     "prepare": "simple-git-hooks",
     "test": "vitest run --workspace vitest.workspace.ts",
-    "test:watch": "vitest --workspace vitest.workspace.ts"
+    "test:watch": "vitest --workspace vitest.workspace.ts",
+    "lint": "eslint .",
+    "test:coverage": "vitest run --coverage"
   },
   "private": true,
   "devDependencies": {
     "@rollup/rollup-linux-arm64-gnu": "^4.60.1",
     "@tailwindcss/oxide-linux-arm64-gnu": "^4.2.2",
+    "@typescript-eslint/eslint-plugin": "^8.59.1",
+    "@typescript-eslint/parser": "^8.59.1",
     "concurrently": "^9.2.1",
+    "eslint": "^10.2.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "lightningcss-linux-arm64-gnu": "^1.32.0",
     "prettier": "^3.8.1",
     "simple-git-hooks": "^2.11.1",
     "ts-morph": "^28.0.0",
     "typescript": "~5.9.3",
     "vitest": "^3.2.0"
+  },
+  "simple-git-hooks": {
+    "pre-push": "pnpm typecheck && pnpm lint"
   }
 }
