@@ -1,0 +1,66 @@
+# FR-020 — CI Pipeline
+# Six checks: prettier → lint → typecheck → test → build
+# Target: < 3 minutes on ubuntu-latest.
+#
+# Secrets required (GitHub Actions → Settings → Secrets):
+#   ANTHROPIC_API_KEY  — only needed if integration tests run live API calls
+#   API_SECRET         — only needed if tests require an authenticated server
+
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      # ── 1. Prettier ───────────────────────────────────────────────────────
+      - name: Prettier
+        run: pnpm exec prettier --check .
+
+      # ── 2. ESLint (FR-018) ────────────────────────────────────────────────
+      - name: Lint
+        run: pnpm lint
+
+      # ── 3. TypeScript (strict) ────────────────────────────────────────────
+      - name: Typecheck
+        run: pnpm typecheck
+
+      # ── 4. Vitest (FR-019 coverage threshold) ─────────────────────────────
+      - name: Test
+        run: pnpm test --run
+
+      # ── 5. Build (both apps) ──────────────────────────────────────────────
+      - name: Build
+        run: pnpm build
+        env:
+          # Stub values — build must not require live secrets
+          ANTHROPIC_API_KEY: "sk-ant-stub-ci"
+          API_SECRET: "ci-stub-secret"
+          VITE_API_SECRET: "ci-stub-secret"

@@ -7,3 +7,14 @@ dist/
 !.env.example
 tsconfig.tsbuildinfo
 .patch-backups/
+
+# Wire protocol backups
+*.bak
+*.bak-*
+
+# Runtime logs
+apps/api-server/api.log
+*.bak_*
+
+# Binary assets — keep out of git
+*.pdf
