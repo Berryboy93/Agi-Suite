@@ -1,12 +1,16 @@
 // eslint.config.mjs — FR-018
 // .mjs extension = always ESM, no "type":"module" needed in package.json.
 //
-// Key change from original: parserOptions.project → parserOptions.projectService
-// projectService (v8 API) auto-discovers the nearest tsconfig.json for each file.
-// This is correct for monorepos where each workspace package has its own tsconfig.
-// The old `project: "./tsconfig.json"` only covered files in the root tsconfig —
-// every file in apps/** and lib/** failed with "file not found in project".
-
+// Architecture: two-block TypeScript strategy.
+//
+// Block 1 (all TS/TSX): non-type-aware recommended rules.
+//   No projectService — r3-agi and lib/* use composite tsconfig references
+//   which the project service does not follow, causing "file not found" errors.
+//   All rules here work without type information.
+//
+// Block 2 (api-server only): type-aware rules via projectService.
+//   api-server/tsconfig.json directly includes src/**, so the project service
+//   resolves every file. Adds no-floating-promises which catches real bugs.
 import tsPlugin from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
 import reactHooks from "eslint-plugin-react-hooks";
@@ -14,7 +18,6 @@ import prettierConfig from "eslint-config-prettier";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 
-// ESM equivalent of __dirname (import.meta.dirname is Node 21.2+ only)
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default [
@@ -32,43 +35,22 @@ export default [
       "lib/api-zod/src/generated/**",
       // Plain JS tools — not TypeScript, skip type-aware linting
       "tools/**/*.js",
-      "ecosystem.config.cjs",
       "tools/fix/**",
+      "ecosystem.config.cjs",
     ],
   },
-
-  // ── TypeScript source files (all workspace packages) ─────────────────────
+  // ── TypeScript: non-type-aware rules (all workspace packages) ─────────────
   {
     files: ["**/*.ts", "**/*.tsx"],
     languageOptions: {
       parser: tsParser,
-      parserOptions: {
-        // projectService: true — monorepo-safe.
-        // For each file being linted, ESLint resolves the nearest tsconfig.json
-        // in the file's ancestor directories. Each workspace package's own
-        // tsconfig is used for type-aware rules on files within that package.
-        projectService: {
-          // r3-agi tsconfig.json uses composite references (tsconfig.app.json /
-          // tsconfig.node.json) rather than direct includes. projectService:true
-          // does not follow references, so every src file fails as "not found".
-          // allowDefaultProject falls back to the root tsconfig for any file
-          // the project service cannot resolve.
-          allowDefaultProject: ["**/*.ts", "**/*.tsx"],
-          defaultProject: "./tsconfig.json",
-        },
-        tsconfigRootDir: __dirname,
-      },
     },
     plugins: {
       "@typescript-eslint": tsPlugin,
     },
     rules: {
-      // Recommended rules (not type-checked — applied to all TS files safely)
       ...tsPlugin.configs["recommended"].rules,
-
-      // Type-aware rules (require projectService — safe in monorepo with v8)
       "@typescript-eslint/no-explicit-any": "error",
-      "@typescript-eslint/no-floating-promises": "error",
       "@typescript-eslint/no-unused-vars": [
         "error",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
@@ -76,7 +58,23 @@ export default [
       "@typescript-eslint/consistent-type-imports": "warn",
     },
   },
-
+  // ── TypeScript: type-aware rules (api-server only) ────────────────────────
+  {
+    files: ["apps/api-server/**/*.ts"],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: __dirname,
+      },
+    },
+    plugins: {
+      "@typescript-eslint": tsPlugin,
+    },
+    rules: {
+      "@typescript-eslint/no-floating-promises": "error",
+    },
+  },
   // ── React / frontend (react-hooks plugin) ────────────────────────────────
   {
     files: ["apps/r3-agi/src/**/*.ts", "apps/r3-agi/src/**/*.tsx"],
@@ -87,7 +85,6 @@ export default [
       ...reactHooks.configs.recommended.rules,
     },
   },
-
   // ── Prettier compat — must be last ───────────────────────────────────────
   prettierConfig,
 ];

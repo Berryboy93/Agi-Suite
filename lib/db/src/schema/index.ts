@@ -16,7 +16,7 @@
 
 import { pgTable, varchar, text, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod/v4";
+import type { z } from "zod/v4";
 
 // ── FR-021: metrics_kv ────────────────────────────────────────────────────────
 // Simple key-value store for persistent counters that must survive deploys.
