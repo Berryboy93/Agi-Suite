@@ -15,11 +15,52 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-app.listen(port, (err) => {
-  if (err) {
-    logger.error({ err }, "Error listening on port");
-    process.exit(1);
-  }
-
+const server = app.listen(port, () => {
   logger.info({ port }, "Server listening");
+});
+
+// ── Retry on EADDRINUSE ───────────────────────────────────────────────────────
+// During tsx watch restarts, the outgoing server socket may still be in
+// TIME_WAIT when the next child spawns.  We back off 1 s and retry up to
+// three times before giving up.  Any other error is fatal immediately.
+let bindRetries = 0;
+const MAX_BIND_RETRIES = 3;
+const BIND_RETRY_MS = 1_000;
+
+server.on("error", (err: NodeJS.ErrnoException) => {
+  if (err.code === "EADDRINUSE" && bindRetries < MAX_BIND_RETRIES) {
+    bindRetries += 1;
+    logger.warn(
+      { port, attempt: bindRetries, maxAttempts: MAX_BIND_RETRIES },
+      "Port in use — retrying after backoff",
+    );
+    setTimeout(() => {
+      server.close();
+      server.listen(port);
+    }, BIND_RETRY_MS * bindRetries); // 1 s, 2 s, 3 s
+    return;
+  }
+  logger.error({ err }, "Fatal: could not bind to port");
+  process.exit(1);
+});
+
+// ── Graceful shutdown ─────────────────────────────────────────────────────────
+function shutdown(signal: string): void {
+  logger.info({ signal }, "Shutting down gracefully");
+  server.close(() => {
+    logger.info("Server closed — all connections drained");
+    process.exit(0);
+  });
+  // Force exit if connections linger beyond 5 s (prevents orphan on tsx restart)
+  setTimeout(() => {
+    logger.warn("Force-exiting after shutdown timeout");
+    process.exit(1);
+  }, 5_000).unref();
+}
+
+process.on("SIGTERM", () => {
+  shutdown("SIGTERM");
+});
+process.on("SIGINT", () => {
+  shutdown("SIGINT");
 });

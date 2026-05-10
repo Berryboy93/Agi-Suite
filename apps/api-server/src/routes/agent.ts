@@ -2,7 +2,16 @@ import { Router, type Request, type Response } from "express";
 import Anthropic from "@anthropic-ai/sdk";
 
 const router = Router();
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+// Lazily initialised so the module can load even when the env var is absent.
+// The runtime guard inside the handler provides a clean 503 in that case.
+let _client: Anthropic | null = null;
+function getClient(): Anthropic {
+  if (!_client) {
+    _client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  }
+  return _client;
+}
 
 router.post("/agent/chat", async (req: Request, res: Response) => {
   const {
@@ -15,15 +24,15 @@ router.post("/agent/chat", async (req: Request, res: Response) => {
     max_tokens?: number;
   };
 
-  if (!messages || !Array.isArray(messages)) {
-    res.status(400).json({ error: "messages array required" });
-    return;
-  }
-
   if (!process.env.ANTHROPIC_API_KEY) {
     res
       .status(503)
       .json({ error: "ANTHROPIC_API_KEY not configured on server" });
+    return;
+  }
+
+  if (!messages || !Array.isArray(messages)) {
+    res.status(400).json({ error: "messages array required" });
     return;
   }
 
@@ -34,7 +43,7 @@ router.post("/agent/chat", async (req: Request, res: Response) => {
   res.flushHeaders();
 
   try {
-    const stream = client.messages.stream({
+    const stream = getClient().messages.stream({
       model: "claude-sonnet-4-20250514",
       max_tokens,
       ...(system ? { system } : {}),
@@ -64,13 +73,13 @@ router.post("/agent/chat", async (req: Request, res: Response) => {
         );
         res.end();
       } catch {
-        /* ignore */
+        /* ignore — response may already be closed */
       }
     });
 
     // abort is a distinct event from error in the Anthropic SDK.
-    // Without this listener, _emit('abort') calls Promise.reject() intentionally,
-    // producing an unhandled rejection that kills the process on client disconnect.
+    // Without this listener, _emit('abort') produces an unhandled rejection
+    // that kills the process on client disconnect.
     stream.on("abort", () => {});
 
     req.on("close", () => {
