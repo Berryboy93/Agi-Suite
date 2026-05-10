@@ -186,10 +186,10 @@ dequeue () {
 # --------------------------------------------------
 
 plugin_api () {
-  mkdir -p lib/api-spec artifacts/api-server/src/middlewares
+  mkdir -p lib/api-spec apps/api-server/src/middlewares
   cp "$STAGE/openapi.yaml"  lib/api-spec/openapi.yaml
-  cp "$STAGE/auth.ts"       artifacts/api-server/src/middlewares/auth.ts
-  cp "$STAGE/app.ts"        artifacts/api-server/src/app.ts
+  cp "$STAGE/auth.ts"       apps/api-server/src/middlewares/auth.ts
+  cp "$STAGE/app.ts"        apps/api-server/src/app.ts
 
   # FIX 1: Run the code generator immediately after openapi.yaml is updated.
   # WIRE.txt §API contract discipline step 2: "Run the code generator to update
@@ -203,8 +203,8 @@ plugin_api () {
 }
 
 plugin_routes () {
-  mkdir -p artifacts/api-server/src/routes
-  cp "$STAGE/routes-index.ts" artifacts/api-server/src/routes/index.ts
+  mkdir -p apps/api-server/src/routes
+  cp "$STAGE/routes-index.ts" apps/api-server/src/routes/index.ts
 }
 
 plugin_db () {
@@ -228,8 +228,8 @@ plugin_db () {
 }
 
 plugin_ui () {
-  mkdir -p artifacts/r3-agi/src
-  cp "$STAGE/main.tsx" artifacts/r3-agi/src/main.tsx
+  mkdir -p apps/r3-agi/src
+  cp "$STAGE/main.tsx" apps/r3-agi/src/main.tsx
 }
 
 plugin_ci () {
@@ -333,11 +333,11 @@ echo "=============================="
 # A failed plugin_routes, plugin_db, or plugin_ci would pass the old check.
 FILES=(
   "lib/api-spec/openapi.yaml"
-  "artifacts/api-server/src/middlewares/auth.ts"
-  "artifacts/api-server/src/app.ts"
-  "artifacts/api-server/src/routes/index.ts"
+  "apps/api-server/src/middlewares/auth.ts"
+  "apps/api-server/src/app.ts"
+  "apps/api-server/src/routes/index.ts"
   "lib/db/src/schema/index.ts"
-  "artifacts/r3-agi/src/main.tsx"
+  "apps/r3-agi/src/main.tsx"
   ".github/workflows/ci.yml"
 )
 
