@@ -18,3 +18,11 @@ apps/api-server/api.log
 
 # Binary assets — keep out of git
 *.pdf
+
+# Development
+logs/
+.pids/
+*.log
+
+# Production builds (optional - include if not already there)
+apps/*/dist/
