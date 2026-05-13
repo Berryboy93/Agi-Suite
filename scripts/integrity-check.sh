@@ -38,9 +38,6 @@ log "Gate 1: Corruption / Integrity Scan"
 # NOTE: Merge marker patterns include trailing space to avoid false positives
 # from decorative comment banners (e.g., "=====" in shell script headers).
 # Git merge markers always have a space after the marker:
-#   <<<<<<< branch-name
-#   =======
-#   >>>>>>> branch-name
 # Decorative banners like "echo "======================================"" have no trailing space.
 
 CORRUPTION=$(find . \
@@ -49,7 +46,7 @@ CORRUPTION=$(find . \
         -path ./.git -o \
         -path ./dist -o \
         -path ./.patch-backups -o \
-        -path ./legacy-scripts -o -path ./.rustup \
+        -path ./legacy-scripts -o -path ./rustup -o -path ./scripts \
     \) -prune -o \
     -type f \
     \( \
@@ -184,7 +181,7 @@ BAK_FILES=$(find . \
         -path ./node_modules -o \
         -path ./.git -o \
         -path ./.patch-backups -o \
-        -path ./legacy-scripts -o -path ./.rustup \
+        -path ./legacy-scripts -o -path ./rustup -o -path ./scripts \
     \) -prune -o \
     -type f -name "*.bak-*" \
     -print 2>/dev/null || true)
