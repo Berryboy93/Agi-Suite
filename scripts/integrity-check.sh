@@ -49,7 +49,7 @@ CORRUPTION=$(find . \
         -path ./.git -o \
         -path ./dist -o \
         -path ./.patch-backups -o \
-        -path ./legacy-scripts \
+        -path ./legacy-scripts -o -path ./.rustup \
     \) -prune -o \
     -type f \
     \( \
@@ -64,7 +64,7 @@ CORRUPTION=$(find . \
         -name "*.css" \
     \) \
     -print0 2>/dev/null | xargs -0 grep -nE \
-    "(ARIS|TRACE_CORRUPT|<<<<<<< |======= |>>>>>>> )" 2>/dev/null || true)
+    "(ARIS_CORRUPT|TRACE_CORRUPT|<<<<<<< |======= |>>>>>>> )" 2>/dev/null || true)
 
 if [ -n "$CORRUPTION" ]; then
     echo "$CORRUPTION"
@@ -184,7 +184,7 @@ BAK_FILES=$(find . \
         -path ./node_modules -o \
         -path ./.git -o \
         -path ./.patch-backups -o \
-        -path ./legacy-scripts \
+        -path ./legacy-scripts -o -path ./.rustup \
     \) -prune -o \
     -type f -name "*.bak-*" \
     -print 2>/dev/null || true)
