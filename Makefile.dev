@@ -1,0 +1,77 @@
+.PHONY: dev prod-start stop clean help logs
+
+## Agi-Suite v2.0 Makefile
+## Development and production task automation
+
+help:
+	@echo "Agi-Suite v2.0 - Make Commands"
+	@echo ""
+	@echo "Development:"
+	@echo "  make dev              Start development with live reload (port 3001)"
+	@echo "  make logs             Tail logs from running services"
+	@echo ""
+	@echo "Production:"
+	@echo "  make prod-start       Start production services (port 3000)"
+	@echo "  make stop             Stop all services"
+	@echo ""
+	@echo "Maintenance:"
+	@echo "  make clean            Clean node_modules and build artifacts"
+	@echo "  make install          Install dependencies (pnpm install)"
+	@echo ""
+
+# Development target: Uses tsx watch + Vite with HMR
+dev:
+	@echo "Starting Agi-Suite in development mode (port 3001)..."
+	./agi-suite-startup-dev.sh
+
+# Production start: Uses compiled TypeScript + Vite build
+prod-start:
+	@echo "Starting Agi-Suite in production mode (port 3000)..."
+	./agi-suite-startup.sh
+
+# Stop all services
+stop:
+	@echo "Stopping Agi-Suite services..."
+	@pkill -f "agi-suite-startup" || true
+	@pkill -f "tsx" || true
+	@pkill -f "vite" || true
+	@pkill -f "node" || true
+	@sleep 1
+	@echo "Services stopped."
+
+# Tail logs from running containers/services
+logs:
+	@echo "Tailing logs... (Ctrl+C to exit)"
+	@if [ -f "logs/combined.log" ]; then \
+		tail -f logs/combined.log; \
+	else \
+		echo "No logs found. Start services first with 'make dev' or 'make prod-start'"; \
+	fi
+
+# Clean build artifacts and dependencies
+clean:
+	@echo "Cleaning build artifacts..."
+	rm -rf node_modules dist build .turbo
+	rm -rf apps/*/node_modules apps/*/dist
+	rm -rf lib/*/node_modules lib/*/dist
+	@echo "Clean complete."
+
+# Install dependencies
+install:
+	@echo "Installing dependencies with pnpm..."
+	pnpm install
+
+# Development quick setup
+setup-dev:
+	@echo "Setting up Agi-Suite for development..."
+	pnpm install
+	@echo "Ready to run: make dev"
+
+# Production quick setup
+setup-prod:
+	@echo "Setting up Agi-Suite for production..."
+	pnpm install --prod
+	pnpm run build
+	@echo "Ready to run: make prod-start"
+
+.DEFAULT_GOAL := help

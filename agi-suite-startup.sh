@@ -1,18 +1,23 @@
 #!/usr/bin/env bash
 
 ################################################################################
-# Agi-Suite Startup Script v1.0
+# Agi-Suite Startup Script (Unified Dev + Prod)
 # 
-# A clean, robust startup script for the Agi-Suite monorepo
-# Handles: API server, frontend, process management, logging, health checks
+# Consolidates agi-suite-startup-dev.sh and agi-suite-startup.sh into one script.
+# Supports both development (live reload) and production modes.
 #
 # Usage:
-#   ./agi-suite-startup.sh                    # Start both API + frontend
-#   ./agi-suite-startup.sh --api-only         # Start just the API
-#   ./agi-suite-startup.sh --frontend-only    # Start just the frontend
-#   ./agi-suite-startup.sh stop                # Stop all services
-#   ./agi-suite-startup.sh status              # Check service status
-#   ./agi-suite-startup.sh logs [service]     # Tail logs (api, frontend, or both)
+#   ./agi-suite-startup.sh                      # Start with dev defaults
+#   ./agi-suite-startup.sh --mode prod          # Start in production
+#   ./agi-suite-startup.sh --mode dev --kill-ports
+#   ./agi-suite-startup.sh status               # Check service status
+#   ./agi-suite-startup.sh stop                 # Stop all services
+#   ./agi-suite-startup.sh logs [api|frontend|both]
+#
+# Modes:
+#   dev:  API on 3001 (tsx watch), Frontend on 5176+ (vite HMR)
+#   prod: API on 3000 (node dist), Frontend on 5174 (static)
+#
 ################################################################################
 
 set -o pipefail
@@ -21,494 +26,278 @@ set -o pipefail
 # Configuration
 # ══════════════════════════════════════════════════════════════════════════════
 
-# Resolve script directory and project root
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}" && git rev-parse --show-toplevel 2>/dev/null || echo "$(pwd)")"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}" && git rev-parse --show-toplevel 2>/dev/null || echo "${SCRIPT_DIR}")"
 
-# Service directories
+# Default mode and command (will be overridden by argument parsing in main())
+MODE="dev"
+COMMAND="start"
+
+# Service directories (monorepo structure)
 API_DIR="${PROJECT_ROOT}/apps/api-server"
 FRONTEND_DIR="${PROJECT_ROOT}/apps/r3-agi"
-LOGS_DIR="${PROJECT_ROOT}/logs"
+LOGS_DIR="${PROJECT_ROOT}/.logs"
 
-# Service configuration
-API_PORT="${API_PORT:-3000}"
-API_HOST="${API_HOST:-localhost}"
-FRONTEND_PORT="${FRONTEND_PORT:-5173}"
-FRONTEND_HOST="${FRONTEND_HOST:-localhost}"
+# Create logs directory if missing
+mkdir -p "${LOGS_DIR}"
 
-# PID files
-PID_FILE_API="${PROJECT_ROOT}/.pids/api.pid"
-PID_FILE_FRONTEND="${PROJECT_ROOT}/.pids/frontend.pid"
-PID_DIR="$(dirname "$PID_FILE_API")"
+# Mode-specific configuration
+if [[ "${MODE}" == "prod" ]]; then
+  API_PORT=3000
+  FRONTEND_PORT=5174
+  API_COMMAND="node dist/index.js"
+  API_LOG="${LOGS_DIR}/api.prod.log"
+  FRONTEND_LOG="${LOGS_DIR}/frontend.prod.log"
+  MODE_LABEL="PRODUCTION"
+else
+  # Default to dev mode
+  MODE="dev"
+  API_PORT=3001
+  FRONTEND_PORT=5176
+  API_COMMAND="tsx watch --ignore ./client --ignore ./node_modules index.ts"
+  API_LOG="${LOGS_DIR}/api.dev.log"
+  FRONTEND_LOG="${LOGS_DIR}/frontend.dev.log"
+  MODE_LABEL="DEVELOPMENT"
+fi
 
-# Timeouts
-STARTUP_TIMEOUT=30
-HEALTH_CHECK_TIMEOUT=15
-SHUTDOWN_TIMEOUT=10
-
-# Colors for output
+# Color codes
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# ══════════════════════════════════════════════════════════════════════════════
-# Logging Functions
-# ══════════════════════════════════════════════════════════════════════════════
-
-log_info() {
-  echo -e "${BLUE}ℹ${NC} [$(date +'%H:%M:%S')] $*"
-}
-
-log_success() {
-  echo -e "${GREEN}✓${NC} [$(date +'%H:%M:%S')] $*"
-}
-
-log_warn() {
-  echo -e "${YELLOW}⚠${NC} [$(date +'%H:%M:%S')] $*" >&2
-}
-
-log_error() {
-  echo -e "${RED}✗${NC} [$(date +'%H:%M:%S')] $*" >&2
-}
-
-die() {
-  log_error "$@"
-  exit 1
-}
+# Logging functions
+log_info()    { echo -e "${BLUE}[INFO]${NC} $*"; }
+log_success() { echo -e "${GREEN}[✓]${NC} $*"; }
+log_warn()    { echo -e "${YELLOW}[!]${NC} $*"; }
+log_error()   { echo -e "${RED}[✗]${NC} $*"; exit 1; }
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Utility Functions
+# Preconditions
 # ══════════════════════════════════════════════════════════════════════════════
 
-# Check if port is in use
-port_in_use() {
-  local port=$1
-  ss -tlnp 2>/dev/null | grep ":${port}" >/dev/null 2>&1
-}
-
-# Wait for a port to be available
-wait_for_port() {
-  local port=$1
-  local timeout=$2
-  local elapsed=0
+precondition_check() {
+  log_info "Checking preconditions..."
   
-  while [[ $elapsed -lt $timeout ]]; do
-    if port_in_use "$port"; then
-      return 0
+  # Check directories exist
+  [[ -d "${API_DIR}" ]] || log_error "API directory not found: ${API_DIR}"
+  [[ -d "${FRONTEND_DIR}" ]] || log_error "Frontend directory not found: ${FRONTEND_DIR}"
+  
+  # Check package.json files exist
+  [[ -f "${API_DIR}/package.json" ]] || log_error "No package.json in ${API_DIR}"
+  [[ -f "${FRONTEND_DIR}/package.json" ]] || log_error "No package.json in ${FRONTEND_DIR}"
+  
+  # Check git repo
+  [[ -d "${PROJECT_ROOT}/.git" ]] || log_error "Not a git repository: ${PROJECT_ROOT}"
+  
+  log_success "Preconditions passed"
+}
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Core Functions
+# ══════════════════════════════════════════════════════════════════════════════
+
+start_services() {
+  log_info "Starting ${MODE_LABEL} mode services..."
+  
+  if [[ "${MODE}" == "prod" ]]; then
+    # Production: ensure build is fresh
+    log_info "Building for production..."
+    cd "${API_DIR}"
+    npm run build || log_error "API build failed"
+    cd "${FRONTEND_DIR}"
+    npm run build || log_error "Frontend build failed"
+  fi
+  
+  # Start API
+  log_info "Starting API on port ${API_PORT}..."
+  cd "${API_DIR}"
+  nohup bash -c "${API_COMMAND}" > "${API_LOG}" 2>&1 &
+  API_PID=$!
+  echo "${API_PID}" > "${LOGS_DIR}/api.pid"
+  log_success "API started (PID: ${API_PID})"
+  
+  # Wait for API to be ready
+  log_info "Waiting for API to become ready..."
+  for i in {1..30}; do
+    if curl -s "http://localhost:${API_PORT}/health" > /dev/null 2>&1; then
+      log_success "API is ready"
+      break
     fi
-    sleep 0.5
-    elapsed=$((elapsed + 1))
+    if [[ $i -eq 30 ]]; then
+      log_warn "API health check timeout (this may be OK if service is starting)"
+    fi
+    sleep 1
   done
   
-  return 1
-}
-
-# Check if a process is still running
-is_running() {
-  local pid=$1
-  if [[ -z "$pid" ]]; then
-    return 1
+  # Start Frontend
+  log_info "Starting Frontend on port ${FRONTEND_PORT}..."
+  cd "${FRONTEND_DIR}"
+  if [[ "${MODE}" == "dev" ]]; then
+    nohup npm run dev > "${FRONTEND_LOG}" 2>&1 &
+  else
+    nohup npm run serve > "${FRONTEND_LOG}" 2>&1 &
   fi
-  kill -0 "$pid" 2>/dev/null
+  FRONTEND_PID=$!
+  echo "${FRONTEND_PID}" > "${LOGS_DIR}/frontend.pid"
+  log_success "Frontend started (PID: ${FRONTEND_PID})"
+  
+  # Print access info
+  echo
+  log_success "══════════════════════════════════════════════════════════════"
+  log_success "Services running in ${MODE_LABEL} mode"
+  log_success "API:      http://localhost:${API_PORT}"
+  log_success "Frontend: http://localhost:${FRONTEND_PORT}"
+  log_success "══════════════════════════════════════════════════════════════"
+  echo
 }
 
-# Get PID from file (if it exists and process is running)
-get_saved_pid() {
-  local pid_file=$1
-  if [[ -f "$pid_file" ]]; then
-    local pid=$(cat "$pid_file")
-    if is_running "$pid"; then
-      echo "$pid"
-      return 0
+stop_services() {
+  log_info "Stopping services..."
+  
+  # Stop API
+  if [[ -f "${LOGS_DIR}/api.pid" ]]; then
+    API_PID=$(cat "${LOGS_DIR}/api.pid")
+    if kill -0 "${API_PID}" 2>/dev/null; then
+      kill "${API_PID}"
+      log_success "Stopped API (PID: ${API_PID})"
+    fi
+    rm -f "${LOGS_DIR}/api.pid"
+  fi
+  
+  # Stop Frontend
+  if [[ -f "${LOGS_DIR}/frontend.pid" ]]; then
+    FRONTEND_PID=$(cat "${LOGS_DIR}/frontend.pid")
+    if kill -0 "${FRONTEND_PID}" 2>/dev/null; then
+      kill "${FRONTEND_PID}"
+      log_success "Stopped Frontend (PID: ${FRONTEND_PID})"
+    fi
+    rm -f "${LOGS_DIR}/frontend.pid"
+  fi
+  
+  # Kill any remaining processes on our ports
+  log_info "Cleaning up lingering processes..."
+  lsof -ti:${API_PORT} | xargs kill -9 2>/dev/null || true
+  lsof -ti:${FRONTEND_PORT} | xargs kill -9 2>/dev/null || true
+  
+  log_success "Services stopped"
+}
+
+status_services() {
+  log_info "Service status:"
+  echo
+  
+  # API status
+  if [[ -f "${LOGS_DIR}/api.pid" ]]; then
+    API_PID=$(cat "${LOGS_DIR}/api.pid")
+    if kill -0 "${API_PID}" 2>/dev/null; then
+      log_success "API (PID ${API_PID}) is running on port ${API_PORT}"
     else
-      rm -f "$pid_file"
+      log_warn "API (PID ${API_PID}) is NOT running"
     fi
-  fi
-  return 1
-}
-
-# Kill process by PID gracefully, then forcefully
-kill_process() {
-  local pid=$1
-  local name=$2
-  
-  if ! is_running "$pid"; then
-    return 0
-  fi
-  
-  log_info "Terminating $name (PID: $pid)..."
-  kill -TERM "$pid" 2>/dev/null || true
-  
-  local elapsed=0
-  while [[ $elapsed -lt $SHUTDOWN_TIMEOUT ]] && is_running "$pid"; do
-    sleep 0.5
-    elapsed=$((elapsed + 1))
-  done
-  
-  if is_running "$pid"; then
-    log_warn "Force killing $name (PID: $pid)..."
-    kill -9 "$pid" 2>/dev/null || true
-    sleep 0.5
-  fi
-  
-  if ! is_running "$pid"; then
-    log_success "$name stopped"
-    return 0
   else
-    log_error "Failed to stop $name"
-    return 1
-  fi
-}
-
-# Ensure directories exist
-ensure_dirs() {
-  mkdir -p "$LOGS_DIR"
-  mkdir -p "$PID_DIR"
-}
-
-# ══════════════════════════════════════════════════════════════════════════════
-# Health Check Functions
-# ══════════════════════════════════════════════════════════════════════════════
-
-check_api_health() {
-  local url="http://${API_HOST}:${API_PORT}/health"
-  curl -sf "$url" >/dev/null 2>&1
-}
-
-check_api_ready() {
-  local elapsed=0
-  log_info "Waiting for API to be ready..."
-  
-  while [[ $elapsed -lt $HEALTH_CHECK_TIMEOUT ]]; do
-    if check_api_health; then
-      log_success "API is healthy"
-      return 0
-    fi
-    sleep 0.5
-    elapsed=$((elapsed + 1))
-  done
-  
-  log_warn "API health check timeout (${HEALTH_CHECK_TIMEOUT}s)"
-  return 1
-}
-
-# ══════════════════════════════════════════════════════════════════════════════
-# API Server Functions
-# ══════════════════════════════════════════════════════════════════════════════
-
-start_api() {
-  log_info "Starting API server..."
-  
-  if [[ ! -d "$API_DIR" ]]; then
-    die "API directory not found: $API_DIR"
+    log_warn "API: no PID file found"
   fi
   
-  # Check if already running
-  if pid=$(get_saved_pid "$PID_FILE_API"); then
-    log_warn "API is already running (PID: $pid)"
-    return 0
-  fi
-  
-  # Check if port is free
-  if port_in_use "$API_PORT"; then
-    log_error "Port $API_PORT is already in use"
-    log_info "Attempting to kill existing process..."
-    
-    # Find and kill the process using the port
-    local pid=$(ss -tlnp 2>/dev/null | grep ":${API_PORT}" | sed -n 's/.*pid=\([0-9]*\).*/\1/p' | head -1)
-    if [[ -n "$pid" ]]; then
-      kill_process "$pid" "Process on port $API_PORT" || die "Cannot free port $API_PORT"
-      sleep 1
+  # Frontend status
+  if [[ -f "${LOGS_DIR}/frontend.pid" ]]; then
+    FRONTEND_PID=$(cat "${LOGS_DIR}/frontend.pid")
+    if kill -0 "${FRONTEND_PID}" 2>/dev/null; then
+      log_success "Frontend (PID ${FRONTEND_PID}) is running on port ${FRONTEND_PORT}"
     else
-      die "Port $API_PORT in use but cannot identify process"
+      log_warn "Frontend (PID ${FRONTEND_PID}) is NOT running"
     fi
-  fi
-  
-  # Check dependencies
-  if [[ ! -f "$API_DIR/dist/index.mjs" ]]; then
-    die "API build not found at $API_DIR/dist/index.mjs. Run: cd $API_DIR && pnpm build"
-  fi
-  
-  if [[ ! -f "$API_DIR/.env" ]]; then
-    log_warn "No .env file found at $API_DIR/.env"
-    log_info "Creating basic .env file..."
-    cat > "$API_DIR/.env" << EOF
-API_PORT=${API_PORT}
-API_HOST=${API_HOST}
-NODE_ENV=development
-EOF
-  fi
-  
-  # Clear old log file
-  > "$LOGS_DIR/api.log"
-  
-  # Start the API server
-  (
-    cd "$API_DIR"
-    nohup node --env-file=.env --enable-source-maps ./dist/index.mjs >> "$LOGS_DIR/api.log" 2>&1 &
-    # Capture the PID immediately
-    echo $! > "$PID_FILE_API"
-  )
-  
-  # Small delay to let process start
-  sleep 0.5
-  
-  # Verify the process is actually running
-  if ! pid=$(get_saved_pid "$PID_FILE_API"); then
-    log_error "Failed to start API server"
-    log_error "Recent logs:"
-    tail -20 "$LOGS_DIR/api.log" | sed 's/^/  /'
-    die "API startup failed"
-  fi
-  
-  log_success "API server started (PID: $pid)"
-  
-  # Wait for port to be listening
-  if wait_for_port "$API_PORT" "$STARTUP_TIMEOUT"; then
-    log_success "API listening on port $API_PORT"
   else
-    log_warn "API port not detected after ${STARTUP_TIMEOUT}s (may still be starting)"
+    log_warn "Frontend: no PID file found"
   fi
   
-  # Run health check
-  if ! check_api_ready; then
-    log_warn "API health check failed, but process is running"
-    log_info "Check logs: tail -f $LOGS_DIR/api.log"
-  fi
+  echo
 }
 
-stop_api() {
-  log_info "Stopping API server..."
+logs_services() {
+  local service="${1:-both}"
   
-  if pid=$(get_saved_pid "$PID_FILE_API"); then
-    kill_process "$pid" "API server"
-    rm -f "$PID_FILE_API"
-  else
-    log_info "API is not running"
-  fi
-}
-
-status_api() {
-  if pid=$(get_saved_pid "$PID_FILE_API"); then
-    echo -e "${GREEN}✓${NC} API server is running (PID: $pid)"
-    echo "  Port: $API_PORT"
-    if check_api_health; then
-      echo "  Health: ${GREEN}healthy${NC}"
-    else
-      echo "  Health: ${YELLOW}unhealthy${NC}"
-    fi
-    return 0
-  else
-    echo -e "${RED}✗${NC} API server is not running"
-    return 1
-  fi
-}
-
-# ══════════════════════════════════════════════════════════════════════════════
-# Frontend Functions
-# ══════════════════════════════════════════════════════════════════════════════
-
-start_frontend() {
-  log_info "Starting frontend..."
-  
-  if [[ ! -d "$FRONTEND_DIR" ]]; then
-    die "Frontend directory not found: $FRONTEND_DIR"
-  fi
-  
-  # Check if already running
-  if pid=$(get_saved_pid "$PID_FILE_FRONTEND"); then
-    log_warn "Frontend is already running (PID: $pid)"
-    return 0
-  fi
-  
-  # Check if port is free
-  if port_in_use "$FRONTEND_PORT"; then
-    log_error "Port $FRONTEND_PORT is already in use"
-    local pid=$(ss -tlnp 2>/dev/null | grep ":${FRONTEND_PORT}" | sed -n 's/.*pid=\([0-9]*\).*/\1/p' | head -1)
-    if [[ -n "$pid" ]]; then
-      kill_process "$pid" "Process on port $FRONTEND_PORT" || die "Cannot free port $FRONTEND_PORT"
-      sleep 1
-    fi
-  fi
-  
-  # Clear old log file
-  > "$LOGS_DIR/frontend.log"
-  
-  # Start the frontend
-  (
-    cd "$FRONTEND_DIR"
-    nohup pnpm dev >> "$LOGS_DIR/frontend.log" 2>&1 &
-    echo $! > "$PID_FILE_FRONTEND"
-  )
-  
-  sleep 0.5
-  
-  if ! pid=$(get_saved_pid "$PID_FILE_FRONTEND"); then
-    log_error "Failed to start frontend"
-    log_error "Recent logs:"
-    tail -20 "$LOGS_DIR/frontend.log" | sed 's/^/  /'
-    die "Frontend startup failed"
-  fi
-  
-  log_success "Frontend started (PID: $pid)"
-  
-  if wait_for_port "$FRONTEND_PORT" "$STARTUP_TIMEOUT"; then
-    log_success "Frontend listening on port $FRONTEND_PORT"
-  else
-    log_warn "Frontend port not detected after ${STARTUP_TIMEOUT}s"
-  fi
-}
-
-stop_frontend() {
-  log_info "Stopping frontend..."
-  
-  if pid=$(get_saved_pid "$PID_FILE_FRONTEND"); then
-    kill_process "$pid" "Frontend"
-    rm -f "$PID_FILE_FRONTEND"
-  else
-    log_info "Frontend is not running"
-  fi
-}
-
-status_frontend() {
-  if pid=$(get_saved_pid "$PID_FILE_FRONTEND"); then
-    echo -e "${GREEN}✓${NC} Frontend is running (PID: $pid)"
-    echo "  Port: $FRONTEND_PORT"
-    return 0
-  else
-    echo -e "${RED}✗${NC} Frontend is not running"
-    return 1
-  fi
-}
-
-# ══════════════════════════════════════════════════════════════════════════════
-# Combined Operations
-# ══════════════════════════════════════════════════════════════════════════════
-
-start_all() {
-  ensure_dirs
-  log_info "Starting Agi-Suite services..."
-  start_api
-  start_frontend
-  echo ""
-  status_all
-  echo ""
-  log_success "Services started!"
-  echo "  API: http://${API_HOST}:${API_PORT}"
-  echo "  Frontend: http://${FRONTEND_HOST}:${FRONTEND_PORT}"
-}
-
-stop_all() {
-  log_info "Stopping all services..."
-  stop_api
-  stop_frontend
-  log_success "All services stopped"
-}
-
-status_all() {
-  echo ""
-  echo "Service Status:"
-  echo "─────────────────────────────────────"
-  status_api
-  echo ""
-  status_frontend
-  echo "─────────────────────────────────────"
-}
-
-show_logs() {
-  local service=$1
-  
-  case "${service,,}" in
+  case "${service}" in
     api)
-      log_info "Tailing API logs (Ctrl+C to stop)..."
-      tail -f "$LOGS_DIR/api.log"
+      log_info "Tailing API logs (${API_LOG})..."
+      tail -f "${API_LOG}"
       ;;
     frontend)
-      log_info "Tailing frontend logs (Ctrl+C to stop)..."
-      tail -f "$LOGS_DIR/frontend.log"
+      log_info "Tailing Frontend logs (${FRONTEND_LOG})..."
+      tail -f "${FRONTEND_LOG}"
+      ;;
+    both)
+      log_info "Tailing both logs (Ctrl+C to exit)..."
+      tail -f "${API_LOG}" "${FRONTEND_LOG}"
       ;;
     *)
-      log_info "Tailing all logs (Ctrl+C to stop)..."
-      log_info "API logs:" 
-      tail -f "$LOGS_DIR/api.log" "$LOGS_DIR/frontend.log"
+      log_error "Unknown service: ${service}. Use: api, frontend, both"
       ;;
   esac
 }
 
-# ══════════════════════════════════════════════════════════════════════════════
-# Main Command Handler
-# ══════════════════════════════════════════════════════════════════════════════
-
-show_usage() {
-  cat << EOF
-Agi-Suite Startup Script v1.0
-
-Usage: $0 [COMMAND] [OPTIONS]
-
-Commands:
-  start          Start both API and frontend (default)
-  start-api      Start only the API server
-  start-frontend Start only the frontend
-  stop           Stop all services
-  restart        Restart all services
-  status         Show service status
-  logs [service] Tail logs (api, frontend, or all)
-  help           Show this help message
-
-Environment Variables:
-  API_PORT       API server port (default: 3000)
-  API_HOST       API server host (default: localhost)
-  FRONTEND_PORT  Frontend port (default: 5173)
-  FRONTEND_HOST  Frontend host (default: localhost)
-
-Examples:
-  $0                    # Start both services
-  $0 start-api          # Start only API
-  $0 status             # Check service status
-  $0 logs api           # Tail API logs
-  API_PORT=8080 $0      # Start with custom API port
-
-EOF
+kill_ports() {
+  log_warn "Force-killing processes on ports ${API_PORT} and ${FRONTEND_PORT}..."
+  lsof -ti:${API_PORT} | xargs kill -9 2>/dev/null || log_warn "Nothing on port ${API_PORT}"
+  lsof -ti:${FRONTEND_PORT} | xargs kill -9 2>/dev/null || log_warn "Nothing on port ${FRONTEND_PORT}"
+  log_success "Ports cleared"
 }
 
-# Parse command
-COMMAND="${1:-start}"
+# ══════════════════════════════════════════════════════════════════════════════
+# Command Router
+# ══════════════════════════════════════════════════════════════════════════════
 
-case "${COMMAND,,}" in
-  start)
-    start_all
-    ;;
-  start-api|api)
-    ensure_dirs
-    start_api
-    ;;
-  start-frontend|frontend)
-    ensure_dirs
-    start_frontend
-    ;;
-  stop|shutdown)
-    stop_all
-    ;;
-  restart)
-    stop_all
-    sleep 1
-    start_all
-    ;;
-  status)
-    status_all
-    ;;
-  logs|log)
-    ensure_dirs
-    show_logs "$2"
-    ;;
-  help|-h|--help)
-    show_usage
-    ;;
-  *)
-    log_error "Unknown command: $COMMAND"
-    show_usage
-    exit 1
-    ;;
-esac
+main() {
+  # Parse flags
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --mode)
+        MODE="$2"
+        shift 2
+        ;;
+      --kill-ports)
+        kill_ports
+        exit 0
+        ;;
+      start|stop|status|logs)
+        COMMAND="$1"
+        shift
+        ;;
+      *)
+        shift
+        ;;
+    esac
+  done
+  
+  # Ensure defaults are set (in case no args were provided)
+  MODE="${MODE:-dev}"
+  COMMAND="${COMMAND:-start}"
+  
+  # Validate mode
+  if [[ "${MODE}" != "dev" && "${MODE}" != "prod" ]]; then
+    log_error "Invalid mode: ${MODE}. Use: dev or prod"
+  fi
+  
+  # Execute command
+  case "${COMMAND}" in
+    start)
+      precondition_check
+      start_services
+      ;;
+    stop)
+      stop_services
+      ;;
+    status)
+      status_services
+      ;;
+    logs)
+      logs_services "${@}"
+      ;;
+    *)
+      log_error "Unknown command: ${COMMAND}. Use: start, stop, status, logs"
+      ;;
+  esac
+}
+
+main "$@"
