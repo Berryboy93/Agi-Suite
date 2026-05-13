@@ -12,8 +12,7 @@ import { logger } from "./lib/logger";
 
 const app: Express = express();
 
-// CORS — allow origins defined in CORS_ORIGIN (comma-separated) or fall back
-// to localhost dev defaults. Never use wildcard in an API that reads cookies.
+// ── CORS ───────────────────────────────────────────────────────────────────
 const rawOrigins = process.env["CORS_ORIGIN"] ?? "";
 const allowedOrigins: (string | RegExp)[] = rawOrigins.trim()
   ? rawOrigins.split(",").map((o) => o.trim())
@@ -27,7 +26,6 @@ const allowedOrigins: (string | RegExp)[] = rawOrigins.trim()
 app.use(
   cors({
     origin: (origin, cb) => {
-      // Allow server-to-server requests (no Origin header) and listed origins
       if (
         !origin ||
         allowedOrigins.some((o) =>
@@ -43,6 +41,7 @@ app.use(
   }),
 );
 
+// ── Request logging ────────────────────────────────────────────────────────
 app.use(
   pinoHttp({
     logger,
@@ -66,16 +65,28 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// FR-016: Bearer token auth — all routes except /api/healthz
-// requireAuth was imported by the Phase 2 script but never mounted.
-app.use(requireAuth);
+// ── Public endpoints (no auth) ─────────────────────────────────────────────
+// Root health for load balancers / external probes
+app.get("/health", (_req: Request, res: Response) => {
+  res.json({
+    status: "ok",
+    service: "api-server",
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// ── FR-016: Bearer token auth ──────────────────────────────────────────────
+// Skip auth for /api/healthz — mounted AFTER public routes but BEFORE API router
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (req.path === "/api/healthz") {
+    return next();
+  }
+  return requireAuth(req, res, next);
+});
 
 app.use("/api", router);
 
-// ── FR-022: Global error handler ─────────────────────────────────────────────
-// 4-arg signature is required for Express to recognise this as an error handler.
-// Returns { error, code } per the structured-error contract for all routes.
-// Must be the last middleware registered (after all routes).
+// ── FR-022: Global error handler ───────────────────────────────────────────
 app.use(
   (
     err: Error & { status?: number; code?: string },
