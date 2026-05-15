@@ -1,135 +1,172 @@
-import { Card } from "../ui/Card";
-
-const ac = "var(--accent)";
-const acid = "var(--acid)";
-const _vi = "var(--violet)";
-const done = "var(--done)";
-const warn = "var(--warn)";
-const d2 = "var(--text2)";
+import { Panel } from "@/ui/components/Panel";
+import { colors } from "@/ui/tokens/colors";
+import { typography } from "@/ui/tokens/typography";
 
 type Seg = { text: string; color?: string };
 type Line = Seg[];
 
 const tree: Line[] = [
-  [{ text: "~/Stable/", color: ac }],
-  [{ text: "├── " }, { text: "client/src/", color: ac }],
-  [{ text: "│   ├── " }, { text: "components/", color: ac }],
+  [{ text: "~/Stable/", color: colors.semantic.status.active }],
+  [
+    { text: "├── " },
+    { text: "client/src/", color: colors.semantic.status.active },
+  ],
+  [
+    { text: "│   ├── " },
+    { text: "components/", color: colors.semantic.status.active },
+  ],
   [
     { text: "│   │   ├── " },
-    { text: "admin/", color: done },
+    { text: "admin/", color: colors.semantic.status.healthy },
     { text: "  ← AgentSuite.tsx, AgentMeshPanel.tsx ✓" },
   ],
   [
     { text: "│   │   ├── " },
-    { text: "TimeSavingsPanel.tsx", color: acid },
+    { text: "TimeSavingsPanel.tsx", color: colors.semantic.status.active },
     { text: "  ← MVP item 3 ✓" },
   ],
   [
     { text: "│   │   └── " },
-    { text: "MixSuggestionsPanel.tsx", color: acid },
+    { text: "MixSuggestionsPanel.tsx", color: colors.semantic.status.active },
     { text: "  ← MVP item 4 frontend" },
   ],
-  [{ text: "│   ├── " }, { text: "pages/", color: ac }],
+  [
+    { text: "│   ├── " },
+    { text: "pages/", color: colors.semantic.status.active },
+  ],
   [
     { text: "│   │   ├── " },
-    { text: "admin/AgentSuitePage.tsx", color: done },
+    { text: "admin/AgentSuitePage.tsx", color: colors.semantic.status.healthy },
     { text: "  ← App.tsx:56 imported ✓" },
   ],
   [
     { text: "│   │   └── " },
-    { text: "DAW.tsx", color: acid },
+    { text: "DAW.tsx", color: colors.semantic.status.active },
     { text: "  ← SessionChip L1782 + SessionSummaryPanel L1750 ✓" },
   ],
-  [{ text: "│   └── " }, { text: "hooks/", color: ac }],
+  [
+    { text: "│   └── " },
+    { text: "hooks/", color: colors.semantic.status.active },
+  ],
   [
     { text: "│       └── " },
-    { text: "authStore.ts", color: acid },
+    { text: "authStore.ts", color: colors.semantic.status.active },
     { text: "  ← stored token restored ✓" },
   ],
-  [{ text: "├── " }, { text: "server/", color: ac }],
-  [{ text: "│   ├── " }, { text: "routers/", color: ac }],
+  [{ text: "├── " }, { text: "server/", color: colors.semantic.status.active }],
+  [
+    { text: "│   ├── " },
+    { text: "routers/", color: colors.semantic.status.active },
+  ],
   [
     { text: "│   │   ├── " },
-    { text: "adminRouter.ts", color: done },
+    { text: "adminRouter.ts", color: colors.semantic.status.healthy },
     { text: "  ← wired ✓" },
   ],
   [
     { text: "│   │   ├── " },
-    { text: "sessionMetrics.router.ts", color: done },
+    { text: "sessionMetrics.router.ts", color: colors.semantic.status.healthy },
     { text: "  ← wired ✓" },
   ],
   [
     { text: "│   │   ├── " },
-    { text: "mixer.router.ts", color: done },
+    { text: "mixer.router.ts", color: colors.semantic.status.healthy },
     { text: "  ← wired ✓" },
   ],
   [
     { text: "│   │   └── " },
-    { text: "dj.router.ts, aiMix.router.ts", color: done },
+    {
+      text: "dj.router.ts, aiMix.router.ts",
+      color: colors.semantic.status.healthy,
+    },
     { text: "  ← wired ✓" },
   ],
   [
     { text: "│   ├── " },
-    { text: "procedures.ts", color: done },
+    { text: "procedures.ts", color: colors.semantic.status.healthy },
     { text: "  ← 11 routers wired ✓" },
   ],
   [
     { text: "│   ├── " },
-    { text: "index.ts", color: warn },
+    { text: "index.ts", color: colors.semantic.status.warning },
     { text: "  ← console.log ×5 (lines 300-308) — P2" },
   ],
-  [{ text: "│   ├── " }, { text: "services/", color: ac }],
+  [
+    { text: "│   ├── " },
+    { text: "services/", color: colors.semantic.status.active },
+  ],
   [
     { text: "│   │   ├── " },
-    { text: "session-metrics.service.ts", color: warn },
+    {
+      text: "session-metrics.service.ts",
+      color: colors.semantic.status.warning,
+    },
     { text: "  ← P1: wire aiDecisionLog writes" },
   ],
-  [{ text: "│   │   └── " }, { text: "time-savings.service.ts", color: acid }],
+  [
+    { text: "│   │   └── " },
+    { text: "time-savings.service.ts", color: colors.semantic.status.active },
+  ],
   [
     { text: "│   └── " },
-    { text: "routes/presets.ts", color: warn },
+    { text: "routes/presets.ts", color: colors.semantic.status.warning },
     { text: "  ← as any ×4 (lines 10,11,16,17) — P2" },
   ],
-  [{ text: "├── " }, { text: "drizzle/migrations/", color: ac }],
+  [
+    { text: "├── " },
+    { text: "drizzle/migrations/", color: colors.semantic.status.active },
+  ],
   [
     { text: "│   └── " },
-    { text: "0005_overjoyed_gambit.sql", color: warn },
+    {
+      text: "0005_overjoyed_gambit.sql",
+      color: colors.semantic.status.warning,
+    },
     { text: "  ← PENDING Railway apply (P0)" },
   ],
   [
     { text: "├── " },
-    { text: "r3_hygiene.py", color: acid },
+    { text: "r3_hygiene.py", color: colors.semantic.status.active },
     { text: "  ← v2.0 with ASI learning" },
   ],
   [
     { text: "└── " },
-    { text: "CLAUDE.md", color: acid },
+    { text: "CLAUDE.md", color: colors.semantic.status.active },
     { text: "  ← v4 constitution" },
   ],
 ];
 
 export function TreeView() {
   return (
-    <Card
-      title={
-        <>
-          <span style={{ color: ac }}>📁</span> R3 v4 — ~/Stable (Key Paths)
-        </>
-      }
-    >
-      <div
-        style={{ fontSize: 11, lineHeight: 2, color: d2, overflowX: "auto" }}
-      >
-        {tree.map((line, i) => (
-          <div key={i}>
-            {line.map((seg, j) => (
-              <span key={j} style={seg.color ? { color: seg.color } : {}}>
-                {seg.text}
-              </span>
-            ))}
-          </div>
-        ))}
-      </div>
-    </Card>
+    <Panel elevation="raised" padding="md" variant="default">
+      <Panel.Header
+        title={
+          <>
+            <span style={{ color: colors.semantic.status.active }}>📁</span> R3
+            v4 — ~/Stable (Key Paths)
+          </>
+        }
+      />
+      <Panel.Body>
+        <div
+          style={{
+            fontSize: typography.semantic.caption.size,
+            lineHeight: 2,
+            color: colors.semantic.content.tertiary,
+            overflowX: "auto",
+          }}
+        >
+          {tree.map((line, i) => (
+            <div key={i}>
+              {line.map((seg, j) => (
+                <span key={j} style={seg.color ? { color: seg.color } : {}}>
+                  {seg.text}
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </Panel.Body>
+    </Panel>
   );
 }
