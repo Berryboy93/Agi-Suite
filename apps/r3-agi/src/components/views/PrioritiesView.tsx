@@ -1,37 +1,40 @@
 import { useAGI } from "../../store/useAGI";
-import { Card } from "../ui/Card";
+import { Panel } from "@/ui/components/Panel";
+import { colors } from "@/ui/tokens/colors";
+import { spacing } from "@/ui/tokens/spacing";
+import { typography } from "@/ui/tokens/typography";
 
 const tagColors: Record<string, { bg: string; color: string; border: string }> =
   {
     "pt-p0": {
-      bg: "rgba(255,61,113,.15)",
-      color: "var(--bad)",
-      border: "1px solid rgba(255,61,113,.25)",
+      bg: `${colors.semantic.status.critical}26`,
+      color: colors.semantic.status.critical,
+      border: `1px solid ${colors.semantic.status.critical}40`,
     },
     "pt-p1": {
-      bg: "rgba(245,158,11,.12)",
-      color: "var(--warn)",
-      border: "1px solid rgba(245,158,11,.22)",
+      bg: `${colors.semantic.status.warning}1F`,
+      color: colors.semantic.status.warning,
+      border: `1px solid ${colors.semantic.status.warning}38`,
     },
     "pt-p2": {
-      bg: "rgba(163,230,53,.1)",
-      color: "var(--good)",
-      border: "1px solid rgba(163,230,53,.2)",
+      bg: `${colors.semantic.status.healthy}1A`,
+      color: colors.semantic.status.healthy,
+      border: `1px solid ${colors.semantic.status.healthy}33`,
     },
     "pt-p3": {
-      bg: "rgba(16,185,129,.1)",
-      color: "var(--done)",
-      border: "1px solid rgba(16,185,129,.2)",
+      bg: `${colors.semantic.status.healthy}1A`,
+      color: colors.semantic.status.healthy,
+      border: `1px solid ${colors.semantic.status.healthy}33`,
     },
     "pt-p4": {
-      bg: "rgba(0,229,255,.08)",
-      color: "var(--accent)",
-      border: "1px solid rgba(0,229,255,.18)",
+      bg: `${colors.semantic.status.info}14`,
+      color: colors.semantic.status.info,
+      border: `1px solid ${colors.semantic.status.info}2E`,
     },
     "pt-p5": {
-      bg: "rgba(139,92,246,.08)",
-      color: "var(--violet)",
-      border: "1px solid rgba(139,92,246,.18)",
+      bg: `${colors.semantic.data.series5}14`,
+      color: colors.semantic.data.series5,
+      border: `1px solid ${colors.semantic.data.series5}2E`,
     },
   };
 
@@ -45,153 +48,303 @@ export function PrioritiesView() {
       <div
         style={{
           height: 3,
-          background: "rgba(255,255,255,.05)",
-          borderRadius: 2,
+          background: `${colors.semantic.content.primary}0D`,
+          borderRadius: spacing.semantic.radius.sm,
           overflow: "hidden",
-          marginBottom: 13,
+          marginBottom: spacing.semantic.gap.sm,
         }}
       >
         <div
           style={{
             height: "100%",
-            borderRadius: 2,
-            background: "linear-gradient(90deg,var(--acid),var(--done))",
+            borderRadius: spacing.semantic.radius.sm,
+            background: `linear-gradient(90deg, ${colors.semantic.status.active}, ${colors.semantic.status.healthy})`,
             width: pct + "%",
             transition: "width .6s ease",
           }}
         />
       </div>
 
-      <Card
-        title={
-          <>
-            <span style={{ color: "var(--acid)" }}>▶</span> Live Priority Queue
-            — Click to Mark Done
-          </>
-        }
-      >
-        {prios.map((p, i) => {
-          const tc = tagColors[p.cls] ?? tagColors["pt-p4"];
-          return (
-            <div
-              key={i}
-              onClick={() => togglePrio(i)}
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 11,
-                padding: "10px 0",
-                borderBottom:
-                  i < prios.length - 1 ? "1px solid var(--border)" : "none",
-                cursor: "pointer",
-                borderRadius: 2,
-                opacity: p.done ? 0.45 : 1,
-              }}
-            >
+      <Panel elevation="raised" padding="md" variant="default">
+        <Panel.Header
+          title={
+            <>
+              <span style={{ color: colors.semantic.status.active }}>▶</span>{" "}
+              Live Priority Queue — Click to Mark Done
+            </>
+          }
+        />
+        <Panel.Body>
+          {prios.map((p, i) => {
+            const tc = tagColors[p.cls] ?? tagColors["pt-p4"];
+            return (
               <div
+                key={i}
+                onClick={() => togglePrio(i)}
                 style={{
-                  width: 18,
-                  height: 18,
-                  borderRadius: 2,
-                  flexShrink: 0,
-                  marginTop: 2,
-                  border: `1px solid ${p.done ? "var(--done)" : "var(--bor2)"}`,
-                  background: p.done ? "rgba(16,185,129,.2)" : "transparent",
                   display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 10,
-                  color: "var(--done)",
+                  alignItems: "flex-start",
+                  gap: spacing.semantic.gap.sm,
+                  padding: `${spacing.semantic.gap.sm} 0`,
+                  borderBottom:
+                    i < prios.length - 1
+                      ? `1px solid ${colors.semantic.border.subtle}`
+                      : "none",
+                  cursor: "pointer",
+                  borderRadius: spacing.semantic.radius.sm,
+                  opacity: p.done ? 0.45 : 1,
                 }}
               >
-                {p.done ? "✓" : ""}
-              </div>
-              <div
-                style={{
-                  fontSize: 9,
-                  fontWeight: 700,
-                  padding: "2px 7px",
-                  borderRadius: 2,
-                  letterSpacing: 1,
-                  flexShrink: 0,
-                  marginTop: 2,
-                  ...tc,
-                }}
-              >
-                {p.tag}
-              </div>
-              <div style={{ flex: 1 }}>
                 <div
                   style={{
-                    fontSize: 12,
-                    color: p.done ? "var(--dim)" : "var(--text)",
-                    textDecoration: p.done ? "line-through" : "none",
-                    marginBottom: 3,
+                    width: 18,
+                    height: 18,
+                    borderRadius: spacing.semantic.radius.sm,
+                    flexShrink: 0,
+                    marginTop: 2,
+                    border: `1px solid ${p.done ? colors.semantic.status.healthy : colors.semantic.border.default}`,
+                    background: p.done
+                      ? `${colors.semantic.status.healthy}33`
+                      : "transparent",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: typography.semantic.dataSmall.size,
+                    color: colors.semantic.status.healthy,
                   }}
                 >
-                  {p.title}
+                  {p.done ? "✓" : ""}
                 </div>
                 <div
                   style={{
-                    fontSize: 10,
-                    color: "var(--text2)",
-                    lineHeight: 1.6,
+                    fontSize: typography.semantic.dataSmall.size,
+                    fontWeight: 700,
+                    padding: `${spacing.semantic.gap.xs} ${spacing.semantic.gap.sm}`,
+                    borderRadius: spacing.semantic.radius.sm,
+                    letterSpacing: typography.semantic.label.tracking,
+                    flexShrink: 0,
+                    marginTop: 2,
+                    ...tc,
                   }}
                 >
-                  {p.detail}
+                  {p.tag}
                 </div>
-                {p.cmd && (
+                <div style={{ flex: 1 }}>
                   <div
-                    style={{ fontSize: 10, color: "var(--acid)", marginTop: 4 }}
+                    style={{
+                      fontSize: typography.semantic.bodySmall.size,
+                      color: p.done
+                        ? colors.semantic.content.tertiary
+                        : colors.semantic.content.primary,
+                      textDecoration: p.done ? "line-through" : "none",
+                      marginBottom: 3,
+                    }}
                   >
-                    {p.cmd}
+                    {p.title}
                   </div>
-                )}
+                  <div
+                    style={{
+                      fontSize: typography.semantic.dataSmall.size,
+                      color: colors.semantic.content.secondary,
+                      lineHeight: typography.semantic.body.leading,
+                    }}
+                  >
+                    {p.detail}
+                  </div>
+                  {p.cmd && (
+                    <div
+                      style={{
+                        fontSize: typography.semantic.dataSmall.size,
+                        color: colors.semantic.status.active,
+                        marginTop: 4,
+                      }}
+                    >
+                      {p.cmd}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </Card>
+            );
+          })}
+        </Panel.Body>
+      </Panel>
 
-      <Card
-        title={
-          <>
-            <span style={{ color: "var(--acid)" }}>◈</span> Valuation Gates
-          </>
-        }
-      >
-        <table>
-          <thead>
-            <tr>
-              <th>State</th>
-              <th>Range</th>
-              <th>Gap</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style={{ color: "var(--warn)" }}>→ Current</td>
-              <td>$180K–$400K</td>
-              <td>Baseline</td>
-            </tr>
-            <tr>
-              <td>Demo + 50 beta users</td>
-              <td>$800K–$2.5M</td>
-              <td style={{ color: "var(--warn)" }}>P0 + P1 done</td>
-            </tr>
-            <tr>
-              <td>≥65% AI acceptance</td>
-              <td>$3–6M seed</td>
-              <td style={{ color: "var(--text2)" }}>P0 + P1 + P3</td>
-            </tr>
-            <tr>
-              <td>$120K ARR (500 users)</td>
-              <td>$4.8–9.6M</td>
-              <td style={{ color: "var(--text2)" }}>12mo post-launch</td>
-            </tr>
-          </tbody>
-        </table>
-      </Card>
+      <Panel elevation="raised" padding="md" variant="default">
+        <Panel.Header
+          title={
+            <>
+              <span style={{ color: colors.semantic.status.active }}>◈</span>{" "}
+              Valuation Gates
+            </>
+          }
+        />
+        <Panel.Body>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr
+                style={{
+                  borderBottom: `1px solid ${colors.semantic.border.subtle}`,
+                }}
+              >
+                <th
+                  style={{
+                    textAlign: "left",
+                    padding: `${spacing.semantic.gap.sm} ${spacing.semantic.gap.md}`,
+                    fontSize: typography.semantic.caption.size,
+                    letterSpacing: typography.semantic.caption.tracking,
+                    textTransform: "uppercase",
+                    color: colors.semantic.content.tertiary,
+                  }}
+                >
+                  State
+                </th>
+                <th
+                  style={{
+                    textAlign: "left",
+                    padding: `${spacing.semantic.gap.sm} ${spacing.semantic.gap.md}`,
+                    fontSize: typography.semantic.caption.size,
+                    letterSpacing: typography.semantic.caption.tracking,
+                    textTransform: "uppercase",
+                    color: colors.semantic.content.tertiary,
+                  }}
+                >
+                  Range
+                </th>
+                <th
+                  style={{
+                    textAlign: "left",
+                    padding: `${spacing.semantic.gap.sm} ${spacing.semantic.gap.md}`,
+                    fontSize: typography.semantic.caption.size,
+                    letterSpacing: typography.semantic.caption.tracking,
+                    textTransform: "uppercase",
+                    color: colors.semantic.content.tertiary,
+                  }}
+                >
+                  Gap
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                style={{
+                  borderBottom: `1px solid ${colors.semantic.border.subtle}`,
+                }}
+              >
+                <td
+                  style={{
+                    padding: `${spacing.semantic.gap.sm} ${spacing.semantic.gap.md}`,
+                    color: colors.semantic.status.warning,
+                  }}
+                >
+                  → Current
+                </td>
+                <td
+                  style={{
+                    padding: `${spacing.semantic.gap.sm} ${spacing.semantic.gap.md}`,
+                    color: colors.semantic.content.primary,
+                  }}
+                >
+                  $180K–$400K
+                </td>
+                <td
+                  style={{
+                    padding: `${spacing.semantic.gap.sm} ${spacing.semantic.gap.md}`,
+                    color: colors.semantic.content.secondary,
+                  }}
+                >
+                  Baseline
+                </td>
+              </tr>
+              <tr
+                style={{
+                  borderBottom: `1px solid ${colors.semantic.border.subtle}`,
+                }}
+              >
+                <td
+                  style={{
+                    padding: `${spacing.semantic.gap.sm} ${spacing.semantic.gap.md}`,
+                    color: colors.semantic.content.primary,
+                  }}
+                >
+                  Demo + 50 beta users
+                </td>
+                <td
+                  style={{
+                    padding: `${spacing.semantic.gap.sm} ${spacing.semantic.gap.md}`,
+                    color: colors.semantic.content.primary,
+                  }}
+                >
+                  $800K–$2.5M
+                </td>
+                <td
+                  style={{
+                    padding: `${spacing.semantic.gap.sm} ${spacing.semantic.gap.md}`,
+                    color: colors.semantic.status.warning,
+                  }}
+                >
+                  P0 + P1 done
+                </td>
+              </tr>
+              <tr
+                style={{
+                  borderBottom: `1px solid ${colors.semantic.border.subtle}`,
+                }}
+              >
+                <td
+                  style={{
+                    padding: `${spacing.semantic.gap.sm} ${spacing.semantic.gap.md}`,
+                    color: colors.semantic.content.primary,
+                  }}
+                >
+                  ≥65% AI acceptance
+                </td>
+                <td
+                  style={{
+                    padding: `${spacing.semantic.gap.sm} ${spacing.semantic.gap.md}`,
+                    color: colors.semantic.content.primary,
+                  }}
+                >
+                  $3–6M seed
+                </td>
+                <td
+                  style={{
+                    padding: `${spacing.semantic.gap.sm} ${spacing.semantic.gap.md}`,
+                    color: colors.semantic.content.secondary,
+                  }}
+                >
+                  P0 + P1 + P3
+                </td>
+              </tr>
+              <tr>
+                <td
+                  style={{
+                    padding: `${spacing.semantic.gap.sm} ${spacing.semantic.gap.md}`,
+                    color: colors.semantic.content.primary,
+                  }}
+                >
+                  $120K ARR (500 users)
+                </td>
+                <td
+                  style={{
+                    padding: `${spacing.semantic.gap.sm} ${spacing.semantic.gap.md}`,
+                    color: colors.semantic.content.primary,
+                  }}
+                >
+                  $4.8–9.6M
+                </td>
+                <td
+                  style={{
+                    padding: `${spacing.semantic.gap.sm} ${spacing.semantic.gap.md}`,
+                    color: colors.semantic.content.secondary,
+                  }}
+                >
+                  12mo post-launch
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </Panel.Body>
+      </Panel>
     </>
   );
 }
