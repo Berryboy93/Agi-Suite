@@ -1,4 +1,7 @@
-import { Card } from "../ui/Card";
+import { Panel } from "@/ui/components/Panel";
+import { colors } from "@/ui/tokens/colors";
+import { spacing } from "@/ui/tokens/spacing";
+import { typography } from "@/ui/tokens/typography";
 
 const steps = [
   {
@@ -6,14 +9,14 @@ const steps = [
     desc: "Type-check — zero errors",
     cmd: "pnpm tsc --noEmit",
     note: "Passing — confirmed 2026-04-09",
-    noteColor: "var(--done)",
+    noteColor: colors.semantic.status.healthy,
   },
   {
     status: "warn",
     desc: "Test suite",
     cmd: "pnpm test",
     note: "Runner broken — fix vitest.config.ts (P4) first",
-    noteColor: "var(--warn)",
+    noteColor: colors.semantic.status.warning,
   },
   {
     status: "3",
@@ -36,75 +39,96 @@ const steps = [
 
 export function VerifyView() {
   return (
-    <Card
-      title={
-        <>
-          <span style={{ color: "var(--acid)" }}>▷</span> Post-Patch
-          Verification — Wire.txt: After Every Write
-        </>
-      }
-    >
-      {steps.map((s, i) => (
-        <div
-          key={i}
-          style={{
-            display: "flex",
-            gap: 10,
-            padding: "8px 0",
-            borderBottom:
-              i < steps.length - 1 ? "1px solid var(--border)" : "none",
-          }}
-        >
+    <Panel elevation="raised" padding="md" variant="default">
+      <Panel.Header
+        title={
+          <>
+            <span style={{ color: colors.semantic.status.active }}>▷</span>{" "}
+            Post-Patch Verification — Wire.txt: After Every Write
+          </>
+        }
+      />
+      <Panel.Body>
+        {steps.map((s, i) => (
           <div
+            key={i}
             style={{
-              width: 20,
-              height: 20,
-              borderRadius: "50%",
-              flexShrink: 0,
-              marginTop: 1,
               display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 9,
-              ...(s.status === "done"
-                ? {
-                    background: "rgba(16,185,129,.15)",
-                    border: "1px solid var(--done)",
-                    color: "var(--done)",
-                  }
-                : s.status === "warn"
-                  ? { border: "1px solid var(--bor2)", color: "var(--warn)" }
-                  : { border: "1px solid var(--bor2)", color: "var(--text2)" }),
+              gap: spacing.semantic.gap.sm,
+              padding: `${spacing.semantic.gap.sm} 0`,
+              borderBottom:
+                i < steps.length - 1
+                  ? `1px solid ${colors.semantic.border.subtle}`
+                  : "none",
             }}
           >
-            {s.status === "done" ? "✓" : s.status === "warn" ? "!" : s.status}
-          </div>
-          <div>
             <div
-              style={{ fontSize: 11, color: "var(--text)", marginBottom: 3 }}
+              style={{
+                width: 20,
+                height: 20,
+                borderRadius: "50%",
+                flexShrink: 0,
+                marginTop: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 9,
+                ...(s.status === "done"
+                  ? {
+                      background: `${colors.semantic.status.healthy}26`,
+                      border: `1px solid ${colors.semantic.status.healthy}`,
+                      color: colors.semantic.status.healthy,
+                    }
+                  : s.status === "warn"
+                    ? {
+                        border: `1px solid ${colors.semantic.border.default}`,
+                        color: colors.semantic.status.warning,
+                      }
+                    : {
+                        border: `1px solid ${colors.semantic.border.default}`,
+                        color: colors.semantic.content.tertiary,
+                      }),
+              }}
             >
-              {s.desc}
+              {s.status === "done" ? "✓" : s.status === "warn" ? "!" : s.status}
             </div>
-            {s.cmd && (
+            <div>
               <div
                 style={{
-                  fontSize: 10,
-                  color: "var(--acid)",
-                  marginTop: 3,
-                  whiteSpace: "pre-line",
+                  fontSize: typography.semantic.caption.size,
+                  color: colors.semantic.content.primary,
+                  marginBottom: 3,
                 }}
               >
-                {s.cmd}
+                {s.desc}
               </div>
-            )}
-            {s.note && (
-              <div style={{ fontSize: 10, color: s.noteColor, marginTop: 2 }}>
-                {s.note}
-              </div>
-            )}
+              {s.cmd && (
+                <div
+                  style={{
+                    fontSize: typography.semantic.dataSmall.size,
+                    color: colors.semantic.status.active,
+                    marginTop: 3,
+                    whiteSpace: "pre-line",
+                  }}
+                >
+                  {s.cmd}
+                </div>
+              )}
+              {s.note && (
+                <div
+                  style={{
+                    fontSize: typography.semantic.dataSmall.size,
+                    color: s.noteColor,
+                    marginTop: 2,
+                  }}
+                >
+                  {s.note}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
-    </Card>
+        ))}
+      </Panel.Body>
+    </Panel>
   );
 }
