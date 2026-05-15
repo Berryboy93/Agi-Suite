@@ -1,5 +1,31 @@
 @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;600;700;800&display=swap");
 @import "tailwindcss";
+@theme {
+  --color-bg-base: oklch(8% 0.02 267);
+  --color-bg-surface: oklch(12% 0.03 266);
+  --color-bg-elevated: oklch(18% 0.04 265);
+  --color-content-primary: oklch(92% 0.003 254);
+  --color-content-secondary: oklch(72% 0.01 258);
+  --color-content-tertiary: oklch(58% 0.02 260);
+  --color-border-default: oklch(26% 0.05 264);
+  --color-border-subtle: oklch(18% 0.04 265);
+  --color-interactive-default: oklch(55% 0.19 260);
+  --color-status-healthy: oklch(55% 0.16 147);
+  --color-status-warning: oklch(65% 0.18 85);
+  --color-status-critical: oklch(59% 0.19 38);
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --duration-fast: 100ms;
+  --duration-normal: 200ms;
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+}
 
 :root {
   --bg: #09090b; /* Zinc-950 */

@@ -7,6 +7,7 @@ import React from "react";
 import { colors } from "../tokens/colors";
 import { spacing } from "../tokens/spacing";
 import { typography } from "../tokens/typography";
+import { motion } from "../tokens/motion";
 
 export type Elevation = "flat" | "raised" | "floating" | "inset";
 export type PaddingSize = "none" | "xs" | "sm" | "md" | "lg";
@@ -102,7 +103,7 @@ function PanelRoot({
     display: "flex",
     flexDirection: "column",
     gap: spacing.semantic.gap.sm,
-    transition: "box-shadow 150ms ease-out, border-color 150ms ease-out",
+    transition: `box-shadow ${motion.semantic.panelHover.duration} ${motion.semantic.panelHover.easing}, border-color ${motion.semantic.panelHover.duration} ${motion.semantic.panelHover.easing}`,
   };
 
   return (
