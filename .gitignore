@@ -27,3 +27,5 @@ logs/
 # Production builds (optional - include if not already there)
 apps/*/dist/
 tsconfig.tsbuildinfo
+.logs/
+.repo_snapshots/
