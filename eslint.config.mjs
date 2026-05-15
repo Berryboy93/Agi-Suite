@@ -5,6 +5,17 @@ import reactHooksPlugin from "eslint-plugin-react-hooks";
 
 /** @type {import("eslint").Linter.FlatConfig[]} */
 export default [
+  // ── Global ignores (must be first, no other properties) ─────────────
+  {
+    ignores: [
+      "**/dist/**",
+      "**/.patch-backups/**",
+      "**/legacy-scripts/**",
+      "**/node_modules/**",
+      "**/.git/**",
+    ],
+  },
+
   {
     files: ["**/*.ts", "**/*.tsx"],
     languageOptions: {
@@ -16,7 +27,7 @@ export default [
     },
     plugins: {
       "@typescript-eslint": tsPlugin,
-      "react-hooks": reactHooksPlugin, // ✅ ADDED
+      "react-hooks": reactHooksPlugin,
     },
     rules: {
       // ── React Hooks rules ───────────────────────────────────────────────
@@ -29,7 +40,6 @@ export default [
         {
           patterns: ["@llpte/*/src/*", "@llpte/*/dist/internal/*"],
           paths: [
-            // Transport store: deprecated aliases blocked at import time
             {
               name: "@/store/transport-store",
               importNames: [
@@ -40,7 +50,6 @@ export default [
               message:
                 "Use useTransportStore directly — flat props are first-class members.",
             },
-            // Clip store: lowercase alias blocked at import time
             {
               name: "@/store/clip-store",
               importNames: ["useClipstore", "useclipstore"],
