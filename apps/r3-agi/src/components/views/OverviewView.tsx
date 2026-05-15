@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Card } from "../ui/Card";
+import { Panel } from "@/ui/components/Panel";
+import { colors } from "@/ui/tokens/colors";
+import { spacing } from "@/ui/tokens/spacing";
+import { typography } from "@/ui/tokens/typography";
 
 const checkRows = [
   {
@@ -123,19 +126,20 @@ const secRows = [
 ];
 
 const dotColors: Record<string, string> = {
-  done: "var(--done)",
-  ok: "var(--good)",
-  bad: "var(--bad)",
-  warn: "var(--warn)",
-  vi: "var(--violet)",
-  dim: "var(--dim)",
+  done: colors.semantic.status.healthy,
+  ok: colors.semantic.status.healthy,
+  bad: colors.semantic.status.critical,
+  warn: colors.semantic.status.warning,
+  vi: colors.semantic.data.series5,
+  dim: colors.semantic.content.tertiary,
 };
+
 const detailColors: Record<string, string> = {
-  done: "var(--done)",
-  ok: "var(--good)",
-  bad: "var(--bad)",
-  warn: "var(--warn)",
-  dim: "var(--text2)",
+  done: colors.semantic.status.healthy,
+  ok: colors.semantic.status.healthy,
+  bad: colors.semantic.status.critical,
+  warn: colors.semantic.status.warning,
+  dim: colors.semantic.content.secondary,
 };
 
 function CheckRow({
@@ -149,15 +153,16 @@ function CheckRow({
   detail?: string;
   dCls?: string;
 }) {
+  const dotColor = dotColors[dot] ?? colors.semantic.content.tertiary;
   return (
     <div
       style={{
         display: "flex",
         alignItems: "center",
-        gap: 8,
-        padding: "6px 0",
-        borderBottom: "1px solid var(--border)",
-        fontSize: 11,
+        gap: spacing.semantic.gap.sm,
+        padding: `${spacing.semantic.gap.xs} 0`,
+        borderBottom: `1px solid ${colors.semantic.border.subtle}`,
+        fontSize: typography.semantic.caption.size,
       }}
     >
       <div
@@ -166,16 +171,20 @@ function CheckRow({
           height: 7,
           borderRadius: "50%",
           flexShrink: 0,
-          background: dotColors[dot] ?? "var(--dim)",
-          boxShadow: dot !== "dim" ? `0 0 5px ${dotColors[dot]}` : undefined,
+          background: dotColor,
+          boxShadow: dot !== "dim" ? `0 0 5px ${dotColor}` : undefined,
         }}
       />
-      <div style={{ flex: 1, color: "var(--text)" }}>{label}</div>
+      <div style={{ flex: 1, color: colors.semantic.content.primary }}>
+        {label}
+      </div>
       {detail && (
         <div
           style={{
-            fontSize: 10,
-            color: dCls ? detailColors[dCls] : "var(--text2)",
+            fontSize: typography.semantic.dataSmall.size,
+            color: dCls
+              ? detailColors[dCls]
+              : colors.semantic.content.secondary,
           }}
         >
           {detail}
@@ -225,15 +234,15 @@ function KpiCard({ num, denom, suffix, color, label }: KpiDef) {
   return (
     <div
       style={{
-        background: "var(--surface)",
-        padding: "10px 12px",
+        background: colors.semantic.background.surface,
+        padding: `${spacing.semantic.gap.sm} ${spacing.semantic.gap.md}`,
         textAlign: "center",
       }}
     >
       <div
         style={{
-          fontFamily: "var(--sans)",
-          fontSize: 18,
+          fontFamily: typography.family.sans,
+          fontSize: typography.semantic.h3.size,
           fontWeight: 800,
           color,
           lineHeight: 1,
@@ -243,9 +252,9 @@ function KpiCard({ num, denom, suffix, color, label }: KpiDef) {
       </div>
       <div
         style={{
-          fontSize: 8,
-          letterSpacing: 2,
-          color: "var(--dim)",
+          fontSize: typography.semantic.dataSmall.size,
+          letterSpacing: typography.semantic.label.tracking,
+          color: colors.semantic.content.tertiary,
           marginTop: 3,
           textTransform: "uppercase",
         }}
@@ -261,35 +270,45 @@ const valuationRows = [
     state: "→ Current",
     range: "$180K–$400K",
     gap: "Baseline",
-    sc: "var(--warn)",
+    sc: colors.semantic.status.warning,
   },
   {
     state: "Demo + 50 beta users",
     range: "$800K–$2.5M",
     gap: "P0 done",
-    sc: "var(--text2)",
+    sc: colors.semantic.content.secondary,
   },
   {
     state: "≥65% AI acceptance",
     range: "$3–6M seed",
     gap: "P0 + P3",
-    sc: "var(--text2)",
+    sc: colors.semantic.content.secondary,
   },
   {
     state: "$120K ARR",
     range: "$4.8–9.6M",
     gap: "12mo post-launch",
-    sc: "var(--text2)",
+    sc: colors.semantic.content.secondary,
   },
 ];
 
 export function OverviewView() {
   const kpis: KpiDef[] = [
-    { num: 11, color: "var(--done)", label: "Routers" },
-    { num: 3, denom: 4, color: "var(--accent)", label: "MVP Done" },
-    { num: 5, color: "var(--warn)", label: "any Left" },
-    { num: 0, suffix: "P0", color: "var(--bad)", label: "Migration" },
-    { num: 0, color: "var(--done)", label: "TSC Errors" },
+    { num: 11, color: colors.semantic.status.healthy, label: "Routers" },
+    {
+      num: 3,
+      denom: 4,
+      color: colors.semantic.status.active,
+      label: "MVP Done",
+    },
+    { num: 5, color: colors.semantic.status.warning, label: "any Left" },
+    {
+      num: 0,
+      suffix: "P0",
+      color: colors.semantic.status.critical,
+      label: "Migration",
+    },
+    { num: 0, color: colors.semantic.status.healthy, label: "TSC Errors" },
   ];
 
   return (
@@ -299,10 +318,10 @@ export function OverviewView() {
           display: "grid",
           gridTemplateColumns: "repeat(5,1fr)",
           gap: 1,
-          border: "1px solid var(--border)",
-          borderRadius: 3,
+          border: `1px solid ${colors.semantic.border.subtle}`,
+          borderRadius: spacing.semantic.radius.sm,
           overflow: "hidden",
-          marginBottom: 13,
+          marginBottom: spacing.semantic.gap.md,
         }}
       >
         {kpis.map((s) => (
@@ -314,8 +333,8 @@ export function OverviewView() {
         style={{
           display: "grid",
           gridTemplateColumns: "1fr 1fr 1fr",
-          gap: 8,
-          marginBottom: 13,
+          gap: spacing.semantic.gap.sm,
+          marginBottom: spacing.semantic.gap.md,
         }}
       >
         {[
@@ -323,35 +342,35 @@ export function OverviewView() {
             label: "PRD Version",
             val: "v4.1",
             sub: "Updated 2026-04-12",
-            color: "var(--accent)",
+            color: colors.semantic.status.active,
           },
           {
             label: "Session",
             val: new Date().toISOString().split("T")[0],
             sub: "Last priorities update",
-            color: "var(--text)",
+            color: colors.semantic.content.primary,
           },
           {
             label: "Hygiene",
             val: "10/100",
             sub: "Target: 90 — P5 open",
-            color: "var(--warn)",
+            color: colors.semantic.status.warning,
           },
         ].map((c) => (
           <div
             key={c.label}
             style={{
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              borderRadius: 3,
-              padding: "10px 12px",
+              background: colors.semantic.background.surface,
+              border: `1px solid ${colors.semantic.border.subtle}`,
+              borderRadius: spacing.semantic.radius.sm,
+              padding: `${spacing.semantic.gap.sm} ${spacing.semantic.gap.md}`,
             }}
           >
             <div
               style={{
-                fontSize: 8,
-                letterSpacing: 2,
-                color: "var(--dim)",
+                fontSize: typography.semantic.dataSmall.size,
+                letterSpacing: typography.semantic.label.tracking,
+                color: colors.semantic.content.tertiary,
                 textTransform: "uppercase",
                 marginBottom: 4,
               }}
@@ -360,85 +379,164 @@ export function OverviewView() {
             </div>
             <div
               style={{
-                fontFamily: "var(--sans)",
-                fontSize: 15,
+                fontFamily: typography.family.sans,
+                fontSize: typography.semantic.h4.size,
                 fontWeight: 800,
                 color: c.color,
               }}
             >
               {c.val}
             </div>
-            <div style={{ fontSize: 9, color: "var(--text2)", marginTop: 2 }}>
+            <div
+              style={{
+                fontSize: typography.semantic.dataSmall.size,
+                color: colors.semantic.content.secondary,
+                marginTop: 2,
+              }}
+            >
               {c.sub}
             </div>
           </div>
         ))}
       </div>
 
-      <Card
-        title={
-          <>
-            <span style={{ color: "var(--acid)" }}>⚡</span> Codebase State —{" "}
-            {new Date().toISOString().split("T")[0]}
-          </>
-        }
-      >
-        {checkRows.map((r, i) => (
-          <CheckRow
-            key={i}
-            dot={r.dot}
-            label={r.label}
-            detail={r.detail}
-            dCls={r.dCls}
-          />
-        ))}
-      </Card>
+      <Panel elevation="raised" padding="md" variant="default">
+        <Panel.Header
+          title={
+            <>
+              <span style={{ color: colors.semantic.status.active }}>⚡</span>{" "}
+              Codebase State — {new Date().toISOString().split("T")[0]}
+            </>
+          }
+        />
+        <Panel.Body>
+          {checkRows.map((r, i) => (
+            <CheckRow
+              key={i}
+              dot={r.dot}
+              label={r.label}
+              detail={r.detail}
+              dCls={r.dCls}
+            />
+          ))}
+        </Panel.Body>
+      </Panel>
 
-      <Card
-        title={
-          <>
-            <span style={{ color: "var(--violet)" }}>◈</span> Valuation Gates
-          </>
-        }
-      >
-        <table>
-          <thead>
-            <tr>
-              <th>State</th>
-              <th>Range</th>
-              <th>Gap</th>
-            </tr>
-          </thead>
-          <tbody>
-            {valuationRows.map((v) => (
-              <tr key={v.state}>
-                <td style={{ color: v.sc }}>{v.state}</td>
-                <td>{v.range}</td>
-                <td style={{ color: "var(--text2)" }}>{v.gap}</td>
+      <Panel elevation="raised" padding="md" variant="default">
+        <Panel.Header
+          title={
+            <>
+              <span style={{ color: colors.semantic.data.series5 }}>◈</span>{" "}
+              Valuation Gates
+            </>
+          }
+        />
+        <Panel.Body>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr
+                style={{
+                  borderBottom: `1px solid ${colors.semantic.border.subtle}`,
+                }}
+              >
+                <th
+                  style={{
+                    textAlign: "left",
+                    padding: `${spacing.semantic.gap.sm} ${spacing.semantic.gap.md}`,
+                    fontSize: typography.semantic.caption.size,
+                    letterSpacing: typography.semantic.caption.tracking,
+                    textTransform: "uppercase",
+                    color: colors.semantic.content.tertiary,
+                  }}
+                >
+                  State
+                </th>
+                <th
+                  style={{
+                    textAlign: "left",
+                    padding: `${spacing.semantic.gap.sm} ${spacing.semantic.gap.md}`,
+                    fontSize: typography.semantic.caption.size,
+                    letterSpacing: typography.semantic.caption.tracking,
+                    textTransform: "uppercase",
+                    color: colors.semantic.content.tertiary,
+                  }}
+                >
+                  Range
+                </th>
+                <th
+                  style={{
+                    textAlign: "left",
+                    padding: `${spacing.semantic.gap.sm} ${spacing.semantic.gap.md}`,
+                    fontSize: typography.semantic.caption.size,
+                    letterSpacing: typography.semantic.caption.tracking,
+                    textTransform: "uppercase",
+                    color: colors.semantic.content.tertiary,
+                  }}
+                >
+                  Gap
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </Card>
+            </thead>
+            <tbody>
+              {valuationRows.map((v) => (
+                <tr
+                  key={v.state}
+                  style={{
+                    borderBottom: `1px solid ${colors.semantic.border.subtle}`,
+                  }}
+                >
+                  <td
+                    style={{
+                      padding: `${spacing.semantic.gap.sm} ${spacing.semantic.gap.md}`,
+                      color: v.sc,
+                    }}
+                  >
+                    {v.state}
+                  </td>
+                  <td
+                    style={{
+                      padding: `${spacing.semantic.gap.sm} ${spacing.semantic.gap.md}`,
+                      color: colors.semantic.content.primary,
+                    }}
+                  >
+                    {v.range}
+                  </td>
+                  <td
+                    style={{
+                      padding: `${spacing.semantic.gap.sm} ${spacing.semantic.gap.md}`,
+                      color: colors.semantic.content.secondary,
+                    }}
+                  >
+                    {v.gap}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Panel.Body>
+      </Panel>
 
-      <Card
-        title={
-          <>
-            <span style={{ color: "var(--violet)" }}>🔒</span> Security
-            Architecture
-          </>
-        }
-      >
-        {secRows.map((r, i) => (
-          <CheckRow
-            key={i}
-            dot={r.dot}
-            label={r.label}
-            detail={r.detail}
-            dCls={r.dCls}
-          />
-        ))}
-      </Card>
+      <Panel elevation="raised" padding="md" variant="default">
+        <Panel.Header
+          title={
+            <>
+              <span style={{ color: colors.semantic.data.series5 }}>🔒</span>{" "}
+              Security Architecture
+            </>
+          }
+        />
+        <Panel.Body>
+          {secRows.map((r, i) => (
+            <CheckRow
+              key={i}
+              dot={r.dot}
+              label={r.label}
+              detail={r.detail}
+              dCls={r.dCls}
+            />
+          ))}
+        </Panel.Body>
+      </Panel>
     </>
   );
 }
