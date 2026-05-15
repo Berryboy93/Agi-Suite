@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { Card } from "../ui/Card";
+import { Panel } from "@/ui/components/Panel";
+import { colors } from "@/ui/tokens/colors";
+import { spacing } from "@/ui/tokens/spacing";
+import { typography } from "@/ui/tokens/typography";
 
 interface CheckItem {
   done: boolean;
@@ -116,37 +119,44 @@ export function ChecklistView() {
         style={{
           display: "grid",
           gridTemplateColumns: "1fr 1fr 1fr",
-          gap: 8,
-          marginBottom: 13,
+          gap: spacing.semantic.gap.sm,
+          marginBottom: spacing.semantic.gap.md,
         }}
       >
         {[
           {
             label: "Completed",
             val: done + "/" + items.length,
-            color: "var(--done)",
+            color: colors.semantic.status.healthy,
           },
-          { label: "Progress", val: pct + "%", color: "var(--accent)" },
+          {
+            label: "Progress",
+            val: pct + "%",
+            color: colors.semantic.status.active,
+          },
           {
             label: "Critical Open",
             val: String(critical),
-            color: critical > 0 ? "var(--bad)" : "var(--done)",
+            color:
+              critical > 0
+                ? colors.semantic.status.critical
+                : colors.semantic.status.healthy,
           },
         ].map((c) => (
           <div
             key={c.label}
             style={{
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              borderRadius: 3,
-              padding: "10px 12px",
+              background: colors.semantic.background.surface,
+              border: `1px solid ${colors.semantic.border.subtle}`,
+              borderRadius: spacing.semantic.radius.sm,
+              padding: `${spacing.semantic.gap.sm} ${spacing.semantic.gap.md}`,
               textAlign: "center",
             }}
           >
             <div
               style={{
-                fontFamily: "var(--sans)",
-                fontSize: 18,
+                fontFamily: typography.family.sans,
+                fontSize: typography.semantic.h3.size,
                 fontWeight: 800,
                 color: c.color,
               }}
@@ -155,9 +165,9 @@ export function ChecklistView() {
             </div>
             <div
               style={{
-                fontSize: 8,
-                letterSpacing: 2,
-                color: "var(--dim)",
+                fontSize: typography.semantic.dataSmall.size,
+                letterSpacing: typography.semantic.label.tracking,
+                color: colors.semantic.content.tertiary,
                 textTransform: "uppercase",
                 marginTop: 3,
               }}
@@ -171,92 +181,104 @@ export function ChecklistView() {
       <div
         style={{
           height: 3,
-          background: "rgba(255,255,255,.05)",
-          borderRadius: 2,
+          background: `${colors.semantic.content.primary}0D`,
+          borderRadius: spacing.semantic.radius.sm,
           overflow: "hidden",
-          marginBottom: 13,
+          marginBottom: spacing.semantic.gap.md,
         }}
       >
         <div
           style={{
             height: "100%",
-            borderRadius: 2,
-            background: "linear-gradient(90deg,var(--acid),var(--done))",
+            borderRadius: spacing.semantic.radius.sm,
+            background: `linear-gradient(90deg, ${colors.semantic.status.active}, ${colors.semantic.status.healthy})`,
             width: pct + "%",
             transition: "width .6s ease",
           }}
         />
       </div>
 
-      <Card
-        title={
-          <>
-            <span style={{ color: "var(--acid)" }}>🛫</span> Pre-flight
-            Checklist — Click to Toggle
-          </>
-        }
-      >
-        {items.map((item, i) => (
-          <div
-            key={i}
-            onClick={() => toggle(i)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "6px 0",
-              borderBottom:
-                i < items.length - 1 ? "1px solid var(--border)" : "none",
-              fontSize: 11,
-              cursor: "pointer",
-            }}
-          >
+      <Panel elevation="raised" padding="md" variant="default">
+        <Panel.Header
+          title={
+            <>
+              <span style={{ color: colors.semantic.status.active }}>🛫</span>{" "}
+              Pre-flight Checklist — Click to Toggle
+            </>
+          }
+        />
+        <Panel.Body>
+          {items.map((item, i) => (
             <div
+              key={i}
+              onClick={() => toggle(i)}
               style={{
-                width: 7,
-                height: 7,
-                borderRadius: "50%",
-                flexShrink: 0,
-                background: item.done
-                  ? "var(--done)"
-                  : item.critical
-                    ? "var(--bad)"
-                    : "var(--dim)",
-                boxShadow: item.done
-                  ? "0 0 5px var(--done)"
-                  : item.critical
-                    ? "0 0 5px var(--bad)"
-                    : undefined,
-              }}
-            />
-            <div
-              style={{
-                flex: 1,
-                color: "var(--text)",
-                textDecoration: item.done ? "line-through" : "none",
-                opacity: item.done ? 0.6 : 1,
+                display: "flex",
+                alignItems: "center",
+                gap: spacing.semantic.gap.sm,
+                padding: `${spacing.semantic.gap.xs} 0`,
+                borderBottom:
+                  i < items.length - 1
+                    ? `1px solid ${colors.semantic.border.subtle}`
+                    : "none",
+                fontSize: typography.semantic.caption.size,
+                cursor: "pointer",
               }}
             >
-              {item.label}
-            </div>
-            {item.critical && !item.done && (
               <div
                 style={{
-                  fontSize: 9,
-                  color: "var(--bad)",
-                  fontWeight: 700,
-                  letterSpacing: 1,
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  flexShrink: 0,
+                  background: item.done
+                    ? colors.semantic.status.healthy
+                    : item.critical
+                      ? colors.semantic.status.critical
+                      : colors.semantic.content.tertiary,
+                  boxShadow: item.done
+                    ? `0 0 5px ${colors.semantic.status.healthy}`
+                    : item.critical
+                      ? `0 0 5px ${colors.semantic.status.critical}`
+                      : undefined,
+                }}
+              />
+              <div
+                style={{
+                  flex: 1,
+                  color: colors.semantic.content.primary,
+                  textDecoration: item.done ? "line-through" : "none",
+                  opacity: item.done ? 0.6 : 1,
                 }}
               >
-                CRITICAL
+                {item.label}
               </div>
-            )}
-            {item.done && (
-              <div style={{ fontSize: 10, color: "var(--done)" }}>✓</div>
-            )}
-          </div>
-        ))}
-      </Card>
+              {item.critical && !item.done && (
+                <div
+                  style={{
+                    fontSize: typography.semantic.dataSmall.size,
+                    color: colors.semantic.status.critical,
+                    fontWeight: 700,
+                    letterSpacing: typography.semantic.label.tracking,
+                  }}
+                >
+                  CRITICAL
+                </div>
+              )}
+              {item.done && (
+                <div
+                  style={{
+                    fontSize: typography.semantic.dataSmall.size,
+                    color: colors.semantic.status.healthy,
+                  }}
+                >
+                  ✓
+                </div>
+              )}
+            </div>
+          ))}
+        </Panel.Body>
+      </Panel>
     </>
   );
 }
