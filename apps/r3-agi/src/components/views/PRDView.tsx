@@ -1,5 +1,7 @@
 import { Panel } from "@/ui/components/Panel";
 import { colors } from "@/ui/tokens/colors";
+import { spacing } from "@/ui/tokens/spacing";
+import { typography } from "@/ui/tokens/typography";
 
 export function PRDView() {
   const rows = [
@@ -59,6 +61,16 @@ export function PRDView() {
     },
   ];
 
+  const cellPadding = `${spacing.semantic.gap.sm} ${spacing.semantic.gap.md}`;
+  const headerStyle: React.CSSProperties = {
+    textAlign: "left",
+    padding: cellPadding,
+    fontSize: typography.semantic.caption.size,
+    letterSpacing: typography.semantic.caption.tracking,
+    textTransform: "uppercase",
+    color: colors.semantic.content.tertiary,
+  };
+
   return (
     <Panel elevation="raised" padding="md" variant="default">
       <Panel.Header
@@ -73,42 +85,9 @@ export function PRDView() {
                 borderBottom: `1px solid ${colors.semantic.border.subtle}`,
               }}
             >
-              <th
-                style={{
-                  textAlign: "left",
-                  padding: "8px 12px",
-                  fontSize: "0.75rem",
-                  letterSpacing: "0.05em",
-                  textTransform: "uppercase",
-                  color: colors.semantic.content.tertiary,
-                }}
-              >
-                Section
-              </th>
-              <th
-                style={{
-                  textAlign: "left",
-                  padding: "8px 12px",
-                  fontSize: "0.75rem",
-                  letterSpacing: "0.05em",
-                  textTransform: "uppercase",
-                  color: colors.semantic.content.tertiary,
-                }}
-              >
-                Claim
-              </th>
-              <th
-                style={{
-                  textAlign: "left",
-                  padding: "8px 12px",
-                  fontSize: "0.75rem",
-                  letterSpacing: "0.05em",
-                  textTransform: "uppercase",
-                  color: colors.semantic.content.tertiary,
-                }}
-              >
-                Status
-              </th>
+              <th style={headerStyle}>Section</th>
+              <th style={headerStyle}>Claim</th>
+              <th style={headerStyle}>Status</th>
             </tr>
           </thead>
           <tbody>
@@ -121,7 +100,7 @@ export function PRDView() {
               >
                 <td
                   style={{
-                    padding: "8px 12px",
+                    padding: cellPadding,
                     color: colors.semantic.content.secondary,
                   }}
                 >
@@ -129,7 +108,7 @@ export function PRDView() {
                 </td>
                 <td
                   style={{
-                    padding: "8px 12px",
+                    padding: cellPadding,
                     color: colors.semantic.content.primary,
                   }}
                 >
@@ -137,7 +116,7 @@ export function PRDView() {
                 </td>
                 <td
                   style={{
-                    padding: "8px 12px",
+                    padding: cellPadding,
                     color: r.color,
                     fontWeight: 600,
                   }}
