@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Panel } from "@/ui/components/Panel";
+import { Panel } from "../components/Panel";
 
 export function Card({
   title,
