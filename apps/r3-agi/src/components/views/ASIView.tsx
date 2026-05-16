@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Card } from "../ui/Card";
+import { Card } from "@/ui/Card";
 
 type AgentStatus = "idle" | "running" | "pass" | "fail" | "healing";
 

@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Panel } from "../../ui/components/Panel";
-import { colors } from "../../ui/tokens/colors";
-import { spacing } from "../../ui/tokens/spacing";
-import { typography } from "../../ui/tokens/typography";
+import { Panel } from "@/ui/components/Panel";
+import { colors } from "@/ui/tokens/colors";
+import { spacing } from "@/ui/tokens/spacing";
+import { typography } from "@/ui/tokens/typography";
 
 interface CheckItem {
   done: boolean;

@@ -1,6 +1,6 @@
-import { Panel } from "../../ui/components/Panel";
-import { colors } from "../../ui/tokens/colors";
-import { typography } from "../../ui/tokens/typography";
+import { Panel } from "@/ui/components/Panel";
+import { colors } from "@/ui/tokens/colors";
+import { typography } from "@/ui/tokens/typography";
 
 type Seg = { text: string; color?: string };
 type Line = Seg[];

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { AreaChart, Area, ResponsiveContainer } from "recharts";
-import { Card } from "../ui/Card";
+import { Card } from "@/ui/Card";
 
 function jitter(base: number, range: number) {
   return parseFloat((base + (Math.random() - 0.5) * range * 2).toFixed(1));
