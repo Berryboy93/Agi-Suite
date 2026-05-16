@@ -126,16 +126,3 @@ export type FontFamily = typeof family;
 export type TypeSize = typeof size;
 export type TypeWeight = typeof weight;
 export type SemanticType = typeof semantic;
-
-/**
- * Unified namespace export — consumed by Panel.tsx as `import { typography }`
- */
-export const typography = {
-  family,
-  size,
-  weight,
-  leading,
-  tracking,
-  semantic,
-  cssVariables,
-};

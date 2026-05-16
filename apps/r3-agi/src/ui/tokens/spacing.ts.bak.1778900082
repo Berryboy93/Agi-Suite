@@ -62,8 +62,3 @@ export const cssVariables = {
 
 export type SpaceScale = typeof space;
 export type SemanticSpacing = typeof semantic;
-
-/**
- * Unified namespace export — consumed by Panel.tsx as `import { spacing }`
- */
-export const spacing = { space, semantic, cssVariables };

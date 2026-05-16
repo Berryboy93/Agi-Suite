@@ -4,10 +4,10 @@
  */
 
 import React from "react";
-import { colors } from "@/ui/tokens/colors";
-import { spacing } from "@/ui/tokens/spacing";
-import { typography } from "@/ui/tokens/typography";
-import { motion } from "@/ui/tokens/motion";
+import { colors } from "@/tokens/colors";
+import { spacing } from "@/tokens/spacing";
+import { typography } from "@/tokens/typography";
+import { motion } from "@/tokens/motion";
 
 export type Elevation = "flat" | "raised" | "floating" | "inset";
 export type PaddingSize = "none" | "xs" | "sm" | "md" | "lg";

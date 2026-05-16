@@ -52,8 +52,3 @@ export const cssVariables = {
 export type Duration = typeof duration;
 export type Easing = typeof easing;
 export type SemanticMotion = typeof semantic;
-
-/**
- * Unified namespace export — consumed by Panel.tsx as `import { motion }`
- */
-export const motion = { semantic };

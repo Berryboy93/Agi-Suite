@@ -104,8 +104,3 @@ export const cssVariables = {
 export type BaseColor = typeof base;
 export type SemanticColor = typeof semantic;
 export type CssColorVar = keyof typeof cssVariables;
-
-/**
- * Unified namespace export — consumed by Panel.tsx as `import { colors }`
- */
-export const colors = { base, semantic, cssVariables };

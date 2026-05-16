@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAGI } from "../../store/useAGI";
-import { Card } from "@/ui/Card";
+import { Card } from "@/components/Card";
 
 function CopyPre({ code }: { code: string }) {
   const [copied, setCopied] = useState(false);

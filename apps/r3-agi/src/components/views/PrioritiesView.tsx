@@ -1,8 +1,8 @@
 import { useAGI } from "../../store/useAGI";
-import { Panel } from "@/ui/components/Panel";
-import { colors } from "@/ui/tokens/colors";
-import { spacing } from "@/ui/tokens/spacing";
-import { typography } from "@/ui/tokens/typography";
+import { Panel } from "@/primitives/Panel";
+import { colors } from "@/tokens/colors";
+import { spacing } from "@/tokens/spacing";
+import { typography } from "@/tokens/typography";
 
 const tagColors: Record<string, { bg: string; color: string; border: string }> =
   {

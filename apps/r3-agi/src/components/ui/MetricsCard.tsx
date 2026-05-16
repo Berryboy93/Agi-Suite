@@ -1,4 +1,4 @@
-import { Panel } from "@/ui/components/Panel";
+import { Panel } from "@/primitives/Panel";
 
 interface MetricsCardProps {
   title: string;

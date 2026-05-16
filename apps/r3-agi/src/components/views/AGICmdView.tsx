@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Card } from "@/ui/Card";
+import { Card } from "@/components/Card";
 
 const PIPELINE: {
   id: string;
