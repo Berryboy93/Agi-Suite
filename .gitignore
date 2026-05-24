@@ -29,3 +29,9 @@ apps/*/dist/
 tsconfig.tsbuildinfo
 .logs/
 .repo_snapshots/
+
+# Generated build outputs
+lib/*/dist/
+lib/*/tsconfig.tsbuildinfo
+# Node modules binaries (symlinks)
+**/node_modules/.bin/

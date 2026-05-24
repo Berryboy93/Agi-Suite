@@ -101,10 +101,14 @@ async function fetchR3Metrics(): Promise<void> {
   }
 }
 
-void fetchR3Metrics();
-setInterval(() => {
+if (process.env["R3_INTERNAL_URL"]) {
   void fetchR3Metrics();
-}, 30_000);
+  setInterval(() => {
+    void fetchR3Metrics();
+  }, 30_000);
+} else {
+  logger.debug("fetchR3Metrics: R3_INTERNAL_URL not set — polling disabled");
+}
 
 /**
  * Prune sessions older than SESSION_TTL_MS and decrement totalSubscribers

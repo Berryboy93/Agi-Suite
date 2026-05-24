@@ -2,9 +2,10 @@
 
 **Last Updated:** 2026-05-15  
 **Review Cycle:** Per Mythos-Skills.pdf Lesson 5  
-**Owner:** @R3  
+**Owner:** @R3
 
 All deferred findings follow the Mythos security triage framework:
+
 - [red.anthropic.com/mythos](https://red.anthropic.com) — April 7, 2026
 
 ---
@@ -33,6 +34,7 @@ All deferred findings follow the Mythos security triage framework:
 Documents which audit surfaces have been reviewed and which remain gaps.
 
 ### Memory Safety
+
 - **Status:** Not yet audited
 - **Components:** @anthropic-ai/sdk (transitive deps), Web Audio API native bindings (if any), WASM modules in LLPTE
 - **Risk:** Memory corruption, buffer overruns in C/Rust code
@@ -40,9 +42,10 @@ Documents which audit surfaces have been reviewed and which remain gaps.
 - **Target:** Pre-first-external-beta
 
 ### Auth Logic
+
 - **Status:** Partial (timing oracle known, see above)
 - **Components:** auth.ts, session-store.ts, JWT validation, token generation
-- **Known gaps:** 
+- **Known gaps:**
   - 2FA bypass paths (if 2FA implemented)
   - Open-redirect in OAuth flows
   - Session-binding gaps (session fixation, cookie theft)
@@ -52,6 +55,7 @@ Documents which audit surfaces have been reviewed and which remain gaps.
 - **Target:** Pre-first-external-beta
 
 ### Data Layer
+
 - **Status:** Not yet audited
 - **Components:** Drizzle ORM query generation, tRPC resolvers, row-level authorization checks
 - **Known gaps:**
@@ -63,6 +67,7 @@ Documents which audit surfaces have been reviewed and which remain gaps.
 - **Target:** Pre-first-external-beta
 
 ### Cryptography
+
 - **Status:** Not yet audited
 - **Components:** Token generation (seed, RNG), session tokens, API request signing (HMAC), JWT signing
 - **Known gaps:**
@@ -75,6 +80,7 @@ Documents which audit surfaces have been reviewed and which remain gaps.
 - **Target:** Pre-first-external-beta
 
 ### Regular Expressions (ReDoS)
+
 - **Status:** Not yet audited
 - **Components:** Any user-supplied input that reaches new RegExp() (search filters, route patterns, schema validation)
 - **Risk:** Denial of service (catastrophic backtracking)
@@ -82,6 +88,7 @@ Documents which audit surfaces have been reviewed and which remain gaps.
 - **Target:** Pre-first-external-beta
 
 ### Client-Side Web Security
+
 - **Status:** Not yet audited
 - **Components:** React components, CSP headers, DOM APIs (innerHTML, dangerouslySetInnerHTML)
 - **Known gaps:**
@@ -109,9 +116,9 @@ Before committing any code that touches security:
 ## Document Sources
 
 This SECURITY.md is derived from:
+
 - Mythos-Skills.pdf (red.anthropic.com, April 7, 2026)
 - Internal R3 v4 security findings
 - SKILLS.md (operational patterns)
 
 **All claims trace to Mythos writeup or documented architectural review.**
-

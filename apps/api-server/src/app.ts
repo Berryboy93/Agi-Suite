@@ -21,6 +21,8 @@ const allowedOrigins: (string | RegExp)[] = rawOrigins.trim()
       "http://localhost:5174",
       "http://localhost:5175",
       "http://localhost:5176",
+      "http://localhost:5177",
+      "http://100.115.92.199:5177",
     ];
 
 app.use(
