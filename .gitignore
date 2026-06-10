@@ -35,3 +35,12 @@ lib/*/dist/
 lib/*/tsconfig.tsbuildinfo
 # Node modules binaries (symlinks)
 **/node_modules/.bin/
+node_modules/
+dist/
+*.js.map
+lib/**/*.js
+lib/**/*.d.ts
+coverage/
+lib/**/*.js.map
+vitest.config.js
+vitest.config.d.ts
