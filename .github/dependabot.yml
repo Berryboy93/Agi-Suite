@@ -1,0 +1,29 @@
+version: 2
+updates:
+  # NPM package updates
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "Berryboy93"
+    labels:
+      - "dependencies"
+      - "npm"
+
+  # GitHub Actions updates
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "Berryboy93"
+    labels:
+      - "dependencies"
+      - "github-actions"
