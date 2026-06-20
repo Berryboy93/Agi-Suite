@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "NODE_ENV=development tsx watch --env-file=.env --ignore='dist/**' --ignore='**/*.bak' --ignore='**/*.mjs' src/index.ts",
+    "dev": "NODE_ENV=development NODE_OPTIONS=--no-deprecation tsx watch --env-file=.env --ignore='dist/**' --ignore='**/*.bak' --ignore='**/*.mjs' src/index.ts",
     "build": "node ./build.mjs",
     "start": "node --env-file=.env --enable-source-maps ./dist/index.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit"
@@ -18,7 +18,8 @@
     "pino": "^9",
     "pino-http": "^10",
     "@anthropic-ai/sdk": "^0.39.0",
-    "@workspace/db": "workspace:*"
+    "@workspace/db": "workspace:*",
+    "@agent-os/rbac": "workspace:*"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.10",

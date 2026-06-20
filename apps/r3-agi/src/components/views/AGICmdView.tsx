@@ -480,9 +480,9 @@ export function AGICmdView() {
             marginBottom: 4,
           }}
         >
-          {agent.desc}
+          {agent?.desc ?? ""}
         </div>
-        <CodeBlock code={agent.code} />
+        <CodeBlock code={agent?.code ?? ""} />
       </div>
 
       <Card

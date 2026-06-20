@@ -1,0 +1,4 @@
+// After the last dependency, add:
+"@agent-os/rbac": "workspace:*",
+// After the last dependency, add:
+"@agent-os/rbac": "workspace:*",

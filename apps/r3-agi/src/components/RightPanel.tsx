@@ -226,12 +226,12 @@ function renderMarkdown(text: string): React.ReactNode[] {
   let i = 0;
   while (i < lines.length) {
     const line = lines[i];
-    if (line.startsWith("```")) {
-      const lang = line.slice(3).trim();
+    if (line?.startsWith("```")) {
+      const lang = line?.slice(3)?.trim() ?? "";
       const codeLines: string[] = [];
       i++;
-      while (i < lines.length && !lines[i].startsWith("```")) {
-        codeLines.push(lines[i]);
+      while (i < lines.length && !lines[i]?.startsWith("```")) {
+        codeLines.push(lines[i] ?? "");
         i++;
       }
       nodes.push(
@@ -264,13 +264,13 @@ function renderMarkdown(text: string): React.ReactNode[] {
           {codeLines.join("\n")}
         </pre>,
       );
-    } else if (line.startsWith("- ") || line.startsWith("* ")) {
+    } else if (line?.startsWith("- ") || line?.startsWith("* ")) {
       const listItems: string[] = [];
       while (
         i < lines.length &&
-        (lines[i].startsWith("- ") || lines[i].startsWith("* "))
+        (lines[i]?.startsWith("- ") || lines[i]?.startsWith("* "))
       ) {
-        listItems.push(lines[i].slice(2));
+        listItems.push(lines[i]?.slice(2) ?? "");
         i++;
       }
       nodes.push(
@@ -299,12 +299,12 @@ function renderMarkdown(text: string): React.ReactNode[] {
         </ul>,
       );
       continue;
-    } else if (line.trim() === "") {
+    } else if (line?.trim() === "") {
       nodes.push(<div key={nodes.length} style={{ height: 4 }} />);
     } else {
       nodes.push(
         <div key={nodes.length} style={{ lineHeight: 1.7 }}>
-          {inlineMarkdown(line)}
+          {inlineMarkdown(line ?? "")}
         </div>,
       );
     }

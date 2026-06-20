@@ -8,9 +8,17 @@ import cors from "cors";
 import { requireAuth } from "./middleware/auth.js";
 import pinoHttp from "pino-http";
 import router from "./routes";
+import { setupToolsProxy } from "./tools-proxy.js";
 import { logger } from "./lib/logger";
+import { RBACManager, AuditLogger } from '@agent-os/rbac';
 
 const app: Express = express();
+
+// ── RBAC (Mythos Security Hardened) ───────────────────────────────────────
+const auditLogger = new AuditLogger(10_000);
+const rbac = new RBACManager(auditLogger);
+app.locals['rbac'] = rbac;
+app.locals['auditLogger'] = auditLogger;
 
 // ── CORS ───────────────────────────────────────────────────────────────────
 const rawOrigins = process.env["CORS_ORIGIN"] ?? "";
@@ -22,6 +30,7 @@ const allowedOrigins: (string | RegExp)[] = rawOrigins.trim()
       "http://localhost:5175",
       "http://localhost:5176",
       "http://localhost:5177",
+      "http://100.115.92.199:5176",
       "http://100.115.92.199:5177",
     ];
 
@@ -87,6 +96,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use("/api", router);
+setupToolsProxy(router);
 
 // ── FR-022: Global error handler ───────────────────────────────────────────
 app.use(

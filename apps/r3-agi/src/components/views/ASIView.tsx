@@ -254,7 +254,7 @@ function useSimulatedPipeline() {
     let i = 0;
     const tick = () => {
       if (i < seq.length) {
-        seq[i]();
+        seq[i]?.();
         i++;
         setTimeout(tick, 900);
       }
@@ -449,7 +449,7 @@ export function ASIView() {
                 {a.name}
               </span>
               <div style={{ marginLeft: "auto" }}>
-                <StatusDot status={statuses[a.id]} />
+                <StatusDot status={statuses[a.id] ?? "idle"} />
               </div>
             </div>
             <div

@@ -71,7 +71,7 @@ const INITIAL_PRIOS: PrioItem[] = [
     title: "Apply migration 0005 to Railway production DB",
     detail:
       "aiDecisionLog table missing in prod. Demo acceptance rate = 0. GET URL: railway.app → PostgreSQL → Connect tab.",
-    cmd: 'DATABASE_URL="postgresql://postgres:PASS@ballast.proxy.rlwy.net:25291/railway" pnpm drizzle-kit migrate',
+    cmd: 'DATABASE_URL="postgresql://postgres:${DATABASE_PASSWORD}@ballast.proxy.rlwy.net:25291/railway" pnpm drizzle-kit migrate',
     done: false,
   },
   {
@@ -129,7 +129,10 @@ function loadPrios(): PrioItem[] {
     const s = sessionStorage.getItem("r3-prios-v2");
     if (s) {
       const d: boolean[] = JSON.parse(s);
-      return INITIAL_PRIOS.map((p, i) => ({ ...p, done: d[i] ?? p.done }));
+      return INITIAL_PRIOS.map((p, i) => ({
+        ...p,
+        done: d[i] ?? p?.done ?? false,
+      }));
     }
   } catch {
     /* ignore */
@@ -140,7 +143,7 @@ function loadPrios(): PrioItem[] {
 function savePrios(prios: PrioItem[]) {
   sessionStorage.setItem(
     "r3-prios-v2",
-    JSON.stringify(prios.map((p) => p.done)),
+    JSON.stringify(prios.map((p) => p?.done ?? false)),
   );
 }
 
@@ -160,7 +163,7 @@ export const useAGI = create<AGIState>((set, get) => ({
   focusBanner: null,
   logs: [
     {
-      ts: "SESSION",
+      ts: new Date().toLocaleTimeString("en-US", { hour12: false }),
       tag: "INIT",
       cls: "lt-cmd",
       text: "AGI Command Center v3.1.0 loaded — PRD v4.1 · 2026-04-28",
@@ -196,16 +199,16 @@ export const useAGI = create<AGIState>((set, get) => ({
 
   togglePrio: (i) => {
     const prios = get().prios.map((p, idx) =>
-      idx === i ? { ...p, done: !p.done } : p,
+      idx === i ? { ...p, done: !(p?.done ?? false) } : p,
     );
     savePrios(prios);
     const p = prios[i];
     get().addLog(
-      p.tag,
-      p.done
-        ? "DONE: " + p.title.substring(0, 50)
-        : "REOPENED: " + p.title.substring(0, 50),
-      p.done ? "lt-fix" : "lt-p0",
+      p?.tag ?? "",
+      (p?.done ?? false)
+        ? "DONE: " + (p?.title ?? "").substring(0, 50)
+        : "REOPENED: " + (p?.title ?? "").substring(0, 50),
+      (p?.done ?? false) ? "lt-fix" : "lt-p0",
     );
     set({ prios });
   },

@@ -35,8 +35,6 @@ function savePersisted(n: number) {
 let totalSubscribers = loadPersisted();
 
 // FR-021 — Overlay with PostgreSQL value on startup.
-// loadPersisted() reads /tmp which resets on every Railway deploy.
-// The DB value persists across deploys and takes precedence when available.
 void (async () => {
   try {
     const { readMetric } = await import("../lib/db-metrics.js");
@@ -49,7 +47,7 @@ void (async () => {
       );
     }
   } catch {
-    /* DB unavailable on startup — /tmp value above is the fallback */
+    /* DB unavailable on startup — /tmp value is fallback */
   }
 })();
 
@@ -95,7 +93,6 @@ async function fetchR3Metrics(): Promise<void> {
         FETCH_TIMEOUT_MS,
       );
     }
-    /* R3 offline or slow — keep last known values */
   } finally {
     clearTimeout(timer);
   }
@@ -110,13 +107,6 @@ if (process.env["R3_INTERNAL_URL"]) {
   logger.debug("fetchR3Metrics: R3_INTERNAL_URL not set — polling disabled");
 }
 
-/**
- * Prune sessions older than SESSION_TTL_MS and decrement totalSubscribers
- * for each unique session that permanently dropped off.
- *
- * We do NOT decrement totalSubscribers for temporary disconnects — only when
- * a session ID has never re-heartbeated within the TTL window.
- */
 function pruneStale() {
   const now = Date.now();
   for (const [id, ts] of activeSessions) {
@@ -138,6 +128,8 @@ function broadcast() {
       (client as Response & { write: (s: string) => void }).write(payload);
     } catch {
       sseClients.delete(client);
+      // BUG A FIX: end the response so Node releases the socket
+      try { client.end(); } catch { /* already gone */ }
     }
   }
 }
@@ -152,6 +144,8 @@ router.get("/metrics", (_req, res) => {
 });
 
 router.get("/metrics/stream", (req: Request, res: Response) => {
+  res.setTimeout(0);
+  req.socket.setTimeout(0);
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
@@ -168,19 +162,29 @@ router.get("/metrics/stream", (req: Request, res: Response) => {
   );
 
   sseClients.add(res);
+  let closed = false;
 
   const keepAlive = setInterval(() => {
+    if (closed) {
+      clearInterval(keepAlive);
+      return;
+    }
     try {
       res.write(": ping\n\n");
     } catch {
       clearInterval(keepAlive);
       sseClients.delete(res);
+      // BUG A FIX: end the response on ping failure
+      try { res.end(); } catch { /* already gone */ }
     }
   }, 20_000);
 
   req.on("close", () => {
+    closed = true;
     clearInterval(keepAlive);
     sseClients.delete(res);
+    // BUG A FIX: explicitly end so Node releases the socket
+    try { res.end(); } catch { /* already gone */ }
   });
 });
 
@@ -196,7 +200,6 @@ router.post("/metrics/heartbeat", (req, res) => {
   if (isNew) {
     totalSubscribers += 1;
     savePersisted(totalSubscribers);
-    // FR-021 — Also write to PostgreSQL (primary store, survives deploys)
     void import("../lib/db-metrics.js").then(({ writeMetric }) => {
       writeMetric("totalSubscribers", String(totalSubscribers));
     });
@@ -205,7 +208,6 @@ router.post("/metrics/heartbeat", (req, res) => {
   res.json({ ok: true, activeUsers: activeSessions.size, totalSubscribers });
 });
 
-// Periodic stale-session pruner — broadcasts if the active count changed
 setInterval(() => {
   const before = activeSessions.size;
   pruneStale();

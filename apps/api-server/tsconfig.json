@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "composite": false,
+    "composite": true,
     "noEmit": false,
     "types": ["node"]
   },

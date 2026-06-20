@@ -1,0 +1,14 @@
+{
+  "name": "@r3vibe/governance-root",
+  "private": true,
+  "scripts": {
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint",
+    "governance": "pnpm --filter @r3vibe/governance-cli governance"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}

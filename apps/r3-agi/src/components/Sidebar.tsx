@@ -250,9 +250,9 @@ export function Sidebar() {
                   fontSize: 8,
                   padding: "1px 5px",
                   borderRadius: 2,
-                  background: bc.bg,
-                  color: bc.color,
-                  border: bc.border,
+                  background: bc?.bg ?? "transparent",
+                  color: bc?.color ?? "inherit",
+                  border: bc?.border ?? "none",
                 }}
               >
                 {q.badge}

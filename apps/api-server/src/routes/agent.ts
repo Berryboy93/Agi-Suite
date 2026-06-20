@@ -1,7 +1,8 @@
 import { Router, type Request, type Response } from "express";
+import type { Router as ExpressRouter } from "express";
 import Anthropic from "@anthropic-ai/sdk";
 
-const router = Router();
+const router: ExpressRouter = Router();
 
 // Lazily initialised so the module can load even when the env var is absent.
 // The runtime guard inside the handler provides a clean 503 in that case.
@@ -60,7 +61,6 @@ router.post("/agent/chat", async (req: Request, res: Response) => {
     });
 
     stream.on("error", (err: Error) => {
-      // Ignore abort errors — expected when client disconnects
       if (
         err.message?.includes("aborted") ||
         err.constructor?.name === "APIUserAbortError"
@@ -73,13 +73,10 @@ router.post("/agent/chat", async (req: Request, res: Response) => {
         );
         res.end();
       } catch {
-        /* ignore — response may already be closed */
+        /* ignore */
       }
     });
 
-    // abort is a distinct event from error in the Anthropic SDK.
-    // Without this listener, _emit('abort') produces an unhandled rejection
-    // that kills the process on client disconnect.
     stream.on("abort", () => {});
 
     req.on("close", () => {
