@@ -47,3 +47,15 @@ vitest.config.d.ts
 *.d.ts
 *.d.ts.map
 *.js
+
+# Compiled output artifacts
+apps/**/src/**/*.js
+apps/**/src/**/*.d.ts
+apps/**/src/**/*.js.map
+apps/**/src/**/*.d.ts.map
+lib/**/src/**/*.js
+lib/**/src/**/*.d.ts
+packages/**/src/**/*.js
+packages/**/src/**/*.d.ts
+docs/updates/*.js
+docs/updates/*.d.ts
