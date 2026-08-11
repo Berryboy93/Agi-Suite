@@ -44,3 +44,6 @@ coverage/
 lib/**/*.js.map
 vitest.config.js
 vitest.config.d.ts
+*.d.ts
+*.d.ts.map
+*.js

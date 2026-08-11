@@ -29,7 +29,13 @@ export const space = {
 } as const;
 
 export const semantic = {
-  component: { xs: space["2"], sm: space["3"], md: space["4"], lg: space["6"], xl: space["8"] },
+  component: {
+    xs: space["2"],
+    sm: space["3"],
+    md: space["4"],
+    lg: space["6"],
+    xl: space["8"],
+  },
   gap: {
     xs: space["1"],
     sm: space["2"],

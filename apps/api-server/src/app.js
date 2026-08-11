@@ -3,8 +3,15 @@ import cors from "cors";
 import { requireAuth } from "./middleware/auth.js";
 import pinoHttp from "pino-http";
 import router from "./routes";
+import { setupToolsProxy } from "./tools-proxy.js";
 import { logger } from "./lib/logger";
+import { RBACManager, AuditLogger } from '@agent-os/rbac';
 const app = express();
+// ── RBAC (Mythos Security Hardened) ───────────────────────────────────────
+const auditLogger = new AuditLogger(10000);
+const rbac = new RBACManager(auditLogger);
+app.locals['rbac'] = rbac;
+app.locals['auditLogger'] = auditLogger;
 // ── CORS ───────────────────────────────────────────────────────────────────
 const rawOrigins = process.env["CORS_ORIGIN"] ?? "";
 const allowedOrigins = rawOrigins.trim()
@@ -68,6 +75,7 @@ app.use((req, res, next) => {
     return requireAuth(req, res, next);
 });
 app.use("/api", router);
+setupToolsProxy(router);
 // ── FR-022: Global error handler ───────────────────────────────────────────
 app.use((err, _req, res, _next) => {
     const status = err.status ?? 500;

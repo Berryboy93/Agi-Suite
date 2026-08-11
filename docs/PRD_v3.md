@@ -647,9 +647,7 @@ The system evolves prompt strategies, scoring weights, and strategy selection lo
 ```typescript
 // Fully typed — prevents runtime string comparison bugs
 type MetaChangeTarget =
-  | "prompt_strategy"
-  | "scoring_weights"
-  | "strategy_selection";
+  "prompt_strategy" | "scoring_weights" | "strategy_selection";
 // NOTE: "execution_engine", "security", "governance" are NOT valid MetaChangeTarget values
 // This is enforced by the TypeScript type system, not by runtime string comparison
 
@@ -894,29 +892,17 @@ export const auditLog = pgTable("audit_log", {
 ### Phase 5
 
 ```typescript
-export const evolutionLogs = pgTable("evolution_logs", {
-  /* see FR-034 */
-});
-export const strategyWeights = pgTable("strategy_weights", {
-  /* see FR-035 */
-});
-export const systemState = pgTable("system_state", {
-  /* see FR-035 */
-});
-export const metaConfig = pgTable("meta_config", {
-  /* see FR-037 */
-});
+export const evolutionLogs = pgTable("evolution_logs", {/* see FR-034 */});
+export const strategyWeights = pgTable("strategy_weights", {/* see FR-035 */});
+export const systemState = pgTable("system_state", {/* see FR-035 */});
+export const metaConfig = pgTable("meta_config", {/* see FR-037 */});
 ```
 
 ### Phase 6
 
 ```typescript
-export const nodeReputation = pgTable("node_reputation", {
-  /* see FR-041 */
-});
-export const globalInsights = pgTable("global_insights", {
-  /* see FR-042 */
-});
+export const nodeReputation = pgTable("node_reputation", {/* see FR-041 */});
+export const globalInsights = pgTable("global_insights", {/* see FR-042 */});
 ```
 
 ---

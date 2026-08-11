@@ -3,7 +3,15 @@ import { colors } from "@/tokens/colors";
 import { spacing } from "@/tokens/spacing";
 import { typography } from "@/tokens/typography";
 
-type PanelVariant = "default" | "raised" | "flat" | "ghost" | "error" | "accent" | "warning" | "success";
+type PanelVariant =
+  | "default"
+  | "raised"
+  | "flat"
+  | "ghost"
+  | "error"
+  | "accent"
+  | "warning"
+  | "success";
 type PanelPadding = "none" | "sm" | "md" | "lg";
 
 interface PanelProps {

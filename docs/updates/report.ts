@@ -10,23 +10,17 @@
  * It performs NO I/O. The caller is responsible for writing the output.
  */
 
-import type { EvaluationResult } from '../analysis/governance-evaluator.js';
-import type { DependencyGraph } from '../graphs/dependency-graph.js';
-import type { EventFlowGraph } from '../graphs/event-flow-graph.js';
-import type { SkillClusterGraph } from '../graphs/skill-cluster-graph.js';
-import {
-  serializeDependencyGraph,
-} from '../graphs/dependency-graph.js';
-import {
-  serializeEventFlowGraph,
-} from '../graphs/event-flow-graph.js';
-import {
-  serializeSkillClusterGraph,
-} from '../graphs/skill-cluster-graph.js';
+import type { EvaluationResult } from "../analysis/governance-evaluator.js";
+import type { DependencyGraph } from "../graphs/dependency-graph.js";
+import type { EventFlowGraph } from "../graphs/event-flow-graph.js";
+import type { SkillClusterGraph } from "../graphs/skill-cluster-graph.js";
+import { serializeDependencyGraph } from "../graphs/dependency-graph.js";
+import { serializeEventFlowGraph } from "../graphs/event-flow-graph.js";
+import { serializeSkillClusterGraph } from "../graphs/skill-cluster-graph.js";
 
 /** Per-spec output structure. */
 export interface WireReport {
-  readonly timestamp: string;         // ISO-8601
+  readonly timestamp: string; // ISO-8601
   readonly root: string;
   readonly metrics: {
     readonly files: number;
@@ -39,7 +33,7 @@ export interface WireReport {
     readonly skillClusters: object;
   };
   readonly findings: readonly {
-    readonly type: 'STATE' | 'EVENT' | 'ARCHITECTURE';
+    readonly type: "STATE" | "EVENT" | "ARCHITECTURE";
     readonly subtype: string;
     readonly file: string;
     readonly line: number;
@@ -47,7 +41,7 @@ export interface WireReport {
     readonly description: string;
     readonly relatedFiles?: readonly string[];
   }[];
-  readonly integrity: 'ok' | 'degraded';
+  readonly integrity: "ok" | "degraded";
 }
 
 export function generateReport(
@@ -56,7 +50,7 @@ export function generateReport(
   dependencyGraph: DependencyGraph,
   eventFlowGraph: EventFlowGraph,
   skillClusterGraph: SkillClusterGraph,
-  integrity: 'ok' | 'degraded',
+  integrity: "ok" | "degraded",
 ): WireReport {
   // Deterministic ordering: sort findings by file path then line number
   const sortedFindings = [...evaluation.findings].sort((a, b) => {

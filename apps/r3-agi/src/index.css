@@ -25,27 +25,24 @@
   --duration-fast: 100ms;
   --duration-normal: 200ms;
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
-}
 
-:root {
-  --bg: #09090b; /* Zinc-950 */
-  --surface: #18181b; /* Zinc-900 */
-  --sur2: #27272a; /* Zinc-800 */
-  --border: rgba(39, 39, 42, 0.5); /* Zinc-800/50 — 6% opacity */
-  --bor2: rgba(63, 63, 70, 0.5); /* Zinc-700/50 */
-  --accent: #a3e635; /* Acid Green — consolidated primary signal */
-  --acid: #a3e635; /* alias */
-  --red: #ff3d71;
-  --violet: #8b5cf6;
-  --dim: #52525b; /* Zinc-600 */
-  --text: #f4f4f5; /* Zinc-100 */
-  --text2: #71717a; /* Zinc-500 */
-  --warn: #f59e0b;
-  --good: #a3e635;
-  --bad: #ff3d71;
-  --done: #10b981;
-  --mono: "JetBrains Mono", monospace;
-  --sans: "Inter", sans-serif;
+  /* ── BRIDGE: Legacy CSS custom properties → Tailwind v4 ── */
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-sur2: var(--sur2);
+  --color-border-default: var(--border);
+  --color-border-subtle: var(--bor2);
+  --color-accent: var(--accent);
+  --color-acid: var(--acid);
+  --color-red: var(--red);
+  --color-violet: var(--violet);
+  --color-dim: var(--dim);
+  --color-text: var(--text);
+  --color-text2: var(--text2);
+  --color-warn: var(--warn);
+  --color-good: var(--good);
+  --color-bad: var(--bad);
+  --color-done: var(--done);
 }
 
 *,
@@ -314,8 +311,15 @@ tr:last-child td {
 
 /* ── CARET BLINK (input-otp) ── */
 @keyframes caret-blink {
-  0%, 70%, 100% { opacity: 1; }
-  20%, 50% { opacity: 0; }
+  0%,
+  70%,
+  100% {
+    opacity: 1;
+  }
+  20%,
+  50% {
+    opacity: 0;
+  }
 }
 .animate-caret-blink {
   animation: caret-blink 1.25s ease-out infinite;

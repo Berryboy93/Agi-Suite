@@ -1,7 +1,7 @@
 /**
  * @package @agent-os/rbac
  * Role-Based Access Control with Mythos Security Hardening
- * 
+ *
  * Findings addressed:
  * - F-01: crypto.randomUUID() import
  * - F-02: RBACManager state persistence
@@ -14,8 +14,8 @@
  * - D-01/D-02/D-03/D-04: Audit wiring, canAccess integration
  */
 
-import type { Request, Response, NextFunction } from 'express';
-import { randomUUID } from 'crypto';
+import type { Request, Response, NextFunction } from "express";
+import { randomUUID } from "crypto";
 
 // ============================================================================
 // TYPES & ENUMS
@@ -23,35 +23,35 @@ import { randomUUID } from 'crypto';
 
 export enum Permission {
   // Agent management
-  AGENT_CREATE = 'agent:create',
-  AGENT_READ = 'agent:read',
-  AGENT_UPDATE = 'agent:update',
-  AGENT_DELETE = 'agent:delete',
-  AGENT_EXECUTE = 'agent:execute',
-  AGENT_STOP = 'agent:stop',
+  AGENT_CREATE = "agent:create",
+  AGENT_READ = "agent:read",
+  AGENT_UPDATE = "agent:update",
+  AGENT_DELETE = "agent:delete",
+  AGENT_EXECUTE = "agent:execute",
+  AGENT_STOP = "agent:stop",
 
   // Execution history
-  EXECUTION_READ = 'execution:read',
-  EXECUTION_DELETE = 'execution:delete',
+  EXECUTION_READ = "execution:read",
+  EXECUTION_DELETE = "execution:delete",
 
   // System
-  SYSTEM_ADMIN = 'system:admin',
-  SYSTEM_CONFIG = 'system:config',
-  SYSTEM_HEALTH = 'system:health',
+  SYSTEM_ADMIN = "system:admin",
+  SYSTEM_CONFIG = "system:config",
+  SYSTEM_HEALTH = "system:health",
 
   // User management
-  USER_MANAGE = 'user:manage',
-  ROLE_ASSIGN = 'role:assign',
+  USER_MANAGE = "user:manage",
+  ROLE_ASSIGN = "role:assign",
 
   // Analytics
-  ANALYTICS_READ = 'analytics:read',
+  ANALYTICS_READ = "analytics:read",
 }
 
 export enum Role {
-  ADMIN = 'admin',
-  OPERATOR = 'operator',
-  VIEWER = 'viewer',
-  CUSTOM = 'custom',
+  ADMIN = "admin",
+  OPERATOR = "operator",
+  VIEWER = "viewer",
+  CUSTOM = "custom",
 }
 
 export interface User {
@@ -67,7 +67,7 @@ export interface User {
 
 export interface ResourceOwnership {
   resourceId: string;
-  resourceType: 'agent' | 'execution' | 'workspace';
+  resourceType: "agent" | "execution" | "workspace";
   ownerId: string;
   workspaceId: string; // FIX F-04: Workspace isolation
   createdAt: Date;
@@ -102,15 +102,15 @@ export function isValidRole(value: string): value is Role {
  * Validate User object (FIX L-03: input validation)
  */
 export function validateUser(user: unknown): user is User {
-  if (!user || typeof user !== 'object') return false;
+  if (!user || typeof user !== "object") return false;
   const u = user as any;
   return (
-    typeof u.id === 'string' &&
-    typeof u.username === 'string' &&
-    typeof u.email === 'string' &&
+    typeof u.id === "string" &&
+    typeof u.username === "string" &&
+    typeof u.email === "string" &&
     Array.isArray(u.roles) &&
     u.roles.every((r: any) => isValidRole(r)) &&
-    typeof u.workspaceId === 'string' &&
+    typeof u.workspaceId === "string" &&
     u.createdAt instanceof Date &&
     u.updatedAt instanceof Date
   );
@@ -120,15 +120,15 @@ export function validateUser(user: unknown): user is User {
  * Validate ResourceOwnership object
  */
 export function validateResourceOwnership(
-  resource: unknown
+  resource: unknown,
 ): resource is ResourceOwnership {
-  if (!resource || typeof resource !== 'object') return false;
+  if (!resource || typeof resource !== "object") return false;
   const r = resource as any;
   return (
-    typeof r.resourceId === 'string' &&
-    ['agent', 'execution', 'workspace'].includes(r.resourceType) &&
-    typeof r.ownerId === 'string' &&
-    typeof r.workspaceId === 'string' &&
+    typeof r.resourceId === "string" &&
+    ["agent", "execution", "workspace"].includes(r.resourceType) &&
+    typeof r.ownerId === "string" &&
+    typeof r.workspaceId === "string" &&
     r.createdAt instanceof Date
   );
 }
@@ -235,7 +235,7 @@ export class RBACManager {
    */
   can(user: User, permission: Permission): boolean {
     if (!validateUser(user)) {
-      throw new Error('Invalid user object');
+      throw new Error("Invalid user object");
     }
     if (!isValidPermission(permission)) {
       throw new Error(`Invalid permission: ${permission}`);
@@ -254,8 +254,8 @@ export class RBACManager {
       this.auditLogger.log({
         userId: user.id,
         action: permission,
-        resource: 'permission-check',
-        result: result ? 'allowed' : 'denied',
+        resource: "permission-check",
+        result: result ? "allowed" : "denied",
       });
     }
 
@@ -270,7 +270,7 @@ export class RBACManager {
   canAccess(
     user: User,
     resource: ResourceOwnership,
-    permission: Permission
+    permission: Permission,
   ): boolean {
     if (!validateUser(user)) {
       throw new Error("Invalid user object");
@@ -309,7 +309,7 @@ export class RBACManager {
         userId: user.id,
         action: permission,
         resource: `${resource.resourceType}:${resource.resourceId}`,
-        result: result ? 'allowed' : 'denied',
+        result: result ? "allowed" : "denied",
       });
     }
 
@@ -331,7 +331,7 @@ export class RBACManager {
    */
   registerOwnership(ownership: ResourceOwnership): void {
     if (!validateResourceOwnership(ownership)) {
-      throw new Error('Invalid resource ownership object');
+      throw new Error("Invalid resource ownership object");
     }
     this.ownershipDb.set(ownership.resourceId, ownership);
   }
@@ -379,7 +379,7 @@ export class RBACManager {
     if (!user) {
       throw new Error(`User not found: ${userId}`);
     }
-    user.roles = user.roles.filter(r => r !== role);
+    user.roles = user.roles.filter((r) => r !== role);
     user.updatedAt = new Date();
     this.userPermissionCache.delete(userId);
   }
@@ -418,7 +418,7 @@ export class RBACManager {
     }
     if (user.customPermissions) {
       user.customPermissions = user.customPermissions.filter(
-        p => p !== permission
+        (p) => p !== permission,
       );
       user.updatedAt = new Date();
     }
@@ -431,11 +431,11 @@ export class RBACManager {
     for (const role of user.roles) {
       if (!isValidRole(role)) continue;
       const rolePerms = RolePermissions[role] || [];
-      rolePerms.forEach(p => permissions.add(p));
+      rolePerms.forEach((p) => permissions.add(p));
     }
 
     if (user.customPermissions) {
-      user.customPermissions.forEach(p => {
+      user.customPermissions.forEach((p) => {
         if (isValidPermission(p)) permissions.add(p);
       });
     }
@@ -453,7 +453,7 @@ export interface AuditLog {
   userId: string;
   action: Permission;
   resource: string;
-  result: 'allowed' | 'denied';
+  result: "allowed" | "denied";
   timestamp: Date;
   context?: Record<string, any>;
 }
@@ -466,7 +466,7 @@ export class AuditLogger {
     this.maxLogs = maxLogs;
   }
 
-  log(entry: Omit<AuditLog, 'id' | 'timestamp'>): void {
+  log(entry: Omit<AuditLog, "id" | "timestamp">): void {
     // FIX L-02: Bounded logs
     if (this.logs.length >= this.maxLogs) {
       this.logs.shift(); // Remove oldest
@@ -480,17 +480,17 @@ export class AuditLogger {
 
   getLogs(userId?: string, action?: Permission): AuditLog[] {
     // FIX L-03: Validate inputs
-    if (userId !== undefined && typeof userId !== 'string') {
-      throw new Error('Invalid userId');
+    if (userId !== undefined && typeof userId !== "string") {
+      throw new Error("Invalid userId");
     }
     if (action !== undefined && !isValidPermission(action)) {
       throw new Error(`Invalid permission: ${action}`);
     }
 
     return this.logs.filter(
-      log =>
+      (log) =>
         (!userId || log.userId === userId) &&
-        (!action || log.action === action)
+        (!action || log.action === action),
     );
   }
 
@@ -512,18 +512,22 @@ export class AuditLogger {
  */
 function createAuthMiddleware(
   checkFn: (rbac: RBACManager, user: User, permission: Permission) => boolean,
-  permissions: Permission[]
+  permissions: Permission[],
 ) {
-  return async (req: Request & { user?: User }, res: Response, next: NextFunction) => {
+  return async (
+    req: Request & { user?: User },
+    res: Response,
+    next: NextFunction,
+  ) => {
     if (!req.user) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      return res.status(401).json({ error: "Unauthorized" });
     }
 
     // FIX F-02: Require initialization
     const rbac = req.app.locals.rbac as RBACManager;
     if (!rbac) {
       return res.status(500).json({
-        error: 'RBAC not initialized on app.locals',
+        error: "RBAC not initialized on app.locals",
       });
     }
 
@@ -536,14 +540,14 @@ function createAuthMiddleware(
         userId: req.user.id,
         action: permissions[0],
         resource: req.path,
-        result: allowed ? 'allowed' : 'denied',
+        result: allowed ? "allowed" : "denied",
         context: { method: req.method, ip: req.ip },
       });
     }
 
     if (!allowed) {
       return res.status(403).json({
-        error: 'Forbidden',
+        error: "Forbidden",
         required: permissions,
         userRoles: req.user.roles,
       });
@@ -562,7 +566,7 @@ export function requirePermission(permission: Permission) {
   }
   return createAuthMiddleware(
     (rbac, user, perm) => rbac.can(user, perm),
-    [permission]
+    [permission],
   );
 }
 
@@ -571,23 +575,27 @@ export function requirePermission(permission: Permission) {
  */
 export function requireAnyPermission(permissions: Permission[]) {
   if (!Array.isArray(permissions) || permissions.length === 0) {
-    throw new Error('Permissions array must not be empty');
+    throw new Error("Permissions array must not be empty");
   }
-  permissions.forEach(p => {
+  permissions.forEach((p) => {
     if (!isValidPermission(p)) throw new Error(`Invalid permission: ${p}`);
   });
 
-  return async (req: Request & { user?: User }, res: Response, next: NextFunction) => {
+  return async (
+    req: Request & { user?: User },
+    res: Response,
+    next: NextFunction,
+  ) => {
     if (!req.user) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      return res.status(401).json({ error: "Unauthorized" });
     }
 
     const rbac = req.app.locals.rbac as RBACManager;
     if (!rbac) {
-      return res.status(500).json({ error: 'RBAC not initialized' });
+      return res.status(500).json({ error: "RBAC not initialized" });
     }
 
-    const hasAny = permissions.some(p => rbac.can(req.user!, p));
+    const hasAny = permissions.some((p) => rbac.can(req.user!, p));
     const auditLogger = req.app.locals.auditLogger as AuditLogger | undefined;
 
     if (auditLogger) {
@@ -595,13 +603,13 @@ export function requireAnyPermission(permissions: Permission[]) {
         userId: req.user.id,
         action: permissions[0],
         resource: req.path,
-        result: hasAny ? 'allowed' : 'denied',
+        result: hasAny ? "allowed" : "denied",
       });
     }
 
     if (!hasAny) {
       return res.status(403).json({
-        error: 'Forbidden',
+        error: "Forbidden",
         required: permissions,
         userRoles: req.user.roles,
       });
@@ -616,23 +624,27 @@ export function requireAnyPermission(permissions: Permission[]) {
  */
 export function requireAllPermissions(permissions: Permission[]) {
   if (!Array.isArray(permissions) || permissions.length === 0) {
-    throw new Error('Permissions array must not be empty');
+    throw new Error("Permissions array must not be empty");
   }
-  permissions.forEach(p => {
+  permissions.forEach((p) => {
     if (!isValidPermission(p)) throw new Error(`Invalid permission: ${p}`);
   });
 
-  return async (req: Request & { user?: User }, res: Response, next: NextFunction) => {
+  return async (
+    req: Request & { user?: User },
+    res: Response,
+    next: NextFunction,
+  ) => {
     if (!req.user) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      return res.status(401).json({ error: "Unauthorized" });
     }
 
     const rbac = req.app.locals.rbac as RBACManager;
     if (!rbac) {
-      return res.status(500).json({ error: 'RBAC not initialized' });
+      return res.status(500).json({ error: "RBAC not initialized" });
     }
 
-    const hasAll = permissions.every(p => rbac.can(req.user!, p));
+    const hasAll = permissions.every((p) => rbac.can(req.user!, p));
     const auditLogger = req.app.locals.auditLogger as AuditLogger | undefined;
 
     if (auditLogger) {
@@ -640,13 +652,13 @@ export function requireAllPermissions(permissions: Permission[]) {
         userId: req.user.id,
         action: permissions[0],
         resource: req.path,
-        result: hasAll ? 'allowed' : 'denied',
+        result: hasAll ? "allowed" : "denied",
       });
     }
 
     if (!hasAll) {
       return res.status(403).json({
-        error: 'Forbidden',
+        error: "Forbidden",
         required: permissions,
         userRoles: req.user.roles,
       });

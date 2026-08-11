@@ -1,0 +1,322 @@
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;600;700;800&display=swap");
+@import "tailwindcss";
+@theme {
+  --color-bg-base: oklch(8% 0.02 267);
+  --color-bg-surface: oklch(12% 0.03 266);
+  --color-bg-elevated: oklch(18% 0.04 265);
+  --color-content-primary: oklch(92% 0.003 254);
+  --color-content-secondary: oklch(72% 0.01 258);
+  --color-content-tertiary: oklch(58% 0.02 260);
+  --color-border-default: oklch(26% 0.05 264);
+  --color-border-subtle: oklch(18% 0.04 265);
+  --color-interactive-default: oklch(55% 0.19 260);
+  --color-status-healthy: oklch(55% 0.16 147);
+  --color-status-warning: oklch(65% 0.18 85);
+  --color-status-critical: oklch(59% 0.19 38);
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --duration-fast: 100ms;
+  --duration-normal: 200ms;
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+}
+
+:root {
+  --bg: #09090b; /* Zinc-950 */
+  --surface: #18181b; /* Zinc-900 */
+  --sur2: #27272a; /* Zinc-800 */
+  --border: rgba(39, 39, 42, 0.5); /* Zinc-800/50 — 6% opacity */
+  --bor2: rgba(63, 63, 70, 0.5); /* Zinc-700/50 */
+  --accent: #a3e635; /* Acid Green — consolidated primary signal */
+  --acid: #a3e635; /* alias */
+  --red: #ff3d71;
+  --violet: #8b5cf6;
+  --dim: #52525b; /* Zinc-600 */
+  --text: #f4f4f5; /* Zinc-100 */
+  --text2: #71717a; /* Zinc-500 */
+  --warn: #f59e0b;
+  --good: #a3e635;
+  --bad: #ff3d71;
+  --done: #10b981;
+  --mono: "JetBrains Mono", monospace;
+  --sans: "Inter", sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(163, 230, 53, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(163, 230, 53, 0.015) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+  animation: gridDrift 120s linear infinite;
+}
+
+@keyframes gridDrift {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 40px 40px;
+  }
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0, 0, 0, 0.05) 3px,
+    rgba(0, 0, 0, 0.05) 4px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: 50px 1fr;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--bor2);
+  border-radius: 3px;
+}
+
+/* ── CODE ── */
+code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+  background: rgba(163, 230, 53, 0.07);
+  border: 1px solid rgba(163, 230, 53, 0.15);
+  padding: 1px 5px;
+  border-radius: 2px;
+  color: var(--accent);
+}
+code.bad {
+  background: rgba(255, 61, 113, 0.07);
+  border-color: rgba(255, 61, 113, 0.15);
+  color: var(--bad);
+}
+code.ok {
+  background: rgba(163, 230, 53, 0.07);
+  border-color: rgba(163, 230, 53, 0.15);
+  color: var(--good);
+}
+code.vi {
+  background: rgba(139, 92, 246, 0.07);
+  border-color: rgba(139, 92, 246, 0.15);
+  color: var(--violet);
+}
+
+/* ── PRE ── */
+pre {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 11px;
+  overflow-x: auto;
+  font-size: 11px;
+  line-height: 1.75;
+  color: #7a9eb8;
+  margin: 8px 0;
+}
+
+/* ── TABLE ── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+th {
+  text-align: left;
+  padding: 6px 9px;
+  color: var(--text2);
+  border-bottom: 1px solid var(--bor2);
+  font-weight: 400;
+  letter-spacing: 1px;
+  font-size: 9px;
+  text-transform: uppercase;
+}
+td {
+  padding: 7px 9px;
+  border-bottom: 1px solid var(--border);
+}
+tr:last-child td {
+  border-bottom: none;
+}
+
+/* ── PULSE ANIMATION ── */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 6px var(--good);
+  }
+  50% {
+    opacity: 0.3;
+    box-shadow: 0 0 18px var(--good);
+  }
+}
+
+/* ── SHIMMER ── */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* ── ARROW PULSE ── */
+@keyframes arrowPulse {
+  0%,
+  100% {
+    color: var(--dim);
+  }
+  50% {
+    color: var(--accent);
+  }
+}
+
+/* ── FADE UP ── */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── BLINK ── */
+@keyframes blink {
+  0%,
+  80%,
+  100% {
+    transform: scale(1);
+    opacity: 0.2;
+  }
+  40% {
+    transform: scale(1.4);
+    opacity: 1;
+  }
+}
+
+/* ── SHAKE ── */
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-4px);
+  }
+  40% {
+    transform: translateX(4px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+.shake {
+  animation: shake 0.35s ease;
+  border-color: var(--bad) !important;
+}
+
+/* ── VIEW ENTER (center panel transition) ── */
+@keyframes viewEnter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── SLA PULSE (LLPTE live indicator) ── */
+@keyframes slaPulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 4px var(--accent);
+  }
+  50% {
+    opacity: 0.5;
+    box-shadow: 0 0 12px var(--accent);
+  }
+}
+
+/* ── COUNTER UP ── */
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── CARET BLINK (input-otp) ── */
+@keyframes caret-blink {
+  0%, 70%, 100% { opacity: 1; }
+  20%, 50% { opacity: 0; }
+}
+.animate-caret-blink {
+  animation: caret-blink 1.25s ease-out infinite;
+}

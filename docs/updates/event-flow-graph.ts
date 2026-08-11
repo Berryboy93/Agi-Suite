@@ -13,7 +13,11 @@
  *   - silent event drops
  */
 
-import type { FileSymbols, EmitCall, HandlerRegistration } from '../analysis/ast-types.js';
+import type {
+  FileSymbols,
+  EmitCall,
+  HandlerRegistration,
+} from "../analysis/ast-types.js";
 
 export interface EventFlowNode {
   readonly eventName: string;
@@ -22,28 +26,26 @@ export interface EventFlowNode {
 }
 
 export interface OrphanEvent {
-  readonly type: 'MISSING_HANDLER';
+  readonly type: "MISSING_HANDLER";
   readonly eventName: string;
   readonly emits: readonly EmitCall[];
 }
 
 export interface DuplicateHandlerViolation {
-  readonly type: 'DUPLICATE_HANDLER';
+  readonly type: "DUPLICATE_HANDLER";
   readonly eventName: string;
   readonly handlers: readonly HandlerRegistration[];
 }
 
 export interface SilentDropViolation {
-  readonly type: 'SILENT_EVENT_DROP';
+  readonly type: "SILENT_EVENT_DROP";
   readonly eventName: string;
   readonly emits: readonly EmitCall[];
   readonly reason: string;
 }
 
 export type EventFlowViolation =
-  | OrphanEvent
-  | DuplicateHandlerViolation
-  | SilentDropViolation;
+  OrphanEvent | DuplicateHandlerViolation | SilentDropViolation;
 
 export interface EventFlowGraph {
   readonly nodes: ReadonlyMap<string, EventFlowNode>;
@@ -57,7 +59,9 @@ export interface EventFlowGraph {
  * Dynamic (non-static) emits and handlers are tracked separately
  * as they cannot be statically resolved without runtime information.
  */
-export function buildEventFlowGraph(files: readonly FileSymbols[]): EventFlowGraph {
+export function buildEventFlowGraph(
+  files: readonly FileSymbols[],
+): EventFlowGraph {
   const emitsByEvent = new Map<string, EmitCall[]>();
   const handlersByEvent = new Map<string, HandlerRegistration[]>();
   const dynamicEmits: EmitCall[] = [];
@@ -110,7 +114,7 @@ export function buildEventFlowGraph(files: readonly FileSymbols[]): EventFlowGra
     // INVARIANT 2: emits with no handler = orphan event
     if (node.emits.length > 0 && node.handlers.length === 0) {
       violations.push({
-        type: 'MISSING_HANDLER',
+        type: "MISSING_HANDLER",
         eventName,
         emits: node.emits,
       });
@@ -119,7 +123,7 @@ export function buildEventFlowGraph(files: readonly FileSymbols[]): EventFlowGra
     // Duplicate handlers: >1 handler for same event name
     if (node.handlers.length > 1) {
       violations.push({
-        type: 'DUPLICATE_HANDLER',
+        type: "DUPLICATE_HANDLER",
         eventName,
         handlers: node.handlers,
       });
@@ -129,10 +133,11 @@ export function buildEventFlowGraph(files: readonly FileSymbols[]): EventFlowGra
     // handler is dead code (informational, low confidence)
     if (node.handlers.length > 0 && node.emits.length === 0) {
       violations.push({
-        type: 'SILENT_EVENT_DROP',
+        type: "SILENT_EVENT_DROP",
         eventName,
         emits: [],
-        reason: 'Handler registered but no static emit found — may be emitted dynamically or is dead code',
+        reason:
+          "Handler registered but no static emit found — may be emitted dynamically or is dead code",
       });
     }
   }

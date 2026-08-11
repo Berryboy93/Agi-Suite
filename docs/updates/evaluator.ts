@@ -18,22 +18,19 @@ import {
   type BlastRadiusLevel,
   lookupBlastRadius,
   INVALID,
-} from '../surfaces/surfaces.js';
+} from "../surfaces/surfaces.js";
 import {
   type Outcome,
   type DeferStructure,
   mostRestrictive,
   validateDeferStructure,
-} from '../rules/outcomes.js';
-import {
-  type BarrierSnapshot,
-  verifyBarriers,
-} from '../barriers/barriers.js';
+} from "../rules/outcomes.js";
+import { type BarrierSnapshot, verifyBarriers } from "../barriers/barriers.js";
 import {
   type AdvisorySeverity,
   type RepricingInput,
   applyRepricing,
-} from '../repricing/repricing.ts';
+} from "../repricing/repricing.ts";
 
 // ─── ChangeRequest Types ──────────────────────────────────────────────────────
 
@@ -125,35 +122,38 @@ export function evaluateChangeRequest(
   }
 
   // ── Compound resolution: most restrictive pair wins ───────────────────────
-  let finalOutcome: Outcome = 'ALLOW_RUNTIME';
+  let finalOutcome: Outcome = "ALLOW_RUNTIME";
   for (const pr of pairResults) {
     finalOutcome = mostRestrictive(finalOutcome, pr.pairOutcome);
   }
   auditTrail.push(`Compound resolution: final outcome = ${finalOutcome}`);
 
   // ── Defer Policy validation ───────────────────────────────────────────────
-  let deferValidation: EvaluationResult['deferValidation'];
+  let deferValidation: EvaluationResult["deferValidation"];
 
-  if (finalOutcome === 'DEFER' || request.defer) {
+  if (finalOutcome === "DEFER" || request.defer) {
     if (!request.defer) {
       // DEFER outcome but no defer structure provided = BLOCK + alert
-      finalOutcome = 'BLOCK';
+      finalOutcome = "BLOCK";
       deferValidation = {
         valid: false,
-        error: 'DEFER outcome requires a valid DeferStructure. None provided. Treating as BLOCK with security alert.',
+        error:
+          "DEFER outcome requires a valid DeferStructure. None provided. Treating as BLOCK with security alert.",
       };
       auditTrail.push(
-        'DEFER → BLOCK: No defer structure provided. Invalid defer = BLOCK per spec.',
+        "DEFER → BLOCK: No defer structure provided. Invalid defer = BLOCK per spec.",
       );
     } else {
       const deferError = validateDeferStructure(request.defer);
       if (deferError) {
-        finalOutcome = 'BLOCK';
+        finalOutcome = "BLOCK";
         deferValidation = { valid: false, error: deferError };
-        auditTrail.push(`DEFER → BLOCK: Invalid defer structure: ${deferError}`);
+        auditTrail.push(
+          `DEFER → BLOCK: Invalid defer structure: ${deferError}`,
+        );
       } else {
         deferValidation = { valid: true };
-        auditTrail.push('Defer structure validated successfully.');
+        auditTrail.push("Defer structure validated successfully.");
       }
     }
   }
@@ -179,17 +179,17 @@ function evaluatePair(
   const tag = `[${pair.surface} / ${pair.actionType}]`;
 
   // ── RULE 1: Credential Surface Hard Block ─────────────────────────────────
-  if (pair.surface === 'dev-build-credential-exposure') {
+  if (pair.surface === "dev-build-credential-exposure") {
     auditTrail.push(
       `${tag} Rule 1: dev-build-credential-exposure — unconditional BLOCK. ` +
-      'No action type is valid on this surface.',
+        "No action type is valid on this surface.",
     );
-    return buildPairResult(pair, 'BLOCK', INVALID, auditTrail, {
+    return buildPairResult(pair, "BLOCK", INVALID, auditTrail, {
       applied: false,
-      finalOutcome: 'BLOCK',
+      finalOutcome: "BLOCK",
       anchoringDivergenceDetected: false,
       flaggedForManualReview: false,
-      reason: 'Rule 1: Credential surface hard block.',
+      reason: "Rule 1: Credential surface hard block.",
     });
   }
 
@@ -200,12 +200,12 @@ function evaluatePair(
     auditTrail.push(
       `${tag} Invalid (Surface, ActionType) combination — entire ChangeRequest is BLOCK.`,
     );
-    return buildPairResult(pair, 'BLOCK', INVALID, auditTrail, {
+    return buildPairResult(pair, "BLOCK", INVALID, auditTrail, {
       applied: false,
-      finalOutcome: 'BLOCK',
+      finalOutcome: "BLOCK",
       anchoringDivergenceDetected: false,
       flaggedForManualReview: false,
-      reason: 'Invalid (Surface, ActionType) combination.',
+      reason: "Invalid (Surface, ActionType) combination.",
     });
   }
 
@@ -224,13 +224,13 @@ function evaluatePair(
   if (barrierResult.demoted) {
     auditTrail.push(
       `${tag} Barrier demotion: ${blastRadiusOutcome} → ${barrierResult.verifiedOutcome}. ` +
-      `Inactive barriers: ${barrierResult.inactiveBarriers.map((b) => b.id).join(', ')}`,
+        `Inactive barriers: ${barrierResult.inactiveBarriers.map((b) => b.id).join(", ")}`,
     );
   }
   const postBarrierOutcome = barrierResult.verifiedOutcome;
 
   // ── Mythos-Class Re-price ─────────────────────────────────────────────────
-  let repricingDetails: PairEvaluationResult['repricing'];
+  let repricingDetails: PairEvaluationResult["repricing"];
 
   if (pair.repricedLevel !== undefined && pair.advisory !== undefined) {
     const repricingInput: RepricingInput = {
@@ -238,7 +238,7 @@ function evaluatePair(
       matrixBlastRadius: blastRadius,
       outcomeCeiling: postBarrierOutcome,
       repricedLevel: pair.repricedLevel,
-      rationale: pair.repricingRationale ?? 'No rationale provided.',
+      rationale: pair.repricingRationale ?? "No rationale provided.",
     };
     const repricingResult = applyRepricing(repricingInput);
     auditTrail.push(`${tag} Re-price: ${repricingResult.reason}`);
@@ -256,7 +256,7 @@ function evaluatePair(
       finalOutcome: postBarrierOutcome,
       anchoringDivergenceDetected: false,
       flaggedForManualReview: false,
-      reason: 'No re-price data provided — outcome unchanged.',
+      reason: "No re-price data provided — outcome unchanged.",
     };
   }
 
@@ -285,21 +285,21 @@ function blastRadiusToCeiling(
 ): Outcome {
   switch (level) {
     // Rule 2: Critical → DEFER
-    case 'critical':
-      return 'DEFER';
+    case "critical":
+      return "DEFER";
 
     // Rule 3: High → surface-specific
-    case 'high':
-      if (surface === 'runtime') return 'ALLOW_STAGING';
-      return 'ALLOW_SANDBOX'; // all non-runtime surfaces
+    case "high":
+      if (surface === "runtime") return "ALLOW_STAGING";
+      return "ALLOW_SANDBOX"; // all non-runtime surfaces
 
     // Rule 4: Medium → ALLOW_SANDBOX
-    case 'medium':
-      return 'ALLOW_SANDBOX';
+    case "medium":
+      return "ALLOW_SANDBOX";
 
     // Rule 5: Low → ALLOW_RUNTIME
-    case 'low':
-      return 'ALLOW_RUNTIME';
+    case "low":
+      return "ALLOW_RUNTIME";
   }
 }
 
@@ -308,7 +308,7 @@ function buildPairResult(
   outcome: Outcome,
   matrixBlastRadius: BlastRadiusLevel | typeof INVALID,
   _auditTrail: string[],
-  repricing: PairEvaluationResult['repricing'],
+  repricing: PairEvaluationResult["repricing"],
 ): PairEvaluationResult {
   return {
     surface: pair.surface,

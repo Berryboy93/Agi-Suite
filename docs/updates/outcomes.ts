@@ -8,14 +8,14 @@
  */
 
 export const OUTCOMES = [
-  'ALLOW_RUNTIME',
-  'ALLOW_STAGING',
-  'ALLOW_SANDBOX',
-  'DEFER',
-  'BLOCK',
+  "ALLOW_RUNTIME",
+  "ALLOW_STAGING",
+  "ALLOW_SANDBOX",
+  "DEFER",
+  "BLOCK",
 ] as const;
 
-export type Outcome = typeof OUTCOMES[number];
+export type Outcome = (typeof OUTCOMES)[number];
 
 /** Higher number = more restrictive. Used for compound request resolution. */
 export const OUTCOME_RESTRICTIVENESS: Record<Outcome, number> = {
@@ -53,11 +53,11 @@ export interface DeferStructure {
  */
 export function validateDeferStructure(defer: DeferStructure): string | null {
   if (!defer.owner.trim()) {
-    return 'Defer owner must be a non-empty accountable party identifier.';
+    return "Defer owner must be a non-empty accountable party identifier.";
   }
 
   if (!defer.trigger.trim()) {
-    return 'Defer trigger must be non-empty.';
+    return "Defer trigger must be non-empty.";
   }
 
   // Reject vague triggers
@@ -76,7 +76,7 @@ export function validateDeferStructure(defer: DeferStructure): string | null {
   }
 
   if (!defer.interimControl.trim()) {
-    return 'Defer interim control must describe the compensating control active during deferral.';
+    return "Defer interim control must describe the compensating control active during deferral.";
   }
 
   return null;

@@ -14,7 +14,15 @@
  *   Phase 6: node_reputation, global_insights
  */
 
-import { pgTable, uuid, varchar, text, jsonb, timestamp, pgEnum } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  uuid,
+  varchar,
+  text,
+  jsonb,
+  timestamp,
+  pgEnum,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import type { z } from "zod/v4";
 
@@ -36,20 +44,24 @@ export type MetricsKv = typeof metricsKv.$inferSelect;
 // ── agi_agents ────────────────────────────────────────────────────────────────
 // Agent dispatch queue for Agent-OS → Agi-Suite integration.
 export const agentStatusEnum = pgEnum("agent_status", [
-  "pending", "claimed", "running", "done", "failed"
+  "pending",
+  "claimed",
+  "running",
+  "done",
+  "failed",
 ]);
 
 export const agents = pgTable("agi_agents", {
-  id:             uuid("id").primaryKey().defaultRandom(),
-  type:           varchar("type", { length: 128 }).notNull(),
-  status:         agentStatusEnum("status").notNull().default("pending"),
-  payload:        jsonb("payload").notNull().default({}),
-  result:         jsonb("result"),
-  error:          text("error"),
+  id: uuid("id").primaryKey().defaultRandom(),
+  type: varchar("type", { length: 128 }).notNull(),
+  status: agentStatusEnum("status").notNull().default("pending"),
+  payload: jsonb("payload").notNull().default({}),
+  result: jsonb("result"),
+  error: text("error"),
   idempotencyKey: varchar("idempotency_key", { length: 256 }),
-  createdAt:      timestamp("created_at",   { withTimezone: true }).defaultNow(),
-  completedAt:    timestamp("completed_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
 });
 
-export type Agent       = typeof agents.$inferSelect;
+export type Agent = typeof agents.$inferSelect;
 export type InsertAgent = typeof agents.$inferInsert;

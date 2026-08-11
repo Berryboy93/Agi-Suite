@@ -10,15 +10,15 @@ import pinoHttp from "pino-http";
 import router from "./routes";
 import { setupToolsProxy } from "./tools-proxy.js";
 import { logger } from "./lib/logger";
-import { RBACManager, AuditLogger } from '@agent-os/rbac';
+import { RBACManager, AuditLogger } from "@agent-os/rbac";
 
 const app: Express = express();
 
 // ── RBAC (Mythos Security Hardened) ───────────────────────────────────────
 const auditLogger = new AuditLogger(10_000);
 const rbac = new RBACManager(auditLogger);
-app.locals['rbac'] = rbac;
-app.locals['auditLogger'] = auditLogger;
+app.locals["rbac"] = rbac;
+app.locals["auditLogger"] = auditLogger;
 
 // ── CORS ───────────────────────────────────────────────────────────────────
 const rawOrigins = process.env["CORS_ORIGIN"] ?? "";

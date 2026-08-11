@@ -12,13 +12,13 @@
  * Caller is responsible for any I/O (writing reports, etc.).
  */
 
-import { discoverFiles } from './analysis/discovery.js';
-import { ASTParser } from './analysis/ast-parser.js';
-import { buildDependencyGraph } from './graphs/dependency-graph.js';
-import { buildEventFlowGraph } from './graphs/event-flow-graph.js';
-import { buildSkillClusterGraph } from './graphs/skill-cluster-graph.js';
-import { evaluate } from './analysis/governance-evaluator.js';
-import { generateReport, type WireReport } from './report/report.js';
+import { discoverFiles } from "./analysis/discovery.js";
+import { ASTParser } from "./analysis/ast-parser.js";
+import { buildDependencyGraph } from "./graphs/dependency-graph.js";
+import { buildEventFlowGraph } from "./graphs/event-flow-graph.js";
+import { buildSkillClusterGraph } from "./graphs/skill-cluster-graph.js";
+import { evaluate } from "./analysis/governance-evaluator.js";
+import { generateReport, type WireReport } from "./report/report.js";
 
 export interface RunOptions {
   /** Absolute or relative path to the project root to analyse. */
@@ -46,11 +46,12 @@ export async function runWire(options: RunOptions): Promise<WireReport> {
   const fileSymbols = parser.parseFiles(discovery.sourceFiles);
 
   // ── STEP 3: Graph Build Phase ─────────────────────────────────────────────
-  const [dependencyGraph, eventFlowGraph, skillClusterGraph] = await Promise.all([
-    Promise.resolve(buildDependencyGraph(fileSymbols)),
-    Promise.resolve(buildEventFlowGraph(fileSymbols)),
-    buildSkillClusterGraph(discovery.skillFiles),
-  ]);
+  const [dependencyGraph, eventFlowGraph, skillClusterGraph] =
+    await Promise.all([
+      Promise.resolve(buildDependencyGraph(fileSymbols)),
+      Promise.resolve(buildEventFlowGraph(fileSymbols)),
+      buildSkillClusterGraph(discovery.skillFiles),
+    ]);
 
   // ── STEP 4: Governance Evaluation ────────────────────────────────────────
   const evaluation = evaluate({
@@ -72,7 +73,7 @@ export async function runWire(options: RunOptions): Promise<WireReport> {
 }
 
 // Re-export public surface
-export type { WireReport } from './report/report.js';
-export type { Finding, FindingType } from './analysis/governance-evaluator.js';
-export type { DiscoveryResult } from './analysis/discovery.js';
-export { serializeReport } from './report/report.js';
+export type { WireReport } from "./report/report.js";
+export type { Finding, FindingType } from "./analysis/governance-evaluator.js";
+export type { DiscoveryResult } from "./analysis/discovery.js";
+export { serializeReport } from "./report/report.js";

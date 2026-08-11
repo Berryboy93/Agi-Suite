@@ -20,6 +20,7 @@ import { APIView } from "./components/views/APIView";
 import { ASIView } from "./components/views/ASIView";
 import { IntelligenceView } from "./components/views/IntelligenceView";
 import { AGICmdView } from "./components/views/AGICmdView";
+import { LatencyDashboard } from "./components/dashboards/LatencyDashboard";
 
 const BOOT_LINES = [
   "R3 AGI COMMAND CENTER v3.1.0 INITIALIZING...",
@@ -168,6 +169,7 @@ function CenterContent() {
         {activeView === "asi" && <ASIView />}
         {activeView === "intelligence" && <IntelligenceView />}
         {activeView === "agi-cmd" && <AGICmdView />}
+        {activeView === "latency-demo" && <LatencyDashboard />}
       </div>
     </main>
   );

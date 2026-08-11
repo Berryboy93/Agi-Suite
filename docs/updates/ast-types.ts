@@ -77,9 +77,9 @@ export interface FileSymbols {
  *   Historical recurrence:  0–0.2 (applied at governance evaluation, not parse)
  */
 export interface ConfidenceWeights {
-  readonly astCertainty: number;       // 0.5–1.0
+  readonly astCertainty: number; // 0.5–1.0
   readonly structuralConsistency: number; // 0–0.3
-  readonly historicalRecurrence: number;  // 0–0.2
+  readonly historicalRecurrence: number; // 0–0.2
 }
 
 export function computeConfidence(weights: ConfidenceWeights): number {

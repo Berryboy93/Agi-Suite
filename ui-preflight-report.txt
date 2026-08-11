@@ -1,0 +1,950 @@
+=== VERIFIED UI PREFLIGHT (R3-AGI) ===
+Generated: 2026-06-28T02:35:53-05:00
+
+------------------------
+apps/r3-agi/src/App.tsx
+SIZE: 6624 bytes
+
+import "./index.css";
+import { useEffect, useState } from "react";
+import { useAGI } from "./store/useAGI";
+import { Header } from "./components/Header";
+import { Sidebar } from "./components/Sidebar";
+import { RightPanel } from "./components/RightPanel";
+import {
+  AgentSuitePanel,
+  AgentSuiteToggle,
+} from "./components/AgentSuitePanel";
+import { OverviewView } from "./components/views/OverviewView";
+import { PrioritiesView } from "./components/views/PrioritiesView";
+import { LLPTEView } from "./components/views/LLPTEView";
+import { PatchView } from "./components/views/PatchView";
+import { ChecklistView } from "./components/views/ChecklistView";
+import { TreeView } from "./components/views/TreeView";
+import { VerifyView } from "./components/views/VerifyView";
+import { PRDView } from "./components/views/PRDView";
+import { APIView } from "./components/views/APIView";
+import { ASIView } from "./components/views/ASIView";
+import { IntelligenceView } from "./components/views/IntelligenceView";
+import { AGICmdView } from "./components/views/AGICmdView";
+import { LatencyDashboard } from "./components/dashboards/LatencyDashboard";
+
+
+const BOOT_LINES = [
+  "R3 AGI COMMAND CENTER v3.1.0 INITIALIZING...",
+  "LOADING LLPTE PIPELINE · PRD v4.1 · ASI MEMORY.............. [OK]",
+  "SYSTEM READY — ALL SUBSYSTEMS NOMINAL",
+];
+
+function BootScreen({ onDone }: { onDone: () => void }) {
+  const [visibleLines, setVisibleLines] = useState<number[]>([]);
+  const [fading, setFading] = useState(false);
+
+  useEffect(() => {
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    BOOT_LINES.forEach((_, i) => {
+      timers.push(
+        setTimeout(
+          () => setVisibleLines((prev) => [...prev, i]),
+          i * 450 + 100,
+        ),
+      );
+    });
+    timers.push(setTimeout(() => setFading(true), 1500));
+    timers.push(setTimeout(() => onDone(), 1850));
+    return () => timers.forEach(clearTimeout);
+  }, [onDone]);
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        background: "var(--bg)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 12,
+        opacity: fading ? 0 : 1,
+        transition: "opacity 0.35s ease",
+        pointerEvents: "none",
+      }}
+    >
+      <div
+        style={{
+          fontFamily: "var(--sans)",
+          fontSize: 13,
+          fontWeight: 800,
+          color: "var(--acid)",
+          letterSpacing: 3,
+          marginBottom: 16,
+          textTransform: "uppercase",
+        }}
+      >
+        R3<span style={{ color: "var(--accent)" }}>v4</span>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 8,
+          minWidth: 420,
+        }}
+      >
+        {BOOT_LINES.map((line, i) => (
+          <div
+            key={i}
+            style={{
+              fontFamily: "var(--mono)",
+              fontSize: 11,
+              color:
+                i === BOOT_LINES.length - 1 ? "var(--done)" : "var(--text2)",
+              letterSpacing: 0.5,
+              opacity: visibleLines.includes(i) ? 1 : 0,
+              transform: visibleLines.includes(i)
+                ? "translateY(0)"
+                : "translateY(6px)",
+              transition: "opacity 0.25s ease, transform 0.25s ease",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            <span style={{ color: "var(--acid)", flexShrink: 0 }}>&gt;</span>
+            {line}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CenterContent() {
+  const { activeView, focusBanner, clearFocus } = useAGI();
+
+  return (
+    <main
+      style={{
+        overflowY: "auto",
+        padding: 16,
+        display: "flex",
+        flexDirection: "column",
+        gap: 14,
+      }}
+    >
+      {focusBanner && (
+        <div
+          style={{
+            padding: "6px 13px",
+            background: "rgba(163,230,53,.06)",
+            borderBottom: "1px solid rgba(163,230,53,.15)",
+            fontSize: 10,
+            color: "var(--acid)",
+            letterSpacing: 1,
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            borderRadius: 3,
+          }}
+        >
+          <span style={{ fontSize: 12 }}>◈</span>
+          <span>{focusBanner}</span>
+          <span
+            onClick={clearFocus}
+            style={{
+              marginLeft: "auto",
+              cursor: "pointer",
+              color: "var(--dim)",
+              fontSize: 11,
+            }}
+          >
+            ✕
+          </span>
+        </div>
+      )}
+      <div key={activeView} style={{ animation: "viewEnter 0.22s ease both" }}>
+------------------------
+apps/r3-agi/src/index.css
+SIZE: 6208 bytes
+
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;600;700;800&display=swap");
+@import "tailwindcss";
+@theme {
+  --color-bg-base: oklch(8% 0.02 267);
+  --color-bg-surface: oklch(12% 0.03 266);
+  --color-bg-elevated: oklch(18% 0.04 265);
+  --color-content-primary: oklch(92% 0.003 254);
+  --color-content-secondary: oklch(72% 0.01 258);
+  --color-content-tertiary: oklch(58% 0.02 260);
+  --color-border-default: oklch(26% 0.05 264);
+  --color-border-subtle: oklch(18% 0.04 265);
+  --color-interactive-default: oklch(55% 0.19 260);
+  --color-status-healthy: oklch(55% 0.16 147);
+  --color-status-warning: oklch(65% 0.18 85);
+  --color-status-critical: oklch(59% 0.19 38);
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --duration-fast: 100ms;
+  --duration-normal: 200ms;
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+}
+
+:root {
+  --bg: #09090b; /* Zinc-950 */
+  --surface: #18181b; /* Zinc-900 */
+  --sur2: #27272a; /* Zinc-800 */
+  --border: rgba(39, 39, 42, 0.5); /* Zinc-800/50 — 6% opacity */
+  --bor2: rgba(63, 63, 70, 0.5); /* Zinc-700/50 */
+  --accent: #a3e635; /* Acid Green — consolidated primary signal */
+  --acid: #a3e635; /* alias */
+  --red: #ff3d71;
+  --violet: #8b5cf6;
+  --dim: #52525b; /* Zinc-600 */
+  --text: #f4f4f5; /* Zinc-100 */
+  --text2: #71717a; /* Zinc-500 */
+  --warn: #f59e0b;
+  --good: #a3e635;
+  --bad: #ff3d71;
+  --done: #10b981;
+  --mono: "JetBrains Mono", monospace;
+  --sans: "Inter", sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(163, 230, 53, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(163, 230, 53, 0.015) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+  animation: gridDrift 120s linear infinite;
+}
+
+@keyframes gridDrift {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 40px 40px;
+  }
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0, 0, 0, 0.05) 3px,
+    rgba(0, 0, 0, 0.05) 4px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: 50px 1fr;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--bor2);
+  border-radius: 3px;
+}
+
+/* ── CODE ── */
+code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+  background: rgba(163, 230, 53, 0.07);
+  border: 1px solid rgba(163, 230, 53, 0.15);
+  padding: 1px 5px;
+  border-radius: 2px;
+  color: var(--accent);
+}
+code.bad {
+  background: rgba(255, 61, 113, 0.07);
+  border-color: rgba(255, 61, 113, 0.15);
+  color: var(--bad);
+}
+code.ok {
+  background: rgba(163, 230, 53, 0.07);
+  border-color: rgba(163, 230, 53, 0.15);
+  color: var(--good);
+}
+code.vi {
+  background: rgba(139, 92, 246, 0.07);
+  border-color: rgba(139, 92, 246, 0.15);
+  color: var(--violet);
+}
+
+/* ── PRE ── */
+pre {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--border);
+------------------------
+apps/r3-agi/src/components/Sidebar.tsx
+SIZE: 9939 bytes
+
+import { useAGI } from "../store/useAGI";
+
+const views = [
+  { id: "overview", icon: "◈", label: "Overview" },
+  { id: "priorities", icon: "▶", label: "Priorities", badge: true },
+  {
+    id: "llpte",
+    icon: "⬡",
+    label: "LLPTE Live",
+    badgeText: "LIVE",
+    badgeCls: "nb-vi",
+  },
+  {
+    id: "asi",
+    icon: "◉",
+    label: "ASI Pipeline",
+    badgeText: "NEW",
+    badgeCls: "nb-vi",
+  },
+  {
+    id: "intelligence",
+    icon: "⚡",
+    label: "Intelligence Layer",
+    badgeText: "NEW",
+    badgeCls: "nb-ok",
+  },
+  {
+    id: "agi-cmd",
+    icon: "⬡",
+    label: "AGI CMD v3",
+    badgeText: "NEW",
+    badgeCls: "nb-ok",
+  },
+  {
+    id: "api",
+    icon: "⊗",
+    label: "API Reference",
+    badgeText: "v2",
+    badgeCls: "nb-ok",
+  },
+  {
+    id: "patch",
+    icon: "⊕",
+    label: "Patch Plan",
+    badgeText: "2 OPEN",
+    badgeCls: "nb-warn",
+  },
+  { id: "checklist", icon: "✓", label: "Pre-flight" },
+  { id: "tree", icon: "⊞", label: "Project Tree" },
+  { id: "verify", icon: "▷", label: "Verification" },
+  { id: "prd", icon: "◉", label: "PRD v4 State" },
+];
+
+const completed = [
+  "TSC: 0 errors ✓",
+  "P1: aiDecisionLog writes wired ✓",
+  "11 routers total",
+  "aiDecisionLog schema + migration 0005 (local)",
+  "SessionChip + SessionSummaryPanel wired",
+  "15 any violations fixed",
+  "billing.ts (LemonSqueezy) removed",
+  "authStore.ts fixed",
+];
+
+const stack = [
+  { color: "var(--accent)", label: "tRPC + Express 4.22.1" },
+  { color: "var(--accent)", label: "Drizzle 0.39.3 + PG" },
+  { color: "var(--accent)", label: "Wouter · Zustand" },
+  { color: "var(--violet)", label: "LLPTE — 6 packages" },
+  { color: "var(--done)", label: "Stripe 20.4.1 ONLY" },
+];
+
+const badgeCls: Record<string, { bg: string; color: string; border: string }> =
+  {
+    "nb-bad": {
+      bg: "rgba(255,61,113,.12)",
+      color: "var(--bad)",
+      border: "1px solid rgba(255,61,113,.2)",
+    },
+    "nb-ok": {
+      bg: "rgba(163,230,53,.1)",
+      color: "var(--good)",
+      border: "1px solid rgba(163,230,53,.2)",
+    },
+    "nb-warn": {
+      bg: "rgba(245,158,11,.1)",
+      color: "var(--warn)",
+      border: "1px solid rgba(245,158,11,.2)",
+    },
+    "nb-done": {
+      bg: "rgba(16,185,129,.1)",
+      color: "var(--done)",
+      border: "1px solid rgba(16,185,129,.2)",
+    },
+    "nb-vi": {
+      bg: "rgba(139,92,246,.1)",
+      color: "var(--violet)",
+      border: "1px solid rgba(139,92,246,.2)",
+    },
+  };
+
+export function Sidebar() {
+  const { activeView, setView, setFocus, prios } = useAGI();
+  const openCount = prios.filter((p) => !p.done).length;
+
+  return (
+    <nav
+      style={{
+        borderRight: "1px solid var(--border)",
+        overflowY: "auto",
+        padding: "12px 0",
+        background: "rgba(9,9,11,.7)",
+      }}
+    >
+      <div style={{ marginBottom: 16 }}>
+        <div
+          style={{
+            fontSize: 8,
+            letterSpacing: 3,
+            color: "var(--dim)",
+            padding: "0 13px 6px",
+            textTransform: "uppercase",
+          }}
+        >
+          Views
+        </div>
+        {views.map((v) => {
+          const bc = v.badgeCls ? badgeCls[v.badgeCls] : null;
+          const badgeText = v.badge
+            ? openCount + " OPEN"
+            : (v.badgeText ?? null);
+          const badgeStyle = v.badge
+            ? openCount > 0
+              ? badgeCls["nb-bad"]
+              : badgeCls["nb-done"]
+            : bc;
+
+          return (
+            <div
+              key={v.id}
+              onClick={() => setView(v.id)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "6px 13px",
+                cursor: "pointer",
+                color: activeView === v.id ? "var(--accent)" : "var(--text2)",
+                fontSize: 11,
+                transition: "all .1s",
+                borderLeft: `2px solid ${activeView === v.id ? "var(--accent)" : "transparent"}`,
+                background:
+                  activeView === v.id ? "rgba(163,230,53,.05)" : "transparent",
+              }}
+            >
+              <span style={{ fontSize: 13, width: 16, textAlign: "center" }}>
+                {v.icon}
+              </span>
+              {v.label}
+              {badgeText && badgeStyle && (
+------------------------
+apps/r3-agi/src/components/Header.tsx
+SIZE: 11509 bytes
+
+import { useEffect, useState } from "react";
+import { useAGI } from "../store/useAGI";
+import { useMetrics } from "../hooks/useMetrics";
+
+const ACID = "#a3e635";
+const VIOLET = "#8B5CF6";
+
+function formatHMS(date: Date) {
+  return date.toLocaleTimeString("en-US", {
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
+
+function formatUptime(seconds: number) {
+  const m = Math.floor(seconds / 60)
+    .toString()
+    .padStart(2, "0");
+  const s = (seconds % 60).toString().padStart(2, "0");
+  return `${m}:${s}`;
+}
+
+export function Header() {
+  const [time, setTime] = useState(() => formatHMS(new Date()));
+  const [uptime, setUptime] = useState(0);
+  const [btnHov, setBtnHov] = useState(false);
+  const prios = useAGI((s) => s.prios);
+  const agentSuiteOpen = useAGI((s) => s.agentSuiteOpen);
+  const toggleAgentSuite = useAGI((s) => s.toggleAgentSuite);
+  const p0Done = prios[0]?.done ?? false;
+  const openCount = prios.filter((p) => !p.done).length;
+  const mvpDone = 3 + (p0Done ? 1 : 0);
+  const { metrics, connected } = useMetrics();
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setTime(formatHMS(new Date()));
+      setUptime((u) => u + 1);
+    }, 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  return (
+    <header
+      style={{
+        borderBottom: "1px solid var(--border)",
+        padding: "0 18px",
+        display: "flex",
+        alignItems: "center",
+        gap: 14,
+        background: "rgba(9,9,11,.97)",
+        backdropFilter: "blur(20px)",
+      }}
+    >
+      <div
+        style={{
+          fontFamily: "var(--sans)",
+          fontWeight: 800,
+          fontSize: 17,
+          letterSpacing: "-.5px",
+          color: "#fff",
+          display: "flex",
+          alignItems: "center",
+          gap: 7,
+        }}
+      >
+        R3<span style={{ color: "var(--accent)" }}>v4</span>{" "}
+        <span
+          style={{
+            fontFamily: "var(--mono)",
+            fontSize: 9,
+            background: "rgba(163,230,53,.12)",
+            border: "1px solid rgba(163,230,53,.3)",
+            color: "var(--accent)",
+            padding: "2px 7px",
+            letterSpacing: 2,
+            borderRadius: 2,
+          }}
+        >
+          AGI CMD v3
+        </span>
+      </div>
+      <span style={{ color: "var(--border)", fontSize: 16 }}>|</span>
+      <span style={{ fontSize: 10, color: "var(--text2)" }}>
+        PRD v4.1 · Live Controls · ASI Memory
+      </span>
+
+      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+        <span
+          style={{
+            fontFamily: "var(--mono)",
+            fontSize: 9,
+            padding: "2px 7px",
+            borderRadius: 2,
+            letterSpacing: 1,
+            fontWeight: 800,
+            background: "rgba(163,230,53,.15)",
+            color: "var(--accent)",
+            border: "1px solid rgba(163,230,53,.3)",
+            textTransform: "uppercase",
+          }}
+        >
+          pro_artist
+        </span>
+      </div>
+
+      <div
+        style={{
+          marginLeft: "auto",
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+        }}
+      >
+        <button
+          onClick={toggleAgentSuite}
+          onMouseEnter={() => setBtnHov(true)}
+          onMouseLeave={() => setBtnHov(false)}
+          title="Toggle Expert Agent Suite"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 7,
+            padding: "4px 12px",
+            background: agentSuiteOpen
+              ? `${VIOLET}20`
+              : btnHov
+                ? `${ACID}12`
+                : "transparent",
+            border: `1px solid ${
+              agentSuiteOpen
+                ? VIOLET + "60"
+                : btnHov
+                  ? ACID + "60"
+                  : "var(--border)"
+            }`,
+            borderRadius: 4,
+            cursor: "pointer",
+            color: agentSuiteOpen ? VIOLET : btnHov ? ACID : "var(--text2)",
+            fontFamily: "var(--mono)",
+            fontSize: 10,
+            letterSpacing: "0.08em",
+            fontWeight: 600,
+            transition: "all 0.15s",
+            boxShadow: agentSuiteOpen ? `0 0 10px ${VIOLET}30` : "none",
+          }}
+        >
+          <span style={{ fontSize: 13 }}>⬡</span>
+          <span>{agentSuiteOpen ? "CLOSE AGENTS" : "AGENT SUITE"}</span>
+          <span
+            style={{
+              fontSize: 8,
+              padding: "1px 5px",
+              borderRadius: 2,
+              background: agentSuiteOpen ? `${VIOLET}25` : `${ACID}15`,
+              border: `1px solid ${agentSuiteOpen ? VIOLET + "40" : ACID + "30"}`,
+              color: agentSuiteOpen ? VIOLET : ACID,
+            }}
+------------------------
+apps/r3-agi/src/components/RightPanel.tsx
+SIZE: 33138 bytes
+
+import { useState, useRef, useEffect } from "react";
+import { useAGI } from "../store/useAGI";
+
+const SYSTEM_PROMPT = `You are the AGI Command Agent for R3 v4, an AI-native Digital Audio Workstation.
+
+═══ IDENTITY ═══
+- LLPTE = Low-Latency Processing Transition Engine (NOT Language-driven, NOT Language-Model)
+- Stack: tRPC + Express 4.22.1 · Drizzle ORM 0.39.3 + PostgreSQL · Wouter (NOT react-router-dom) · Vite + React 18 · Zustand (NOT Redux)
+- Tiers (Stripe ONLY, lowercase): explorer · creator · pro_artist — NEVER "free","Pro","Studio","Starter"
+- Payments: Stripe v20.4.1 ONLY. Never LemonSqueezy. Never other payment providers.
+- Post-login redirect: /instrument ONLY — never /daw
+- Hard guard: never hydrateFromToken() inside ProtectedRoute render
+- All Anthropic/AI calls: server-side ONLY via admin.agentChat — never expose API keys to browser
+
+═══ LLPTE PIPELINE (PRD §8.5) ═══
+Node order — NEVER reorder:
+  inputRouter (llpte-adapters) → spectralAnalyzer (llpte-signal) → aiMixEngine (llpte-ai) → transitionGraph (llpte-transition-graph) → outputBus (llpte-execution)
+
+HARD SLAs (non-negotiable):
+- Inference latency: ≤15ms ceiling · p50 target: 10ms
+- Tick rate: 0.8ms
+- Active edges: 847
+- Confidence gate for auto-apply: ≥0.65
+- Confidence gate for suggestion: ≥0.40 (SUGGESTION_THRESHOLD — module-scope const in AutoLevelEngine.ts)
+- Below 0.40: discard → log to aiDecisionLog only
+- PRD acceptance rate gate: ≥65% — tracked via sessionMetrics.getAcceptanceRate
+
+MODULE RULES:
+- spectralAnalyzer lives in llpte-signal. There is NO @llpte/spectral package.
+- .ts sources resolve before .js artifacts in shared/ — do not modify resolve.extensions order in vite.config.ts
+- Audio: WASM + SharedArrayBuffer + AudioWorklet only — nothing on main thread
+- Waveform: WebGPU renderer — no canvas 2D fallback in production
+- Inference: quantized + SIMD — no unquantized model calls in hot path
+- Zero GC pressure in hot path — typed array pool allocators only
+
+═══ API SURFACE — v2.0.0 (2026-04-12) ═══
+Transport: tRPC over HTTP · Base: localhost:3000/trpc (dev) | Railway URL (prod)
+Auth: JWT via Authorization: Bearer <token> on all protected procedures
+
+appRouter (11 routers):
+  ping.health                    → { status, ts }  [PUBLIC]
+  sessions.start                 mutate({ bpm, trackIds }) → { sessionId }
+  sessions.stop                  mutate({ sessionId }) → { durationSeconds, timeSavedSeconds }
+  sessions.getSummary            query({ sessionId }) → SessionMetricsSummary | null
+  sessionMetrics.getAcceptanceRate query({ sessionId }) → { accepted, total, rate }  ← PRD ≥65% gate
+  sessionMetrics.getTimeSavings  query({ sessionId }) → { totalSavedSeconds, percentageFaster }
+  aiMix.analyze                  mutate({ genre, targetLoudness(LUFS), enableStemSeparation, sessionId? })
+                                   → { suggestions: [{channelId, type, confidence, decision, decisionId}], latencyMs }
+                                   Rate: 30 req/min
+  aiMix.recordOutcome            mutate({ decisionId, outcome: 'accepted'|'rejected'|'ignored' }) → void
+  aiMix.getTransitions           query({ fromTrackId, toTrackId }) → { transitions: [{type, confidence, camelotScore}] }
+  mixer.getState                 query() → { tracks, masterGain }
+  mixer.updateTrack              mutate({ trackId, gain, mute, solo })
+  mixer.applyAISuggestion        mutate({ trackId, gainLinear, decisionId })  ← AudioParam.setTargetAtTime, click-free
+  dj.setCrossfader               mutate({ position: 0–1 })
+  dj.setHotCue                   mutate({ deckId, cueIndex: 0–7, positionMs })
+  dj.getCues                     query({ deckId }) → { cues }
+  subscription.getStatus         query() → { tier, status, currentPeriodEnd }
+  subscription.createCheckout    mutate({ tier, successUrl, cancelUrl }) → { checkoutUrl }
+  subscription.cancelSubscription mutate() → { canceledAt, expiresAt }
+  projects.list/get/create/update/delete
+  presets.listEffects/createEffectPreset/updateEffectPreset/deleteEffectPreset
+  settings.get/update            (17 setting columns)
+  admin.checkAccess              query() → { isAdmin }  ← requires users.isAdmin = true
+  admin.agentChat                mutate({ message, history }) → { reply }  ← Anthropic server-side ONLY
+  daw.*                          DAW state + arrangement procedures
+
+Legacy REST (effects/waveform surface — NOT tRPC, not type-safe):
+  GET/POST  /api/effects/presets · GET/PUT/DELETE /api/effects/presets/:id
+  GET/POST  /api/effects/chains  · POST /api/waveform/analyze|slice|edit
+  GET/POST  /api/presets         · GET/PUT/DELETE /api/presets/:id
+
+Error codes: UNAUTHORIZED(401) · FORBIDDEN(403) · NOT_FOUND(404) · BAD_REQUEST(400) · INTERNAL_SERVER_ERROR(500)
+Rate limits: Auth 10/min · tRPC 100/min · /waveform/* 50/min · aiMix.analyze 30/min
+
+═══ DB SCHEMA (13 tables) ═══
+users · sessions · sessionMetrics · subscriptions · projects · samples · presets · settings
+aiDecisionLog(11 cols: id,sessionId,nodeId,actionType,trackId,inputConfidence,displayedConfidence,decision,outcome,latencyMs,timestamp)
+effectPresetsTable · effectChainsTable · djCuesTable · waveformEditsTable
+
+═══ CODEBASE STATE (2026-04-17) ═══
+- TSC: 0 errors (after this session's fixes)
+- appRouter: 11 routers wired (sessions,sessionMetrics,admin,daw,subscription,mixer,dj,aiMix,projects,presets,settings,ping)
+- aiDecisionLog schema DONE · migration 0005_overjoyed_gambit.sql GENERATED — NOT applied to Railway (P0 BLOCKER)
+- SessionChip L1782 + SessionSummaryPanel L1750 in DAW.tsx ✓
+- Stripe v20.4.1 wired · billing.ts (LemonSqueezy) removed · authStore.ts token read restored
+- card.tsx/Card.tsx casing conflict resolved · API key prefix literal removed from RightPanel
+
+═══ PRIORITY QUEUE ═══
+P0: pnpm drizzle-kit migrate — apply migration 0005 to Railway (DEMO BROKEN without aiDecisionLog)
+P1: Wire aiDecisionLog writes in server/services/session-metrics.service.ts
+P2: Fix routes/presets.ts as any ×4 (lines 10,11,16,17) · console.log ×5 (server/index.ts:300-308)
+P3: Mix Suggestion System — MixSuggestionsPanel.tsx done, backend tRPC wiring missing
+P4: Fix vitest.config.ts · migration 0006 materialized views (mv_user_session_averages, mv_ai_acceptance_rates)
+P5: Consolidate 9 phantom dirs (client/src/store is LIVE — active imports, do NOT delete without migrating)
+
+═══ WORKFLOW RULES (Wire.txt protocol) ═══
+1. INTERVIEW BEFORE BUILDING — for any new feature/non-trivial change, ask:
+   - What is the core problem this solves?
+   - Who is this for (DJ, creator, or both)?
+   - What does success look like (metric / SLA / behavior)?
+   - What should this NOT do?
+   Skip only for single-file bug fixes with no API surface changes.
+
+2. VERIFICATION PLAN FIRST — before any work, state:
+   - Which files will change and why
+   - How correctness will be confirmed (tsc, Vitest, manual flow)
+   - What regression risk exists and how it will be mitigated
+
+3. SELF-REVIEW AFTER EVERY TASK:
+   - All Hard Guards from CLAUDE.md respected
+   - No redundant imports or dead code
+   - No type errors, auth regressions, or store conflicts
+   - pnpm tsc --noEmit passes clean
+
+4. READ-BEFORE-WRITE (Wire.txt):
+   - Read every file in the full import graph before any destructive action
+   - Confirm file contents, occurrence counts, anchor text
+   - Assert anchors match before applying patches
+   - Never assume — read, then act
+   - Python replace(old, new, 1) over sed for precision
+   - Timestamped backup before destructive ops
+
+Stack pins: TS 5.9.3 · Three.js 0.128.0 · Stripe 20.4.1 · ws 8.20.0 · Zod 3.25.76 · Node 22.x`;
+
+const quickPrompts = [
+  {
+    label: "Apply migration P0",
+    text: "Walk me through applying migration 0005 to Railway safely",
+  },
+  {
+    label: "Wire aiDecisionLog P1",
+    text: "Write the exact TypeScript to wire aiDecisionLog writes into session-metrics.service.ts",
+  },
+  {
+    label: "Fix presets.ts any P2",
+    text: "Fix the 4 as any casts in server/routes/presets.ts with proper Drizzle types",
+  },
+  {
+    label: "Fix console.log P2",
+    text: "How do I replace console.log in server/index.ts:300-308 with morgan?",
+  },
+  {
+    label: "Mix Suggestions P3",
+    text: "What is the correct architecture for Mix Suggestion System backend? Which router?",
+  },
+  {
+    label: "Fix test runner P4",
+    text: "Fix vitest.config.ts to output actual test results",
+  },
+  {
+    label: "LLPTE pipeline",
+    text: "Explain the LLPTE pipeline node order and what each package does",
+  },
+];
+
+const memItems = [
+  {
+    key: "Codebase",
+    val: (
+------------------------
+apps/r3-agi/src/lib/utils.ts
+SIZE: 169 bytes
+
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+TREE:
+apps/r3-agi/src
+├── App.tsx
+├── App.tsx.bak
+├── components
+│   ├── AgentSuitePanel.tsx
+│   ├── dashboards
+│   │   ├── LatencyDashboard.tsx
+│   │   └── LatencyDashboard.tsx.bak
+│   ├── Header.tsx
+│   ├── RightPanel.tsx
+│   ├── Sidebar.tsx
+│   ├── ui
+│   │   ├── accordion.tsx
+│   │   ├── alert-dialog.tsx
+│   │   ├── alert.tsx
+│   │   ├── aspect-ratio.tsx
+│   │   ├── avatar.tsx
+│   │   ├── badge.tsx
+│   │   ├── breadcrumb.tsx
+│   │   ├── button-group.tsx
+│   │   ├── button.tsx
+│   │   ├── calendar.tsx
+│   │   ├── Card.tsx
+│   │   ├── carousel.tsx
+│   │   ├── chart.tsx
+│   │   ├── checkbox.tsx
+│   │   ├── collapsible.tsx
+│   │   ├── command.tsx
+│   │   ├── context-menu.tsx
+│   │   ├── dialog.tsx
+│   │   ├── drawer.tsx
+│   │   ├── dropdown-menu.tsx
+│   │   ├── empty.tsx
+│   │   ├── field.tsx
+│   │   ├── form.tsx
+│   │   ├── hover-card.tsx
+│   │   ├── input-group.tsx
+│   │   ├── input-otp.tsx
+│   │   ├── input.tsx
+│   │   ├── item.tsx
+│   │   ├── kbd.tsx
+│   │   ├── label.tsx
+│   │   ├── menubar.tsx
+│   │   ├── MetricsCard.tsx
+│   │   ├── navigation-menu.tsx
+│   │   ├── pagination.tsx
+│   │   ├── popover.tsx
+│   │   ├── progress.tsx
+│   │   ├── radio-group.tsx
+│   │   ├── resizable.tsx
+│   │   ├── scroll-area.tsx
+│   │   ├── select.tsx
+│   │   ├── separator.tsx
+│   │   ├── sheet.tsx
+│   │   ├── sidebar.tsx
+│   │   ├── skeleton.tsx
+│   │   ├── slider.tsx
+│   │   ├── sonner.tsx
+│   │   ├── spinner.tsx
+│   │   ├── switch.tsx
+│   │   ├── table.tsx
+│   │   ├── tabs.tsx
+│   │   ├── textarea.tsx
+│   │   ├── toaster.tsx
+│   │   ├── toast.tsx
+│   │   ├── toggle-group.tsx
+│   │   ├── toggle.tsx
+│   │   └── tooltip.tsx
+│   └── views
+│       ├── AGICmdView.tsx
+│       ├── APIView.tsx
+│       ├── ASIView.tsx
+│       ├── ChecklistView.tsx
+│       ├── IntelligenceView.tsx
+│       ├── LLPTEView.tsx
+│       ├── OverviewView.tsx
+│       ├── PatchView.tsx
+│       ├── PRDView.tsx
+│       ├── PrioritiesView.tsx
+│       ├── TreeView.tsx
+│       └── VerifyView.tsx
+├── hooks
+│   ├── useConversation.ts
+│   ├── useMetrics.ts
+│   ├── use-mobile.tsx
+│   ├── useStreamingCancel.ts
+│   └── use-toast.ts
+├── index.css
+├── index.css.bak
+├── lib
+│   └── utils.ts
+├── main.tsx
+├── pages
+│   ├── latency-demo.tsx
+│   ├── not-found.tsx
+│   └── otp-test.tsx
+├── services
+│   └── llpte.test.ts
+├── store
+│   └── useAGI.ts
+└── ui
+    ├── accessibility
+    ├── components
+    │   └── Panel.tsx
+    ├── layouts
+    ├── primitives
+    ├── themes
+    └── tokens
+        ├── colors.ts
+        ├── index.ts
+        ├── motion.ts
+        ├── spacing.ts
+        └── typography.ts
+
+17 directories, 96 files

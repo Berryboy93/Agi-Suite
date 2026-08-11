@@ -77,7 +77,7 @@ The three-horizon evolution:
 | ------------------------------------------ | ---------- | -------------- |
 | H1: Monitoring + AI chat                   | Now        | ✅ Shipped     |
 | H2: Active control + tool-use AI           | 1–3 months | 🔨 In progress |
-| H3: Autonomous agent with deploy authority | 3–6 months | 🗺 Planned     |
+| H3: Autonomous agent with deploy authority | 3–6 months | 🗺 Planned      |
 
 ---
 

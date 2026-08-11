@@ -17,7 +17,7 @@ const server = app.listen(port, () => {
 // three times before giving up.  Any other error is fatal immediately.
 let bindRetries = 0;
 const MAX_BIND_RETRIES = 3;
-const BIND_RETRY_MS = 1_000;
+const BIND_RETRY_MS = 1000;
 server.on("error", (err) => {
     if (err.code === "EADDRINUSE" && bindRetries < MAX_BIND_RETRIES) {
         bindRetries += 1;
@@ -42,7 +42,7 @@ function shutdown(signal) {
     setTimeout(() => {
         logger.warn("Force-exiting after shutdown timeout");
         process.exit(1);
-    }, 5_000).unref();
+    }, 5000).unref();
 }
 process.on("SIGTERM", () => {
     shutdown("SIGTERM");

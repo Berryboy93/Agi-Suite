@@ -3,8 +3,8 @@ import { logger } from "../lib/logger";
 import fs from "fs";
 import path from "path";
 const router = Router();
-const SESSION_TTL_MS = 45_000;
-const FETCH_TIMEOUT_MS = 10_000;
+const SESSION_TTL_MS = 45000;
+const FETCH_TIMEOUT_MS = 10000;
 const PERSIST_FILE = path.join("/tmp", "r3-metrics.json");
 const activeSessions = new Map();
 const sseClients = new Set();
@@ -82,7 +82,7 @@ if (process.env["R3_INTERNAL_URL"]) {
     void fetchR3Metrics();
     setInterval(() => {
         void fetchR3Metrics();
-    }, 30_000);
+    }, 30000);
 }
 else {
     logger.debug("fetchR3Metrics: R3_INTERNAL_URL not set — polling disabled");
@@ -124,6 +124,8 @@ router.get("/metrics", (_req, res) => {
     });
 });
 router.get("/metrics/stream", (req, res) => {
+    res.setTimeout(0);
+    req.socket.setTimeout(0);
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
@@ -154,7 +156,7 @@ router.get("/metrics/stream", (req, res) => {
             }
             catch { /* already gone */ }
         }
-    }, 20_000);
+    }, 20000);
     req.on("close", () => {
         closed = true;
         clearInterval(keepAlive);
@@ -190,6 +192,6 @@ setInterval(() => {
     pruneStale();
     if (activeSessions.size !== before)
         broadcast();
-}, 15_000);
+}, 15000);
 export default router;
 //# sourceMappingURL=metrics.js.map

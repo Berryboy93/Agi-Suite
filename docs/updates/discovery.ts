@@ -10,9 +10,9 @@
  * All I/O errors are captured, never thrown.
  */
 
-import { readdir, stat } from 'node:fs/promises';
-import { join, resolve } from 'node:path';
-import { checkBoundary, isSkillFile, type BoundaryResult } from './boundary.js';
+import { readdir, stat } from "node:fs/promises";
+import { join, resolve } from "node:path";
+import { checkBoundary, isSkillFile, type BoundaryResult } from "./boundary.js";
 
 export interface DiscoveryResult {
   /** Absolute paths of all in-scope TypeScript source files. */
@@ -24,7 +24,7 @@ export interface DiscoveryResult {
   /** Non-fatal I/O errors encountered during discovery. */
   errors: Array<{ path: string; message: string }>;
   /** Filesystem integrity status. */
-  integrity: 'ok' | 'degraded';
+  integrity: "ok" | "degraded";
 }
 
 /**
@@ -42,13 +42,13 @@ export async function discoverFiles(root: string): Promise<DiscoveryResult> {
     skillFiles: [],
     excluded: [],
     errors: [],
-    integrity: 'ok',
+    integrity: "ok",
   };
 
   await walk(absoluteRoot, result);
 
   if (result.errors.length > 0) {
-    result.integrity = 'degraded';
+    result.integrity = "degraded";
   }
 
   // Deterministic ordering — essential for reproducible graph builds downstream
@@ -89,12 +89,12 @@ async function walk(dir: string, acc: DiscoveryResult): Promise<void> {
       // Apply boundary check to the directory path before recursing.
       // This short-circuits entire subtrees (e.g. node_modules) without
       // walking into them.
-      const check = checkBoundary(fullPath + '/index.ts'); // synthetic path for pattern matching
+      const check = checkBoundary(fullPath + "/index.ts"); // synthetic path for pattern matching
       if (!check.inScope && isExcludedDirectory(fullPath)) {
         acc.excluded.push({
           inScope: false,
           path: fullPath,
-          reason: 'Directory excluded by boundary rules',
+          reason: "Directory excluded by boundary rules",
         });
         continue;
       }
@@ -118,19 +118,19 @@ async function walk(dir: string, acc: DiscoveryResult): Promise<void> {
 /** Fast directory-level exclusion check to avoid descending into large excluded trees. */
 function isExcludedDirectory(dirPath: string): boolean {
   const EXCLUDED_DIR_NAMES = new Set([
-    'node_modules',
-    '.pnpm',
-    'dist',
-    'build',
-    '.next',
-    '.vite',
-    'coverage',
-    '.nyc_output',
-    '.turbo',
-    '.cache',
+    "node_modules",
+    ".pnpm",
+    "dist",
+    "build",
+    ".next",
+    ".vite",
+    "coverage",
+    ".nyc_output",
+    ".turbo",
+    ".cache",
   ]);
 
   const parts = dirPath.split(/[/\\]/);
-  const last = parts[parts.length - 1] ?? '';
+  const last = parts[parts.length - 1] ?? "";
   return EXCLUDED_DIR_NAMES.has(last);
 }

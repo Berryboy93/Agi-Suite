@@ -42,7 +42,6 @@ router.post("/agent/chat", async (req, res) => {
             res.end();
         });
         stream.on("error", (err) => {
-            // Ignore abort errors — expected when client disconnects
             if (err.message?.includes("aborted") ||
                 err.constructor?.name === "APIUserAbortError") {
                 return;
@@ -52,12 +51,9 @@ router.post("/agent/chat", async (req, res) => {
                 res.end();
             }
             catch {
-                /* ignore — response may already be closed */
+                /* ignore */
             }
         });
-        // abort is a distinct event from error in the Anthropic SDK.
-        // Without this listener, _emit('abort') produces an unhandled rejection
-        // that kills the process on client disconnect.
         stream.on("abort", () => { });
         req.on("close", () => {
             try {

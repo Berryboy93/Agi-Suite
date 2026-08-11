@@ -21,28 +21,28 @@ describe("customFetch", () => {
     it("should prepend base URL to relative paths", async () => {
       setBaseUrl("https://api.example.com");
       mockFetch.mockResolvedValueOnce(
-        new Response(JSON.stringify({ ok: true }), { status: 200 })
+        new Response(JSON.stringify({ ok: true }), { status: 200 }),
       );
 
       await customFetch("/healthz");
 
       expect(mockFetch).toHaveBeenCalledWith(
         "https://api.example.com/healthz",
-        expect.objectContaining({ method: "GET" })
+        expect.objectContaining({ method: "GET" }),
       );
     });
 
     it("should not modify absolute URLs", async () => {
       setBaseUrl("https://api.example.com");
       mockFetch.mockResolvedValueOnce(
-        new Response(JSON.stringify({ ok: true }), { status: 200 })
+        new Response(JSON.stringify({ ok: true }), { status: 200 }),
       );
 
       await customFetch("https://other.com/healthz");
 
       expect(mockFetch).toHaveBeenCalledWith(
         "https://other.com/healthz",
-        expect.any(Object)
+        expect.any(Object),
       );
     });
   });
@@ -51,7 +51,7 @@ describe("customFetch", () => {
     it("should attach bearer token when getter returns a token", async () => {
       setAuthTokenGetter(() => "token-123");
       mockFetch.mockResolvedValueOnce(
-        new Response(JSON.stringify({ ok: true }), { status: 200 })
+        new Response(JSON.stringify({ ok: true }), { status: 200 }),
       );
 
       await customFetch("/healthz");
@@ -63,7 +63,7 @@ describe("customFetch", () => {
     it("should not attach auth header when getter returns null", async () => {
       setAuthTokenGetter(() => null);
       mockFetch.mockResolvedValueOnce(
-        new Response(JSON.stringify({ ok: true }), { status: 200 })
+        new Response(JSON.stringify({ ok: true }), { status: 200 }),
       );
 
       await customFetch("/healthz");
@@ -75,7 +75,7 @@ describe("customFetch", () => {
     it("should not override explicit authorization header", async () => {
       setAuthTokenGetter(() => "token-123");
       mockFetch.mockResolvedValueOnce(
-        new Response(JSON.stringify({ ok: true }), { status: 200 })
+        new Response(JSON.stringify({ ok: true }), { status: 200 }),
       );
 
       await customFetch("/healthz", {
@@ -90,7 +90,7 @@ describe("customFetch", () => {
   describe("JSON content-type inference", () => {
     it("should set application/json for JSON-looking body", async () => {
       mockFetch.mockResolvedValueOnce(
-        new Response('{"ok":true}', { status: 200 })
+        new Response('{"ok":true}', { status: 200 }),
       );
 
       await customFetch("/healthz", {
@@ -104,7 +104,7 @@ describe("customFetch", () => {
 
     it("should not override explicit content-type", async () => {
       mockFetch.mockResolvedValueOnce(
-        new Response('{"ok":true}', { status: 200 })
+        new Response('{"ok":true}', { status: 200 }),
       );
 
       await customFetch("/healthz", {
@@ -115,21 +115,21 @@ describe("customFetch", () => {
 
       const call = mockFetch.mock.calls[0];
       expect(call[1].headers.get("content-type")).toBe(
-        "application/vnd.api+json"
+        "application/vnd.api+json",
       );
     });
   });
 
   describe("GET/HEAD body rejection", () => {
     it("should throw on GET with body", async () => {
-      await expect(
-        customFetch("/healthz", { body: "data" })
-      ).rejects.toThrow("GET requests cannot have a body");
+      await expect(customFetch("/healthz", { body: "data" })).rejects.toThrow(
+        "GET requests cannot have a body",
+      );
     });
 
     it("should throw on HEAD with body", async () => {
       await expect(
-        customFetch("/healthz", { method: "HEAD", body: "data" })
+        customFetch("/healthz", { method: "HEAD", body: "data" }),
       ).rejects.toThrow("HEAD requests cannot have a body");
     });
   });
@@ -141,7 +141,7 @@ describe("customFetch", () => {
         new Response(JSON.stringify(data), {
           status: 200,
           headers: { "content-type": "application/json" },
-        })
+        }),
       );
 
       const result = await customFetch("/healthz", { responseType: "json" });
@@ -153,7 +153,7 @@ describe("customFetch", () => {
         new Response("plain text", {
           status: 200,
           headers: { "content-type": "text/plain" },
-        })
+        }),
       );
 
       const result = await customFetch("/healthz", { responseType: "text" });
@@ -175,17 +175,19 @@ describe("customFetch", () => {
           status: 404,
           statusText: "Not Found",
           headers: { "content-type": "application/json" },
-        })
+        }),
       );
 
-      await expect(customFetch("/missing")).rejects.toSatisfy((err: ApiError) => {
-        expect(err).toBeInstanceOf(ApiError);
-        expect(err.status).toBe(404);
-        expect(err.data).toEqual(errorBody);
-        expect(err.message).toContain("Not Found");
-        expect(err.message).toContain("Resource missing");
-        return true;
-      });
+      await expect(customFetch("/missing")).rejects.toSatisfy(
+        (err: ApiError) => {
+          expect(err).toBeInstanceOf(ApiError);
+          expect(err.status).toBe(404);
+          expect(err.data).toEqual(errorBody);
+          expect(err.message).toContain("Not Found");
+          expect(err.message).toContain("Resource missing");
+          return true;
+        },
+      );
     });
 
     it("should throw ApiError with text error body", async () => {
@@ -193,7 +195,7 @@ describe("customFetch", () => {
         new Response("Something went wrong", {
           status: 500,
           statusText: "Internal Server Error",
-        })
+        }),
       );
 
       await expect(customFetch("/error")).rejects.toSatisfy((err: ApiError) => {
@@ -205,7 +207,10 @@ describe("customFetch", () => {
 
     it("should throw ApiError with null body for error with no content", async () => {
       mockFetch.mockResolvedValueOnce(
-        new Response(null, { status: 500, statusText: "Internal Server Error" })
+        new Response(null, {
+          status: 500,
+          statusText: "Internal Server Error",
+        }),
       );
       await expect(customFetch("/noop")).rejects.toSatisfy((err: ApiError) => {
         expect(err.data).toBeNull();
@@ -220,11 +225,11 @@ describe("customFetch", () => {
         new Response("not json", {
           status: 200,
           headers: { "content-type": "application/json" },
-        })
+        }),
       );
 
       await expect(
-        customFetch("/healthz", { responseType: "json" })
+        customFetch("/healthz", { responseType: "json" }),
       ).rejects.toSatisfy((err: ResponseParseError) => {
         expect(err).toBeInstanceOf(ResponseParseError);
         expect(err.rawBody).toBe("not json");
@@ -239,7 +244,7 @@ describe("customFetch", () => {
         new Response('{"auto":true}', {
           status: 200,
           headers: { "content-type": "application/json" },
-        })
+        }),
       );
 
       const result = await customFetch("/healthz", { responseType: "auto" });
@@ -251,7 +256,7 @@ describe("customFetch", () => {
         new Response("auto text", {
           status: 200,
           headers: { "content-type": "text/plain" },
-        })
+        }),
       );
 
       const result = await customFetch("/healthz", { responseType: "auto" });
@@ -266,7 +271,7 @@ describe("customFetch", () => {
         new Response(bomJson, {
           status: 200,
           headers: { "content-type": "application/json" },
-        })
+        }),
       );
 
       const result = await customFetch("/healthz", { responseType: "json" });
@@ -315,7 +320,7 @@ describe("customFetch", () => {
           status: 400,
           statusText: "Bad Request",
           headers: { "content-type": "text/plain" },
-        })
+        }),
       );
 
       await expect(customFetch("/empty")).rejects.toSatisfy((err: ApiError) => {
@@ -330,7 +335,7 @@ describe("customFetch", () => {
           status: 400,
           statusText: "Bad Request",
           headers: { "content-type": "application/json" },
-        })
+        }),
       );
 
       await expect(customFetch("/bad")).rejects.toSatisfy((err: ApiError) => {
@@ -347,7 +352,7 @@ describe("customFetch", () => {
         new Response(blob, {
           status: 200,
           headers: { "content-type": "image/png" },
-        })
+        }),
       );
 
       const result = await customFetch("/image", { responseType: "blob" });
@@ -365,7 +370,7 @@ describe("customFetch", () => {
       mockFetch.mockResolvedValueOnce(response);
 
       await expect(
-        customFetch("/image", { responseType: "blob" })
+        customFetch("/image", { responseType: "blob" }),
       ).rejects.toThrow("Blob responses are not supported");
     });
 

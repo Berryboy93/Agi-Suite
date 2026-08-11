@@ -25,14 +25,14 @@ export const EXCLUDED_PATH_PATTERNS: readonly RegExp[] = Object.freeze([
 
 /** File extensions that are IN scope for AST analysis. */
 export const INCLUDED_EXTENSIONS: readonly string[] = Object.freeze([
-  '.ts',
-  '.tsx',
-  '.mts',
-  '.cts',
+  ".ts",
+  ".tsx",
+  ".mts",
+  ".cts",
 ]);
 
 /** Skill file names — included for SKILL coherence analysis (not AST). */
-export const SKILL_FILE_NAME = 'SKILL.md' as const;
+export const SKILL_FILE_NAME = "SKILL.md" as const;
 
 /** Result of a boundary check on a filesystem path. */
 export type BoundaryResult =
@@ -77,7 +77,7 @@ export function checkBoundary(absolutePath: string): BoundaryResult {
  */
 export function isSkillFile(absolutePath: string): boolean {
   const parts = absolutePath.split(/[/\\]/);
-  const filename = parts[parts.length - 1] ?? '';
+  const filename = parts[parts.length - 1] ?? "";
   // Must not be inside excluded paths
   for (const pattern of EXCLUDED_PATH_PATTERNS) {
     if (pattern.test(absolutePath)) return false;
@@ -89,7 +89,7 @@ export function isSkillFile(absolutePath: string): boolean {
 function getExtension(filePath: string): string {
   // Handle double extensions like .d.ts before this function is called
   // (already excluded by EXCLUDED_PATH_PATTERNS above)
-  const lastDot = filePath.lastIndexOf('.');
-  if (lastDot === -1) return '';
+  const lastDot = filePath.lastIndexOf(".");
+  if (lastDot === -1) return "";
   return filePath.slice(lastDot).toLowerCase();
 }

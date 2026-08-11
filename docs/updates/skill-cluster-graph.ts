@@ -13,7 +13,7 @@
  * No mutation capability.
  */
 
-import { readFile } from 'node:fs/promises';
+import { readFile } from "node:fs/promises";
 
 export interface SkillDescriptor {
   readonly filePath: string;
@@ -77,19 +77,19 @@ export async function buildSkillClusterGraph(
 }
 
 async function parseSkillFile(filePath: string): Promise<SkillDescriptor> {
-  let content = '';
+  let content = "";
   try {
-    content = await readFile(filePath, 'utf-8');
+    content = await readFile(filePath, "utf-8");
   } catch {
     return { filePath, name: null, description: null, triggerTokens: [] };
   }
 
-  const name = extractFrontmatterField(content, 'name');
-  const description = extractFrontmatterField(content, 'description');
+  const name = extractFrontmatterField(content, "name");
+  const description = extractFrontmatterField(content, "description");
 
   // Extract trigger tokens from the description and any trigger/use-when sections
   const triggerSection = extractTriggerSection(content);
-  const tokens = tokenize(`${description ?? ''} ${triggerSection}`);
+  const tokens = tokenize(`${description ?? ""} ${triggerSection}`);
 
   return {
     filePath,
@@ -99,16 +99,22 @@ async function parseSkillFile(filePath: string): Promise<SkillDescriptor> {
   };
 }
 
-function extractFrontmatterField(content: string, field: string): string | null {
+function extractFrontmatterField(
+  content: string,
+  field: string,
+): string | null {
   // Match YAML frontmatter between --- delimiters
   const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
   if (!frontmatterMatch?.[1]) return null;
 
-  const lines = frontmatterMatch[1].split('\n');
+  const lines = frontmatterMatch[1].split("\n");
   for (const line of lines) {
-    const [key, ...rest] = line.split(':');
+    const [key, ...rest] = line.split(":");
     if (key?.trim() === field) {
-      return rest.join(':').trim().replace(/^["']|["']$/g, '');
+      return rest
+        .join(":")
+        .trim()
+        .replace(/^["']|["']$/g, "");
     }
   }
   return null;
@@ -116,14 +122,16 @@ function extractFrontmatterField(content: string, field: string): string | null 
 
 function extractTriggerSection(content: string): string {
   // Look for trigger/when sections in markdown
-  const match = content.match(/##\s+(?:Trigger|When to use|Use when)[^\n]*\n([\s\S]*?)(?=\n##|$)/i);
-  return match?.[1] ?? '';
+  const match = content.match(
+    /##\s+(?:Trigger|When to use|Use when)[^\n]*\n([\s\S]*?)(?=\n##|$)/i,
+  );
+  return match?.[1] ?? "";
 }
 
 function tokenize(text: string): string[] {
   return text
     .toLowerCase()
-    .replace(/[^\w\s]/g, ' ')
+    .replace(/[^\w\s]/g, " ")
     .split(/\s+/)
     .filter((t) => t.length > 3) // filter stop words by length
     .filter(Boolean);

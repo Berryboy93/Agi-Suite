@@ -12,7 +12,7 @@ const AGENT_TOKEN = process.env.AGENT_SERVICE_TOKEN;
 export function requireAgentToken(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void {
   if (!AGENT_TOKEN) {
     res.status(503).json({ error: "Agent token not configured on server" });

@@ -129,7 +129,11 @@ function broadcast() {
     } catch {
       sseClients.delete(client);
       // BUG A FIX: end the response so Node releases the socket
-      try { client.end(); } catch { /* already gone */ }
+      try {
+        client.end();
+      } catch {
+        /* already gone */
+      }
     }
   }
 }
@@ -175,7 +179,11 @@ router.get("/metrics/stream", (req: Request, res: Response) => {
       clearInterval(keepAlive);
       sseClients.delete(res);
       // BUG A FIX: end the response on ping failure
-      try { res.end(); } catch { /* already gone */ }
+      try {
+        res.end();
+      } catch {
+        /* already gone */
+      }
     }
   }, 20_000);
 
@@ -184,7 +192,11 @@ router.get("/metrics/stream", (req: Request, res: Response) => {
     clearInterval(keepAlive);
     sseClients.delete(res);
     // BUG A FIX: explicitly end so Node releases the socket
-    try { res.end(); } catch { /* already gone */ }
+    try {
+      res.end();
+    } catch {
+      /* already gone */
+    }
   });
 });
 

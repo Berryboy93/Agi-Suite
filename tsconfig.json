@@ -1,16 +1,27 @@
 {
   "extends": "./tsconfig.base.json",
-  "compilerOptions": {
-    "composite": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "types": ["node"]
-  },
+  "files": [],
   "references": [
-    { "path": "lib/db" },
-    { "path": "lib/api-zod" },
-    { "path": "lib/api-client-react" },
-    { "path": "apps/api-server" }
+    {
+      "path": "./lib/api-client-react"
+    },
+    {
+      "path": "./lib/api-zod"
+    },
+    {
+      "path": "./lib/db"
+    },
+    {
+      "path": "./scripts"
+    },
+    {
+      "path": "./apps/api-server"
+    },
+    {
+      "path": "./apps/agent-runner"
+    },
+    {
+      "path": "./packages/rbac"
+    }
   ]
 }

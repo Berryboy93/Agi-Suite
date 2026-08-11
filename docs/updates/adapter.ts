@@ -22,9 +22,9 @@
  * instability. An orphan emit is code_change (medium blast radius on runtime).
  */
 
-import type { Finding } from '@r3vibe/asi-wire';
-import type { ChangeRequest, ChangeRequestPair } from '@r3vibe/mythos';
-import type { Surface, ActionType } from '@r3vibe/mythos';
+import type { Finding } from "@r3vibe/asi-wire";
+import type { ChangeRequest, ChangeRequestPair } from "@r3vibe/mythos";
+import type { Surface, ActionType } from "@r3vibe/mythos";
 
 interface FindingMappingRule {
   readonly surface: Surface;
@@ -32,30 +32,33 @@ interface FindingMappingRule {
 }
 
 type FindingSubtype =
-  | 'IMPLICIT_MUTATION'
-  | 'ORPHAN_EMIT'
-  | 'DUPLICATE_HANDLER'
-  | 'SILENT_DROP'
-  | 'CIRCULAR_DEPENDENCY'
-  | 'DEPENDENCY_COLLAPSE_RISK'
-  | 'ARCHITECTURE_DRIFT'
-  | 'SKILL_REDUNDANCY';
+  | "IMPLICIT_MUTATION"
+  | "ORPHAN_EMIT"
+  | "DUPLICATE_HANDLER"
+  | "SILENT_DROP"
+  | "CIRCULAR_DEPENDENCY"
+  | "DEPENDENCY_COLLAPSE_RISK"
+  | "ARCHITECTURE_DRIFT"
+  | "SKILL_REDUNDANCY";
 
 const FINDING_TO_CHANGE_REQUEST: Record<FindingSubtype, FindingMappingRule> = {
-  IMPLICIT_MUTATION: { surface: 'runtime', actionType: 'code_change' },
-  ORPHAN_EMIT: { surface: 'runtime', actionType: 'code_change' },
-  DUPLICATE_HANDLER: { surface: 'runtime', actionType: 'code_change' },
-  SILENT_DROP: { surface: 'dev-build-isolated', actionType: 'code_change' },
-  CIRCULAR_DEPENDENCY: { surface: 'runtime', actionType: 'code_change' },
-  DEPENDENCY_COLLAPSE_RISK: { surface: 'runtime', actionType: 'schema_change' },
-  ARCHITECTURE_DRIFT: { surface: 'runtime', actionType: 'code_change' },
-  SKILL_REDUNDANCY: { surface: 'dev-build-isolated', actionType: 'config_change' },
+  IMPLICIT_MUTATION: { surface: "runtime", actionType: "code_change" },
+  ORPHAN_EMIT: { surface: "runtime", actionType: "code_change" },
+  DUPLICATE_HANDLER: { surface: "runtime", actionType: "code_change" },
+  SILENT_DROP: { surface: "dev-build-isolated", actionType: "code_change" },
+  CIRCULAR_DEPENDENCY: { surface: "runtime", actionType: "code_change" },
+  DEPENDENCY_COLLAPSE_RISK: { surface: "runtime", actionType: "schema_change" },
+  ARCHITECTURE_DRIFT: { surface: "runtime", actionType: "code_change" },
+  SKILL_REDUNDANCY: {
+    surface: "dev-build-isolated",
+    actionType: "config_change",
+  },
 };
 
 /** Default mapping for unknown subtypes. */
 const FALLBACK_MAPPING: FindingMappingRule = {
-  surface: 'runtime',
-  actionType: 'code_change',
+  surface: "runtime",
+  actionType: "code_change",
 };
 
 /**

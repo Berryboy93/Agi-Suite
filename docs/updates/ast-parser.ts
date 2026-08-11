@@ -20,7 +20,7 @@ import {
   type CallExpression,
   type ImportDeclaration,
   type Node,
-} from 'ts-morph';
+} from "ts-morph";
 import type {
   FileSymbols,
   ImportEdge,
@@ -28,19 +28,35 @@ import type {
   HandlerRegistration,
   DirectMutation,
   ReduxDispatch,
-} from './ast-types.js';
+} from "./ast-types.js";
 
 /** Patterns that identify EventBus emit methods. */
-const EMIT_METHOD_NAMES = new Set(['emit', 'dispatch', 'publish', 'trigger', 'fire']);
+const EMIT_METHOD_NAMES = new Set([
+  "emit",
+  "dispatch",
+  "publish",
+  "trigger",
+  "fire",
+]);
 
 /** Patterns that identify event handler registration. */
 const HANDLER_METHOD_NAMES = new Set([
-  'on', 'once', 'listen', 'subscribe', 'addListener', 'addEventListener',
+  "on",
+  "once",
+  "listen",
+  "subscribe",
+  "addListener",
+  "addEventListener",
 ]);
 
 /** Patterns that identify direct state mutations (INVARIANT 1 violation candidates). */
 const DIRECT_MUTATION_PATTERNS = new Set([
-  'setState', 'set', 'assign', 'update', 'mutate', 'replace',
+  "setState",
+  "set",
+  "assign",
+  "update",
+  "mutate",
+  "replace",
 ]);
 
 export interface ParseOptions {
@@ -147,8 +163,8 @@ export class ASTParser {
           const raw = tryGetStringLiteral(specifier);
           edges.push({
             fromFile: sf.getFilePath(),
-            toFile: raw ?? '[dynamic]',
-            specifier: raw ?? '[dynamic]',
+            toFile: raw ?? "[dynamic]",
+            specifier: raw ?? "[dynamic]",
             line: call.getStartLineNumber(),
             isTypeOnly: false,
           });
@@ -183,7 +199,9 @@ export class ASTParser {
         isTypeOnly: decl.isTypeOnly(),
       };
     } catch (err) {
-      warnings.push(`Import resolution error at line ${decl.getStartLineNumber()}: ${err}`);
+      warnings.push(
+        `Import resolution error at line ${decl.getStartLineNumber()}: ${err}`,
+      );
       return null;
     }
   }
@@ -219,7 +237,10 @@ export class ASTParser {
 
   // ─── Handler Registration Detection ──────────────────────────────────────
 
-  private extractHandlers(sf: SourceFile, _warnings: string[]): HandlerRegistration[] {
+  private extractHandlers(
+    sf: SourceFile,
+    _warnings: string[],
+  ): HandlerRegistration[] {
     const handlers: HandlerRegistration[] = [];
 
     sf.getDescendantsOfKind(SyntaxKind.CallExpression).forEach((call) => {
@@ -242,7 +263,7 @@ export class ASTParser {
           secondArg.getKind() === SyntaxKind.ArrowFunction ||
           secondArg.getKind() === SyntaxKind.FunctionExpression
         ) {
-          handlerSymbol = '[anonymous]';
+          handlerSymbol = "[anonymous]";
         }
       }
 
@@ -261,7 +282,10 @@ export class ASTParser {
 
   // ─── Direct Mutation Detection (INVARIANT 1) ─────────────────────────────
 
-  private extractMutations(sf: SourceFile, _warnings: string[]): DirectMutation[] {
+  private extractMutations(
+    sf: SourceFile,
+    _warnings: string[],
+  ): DirectMutation[] {
     const mutations: DirectMutation[] = [];
 
     sf.getDescendantsOfKind(SyntaxKind.CallExpression).forEach((call) => {
@@ -285,12 +309,15 @@ export class ASTParser {
 
   // ─── Redux Dispatch Detection ─────────────────────────────────────────────
 
-  private extractDispatches(sf: SourceFile, _warnings: string[]): ReduxDispatch[] {
+  private extractDispatches(
+    sf: SourceFile,
+    _warnings: string[],
+  ): ReduxDispatch[] {
     const dispatches: ReduxDispatch[] = [];
 
     sf.getDescendantsOfKind(SyntaxKind.CallExpression).forEach((call) => {
       const methodName = getCalledMethodName(call);
-      if (methodName !== 'dispatch') return;
+      if (methodName !== "dispatch") return;
 
       const args = call.getArguments();
       const firstArg = args[0];
@@ -301,7 +328,7 @@ export class ASTParser {
         if (firstArg.getKind() === SyntaxKind.ObjectLiteralExpression) {
           for (const child of firstArg.getChildren()) {
             const text = child.getText();
-            if (text.includes('type:')) {
+            if (text.includes("type:")) {
               const match = text.match(/type:\s*['"]([^'"]+)['"]/);
               if (match?.[1]) actionType = match[1];
             }

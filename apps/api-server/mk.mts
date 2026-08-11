@@ -1,7 +1,7 @@
-import postgres from 'postgres';
+import postgres from "postgres";
 
-const dbUrl = process.env['DATABASE_URL'];
-if (!dbUrl) throw new Error('DATABASE_URL not set');
+const dbUrl = process.env["DATABASE_URL"];
+if (!dbUrl) throw new Error("DATABASE_URL not set");
 
 const sql = postgres(dbUrl);
 try {
@@ -12,7 +12,7 @@ try {
       "updated_at" timestamp DEFAULT now() NOT NULL
     )
   `;
-  console.log('done');
+  console.log("done");
 } finally {
   await sql.end();
 }

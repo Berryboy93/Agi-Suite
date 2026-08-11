@@ -22,8 +22,8 @@ import {
   type BlastRadiusLevel,
   BLAST_RADIUS_ORDER,
   compareBlastRadius,
-} from '../surfaces/surfaces.js';
-import type { Outcome } from './outcomes.js';
+} from "../surfaces/surfaces.js";
+import type { Outcome } from "./outcomes.js";
 
 // ─── Advisory Severity Input ──────────────────────────────────────────────────
 
@@ -77,10 +77,10 @@ export interface RepricingResult {
 
 /** Maps blast radius level to the most permissive allowed outcome at that level. */
 const LEVEL_TO_CEILING: Record<BlastRadiusLevel, Outcome> = {
-  low: 'ALLOW_RUNTIME',
-  medium: 'ALLOW_SANDBOX',
-  high: 'ALLOW_STAGING',
-  critical: 'DEFER',
+  low: "ALLOW_RUNTIME",
+  medium: "ALLOW_SANDBOX",
+  high: "ALLOW_STAGING",
+  critical: "DEFER",
 };
 
 /**
@@ -97,7 +97,8 @@ export function applyRepricing(input: RepricingInput): RepricingResult {
       downgraded: false,
       anchoringDivergenceDetected: false,
       flaggedForManualReview: false,
-      reason: 'No advisory severity available — downgrade prohibited. Change retains matrix-derived outcome.',
+      reason:
+        "No advisory severity available — downgrade prohibited. Change retains matrix-derived outcome.",
     };
   }
 
@@ -121,7 +122,8 @@ export function applyRepricing(input: RepricingInput): RepricingResult {
   }
 
   // Guard 3: Re-priced level must be strictly LOWER than matrix-derived level
-  const canDowngrade = compareBlastRadius(input.repricedLevel, input.matrixBlastRadius) < 0;
+  const canDowngrade =
+    compareBlastRadius(input.repricedLevel, input.matrixBlastRadius) < 0;
 
   if (!canDowngrade) {
     return {

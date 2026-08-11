@@ -24,7 +24,10 @@ router.get("/status", async (_req: Request, res: Response) => {
   try {
     const { sql } = await import("drizzle-orm");
     const rows = await db
-      .select({ status: agents.status, count: sql<string>`cast(count(*) as text)` })
+      .select({
+        status: agents.status,
+        count: sql<string>`cast(count(*) as text)`,
+      })
       .from(agents)
       .groupBy(agents.status);
 
@@ -137,17 +140,26 @@ router.get("/", async (req: Request, res: Response) => {
     const rows = await db
       .select()
       .from(agents)
-      .where(status ? eq(agents.status, status as "pending" | "claimed" | "running" | "done" | "failed") : undefined)
+      .where(
+        status
+          ? eq(
+              agents.status,
+              status as "pending" | "claimed" | "running" | "done" | "failed",
+            )
+          : undefined,
+      )
       .orderBy(desc(agents.createdAt))
       .limit(limit);
 
-    res.json(rows.map((a) => ({
-      agentId: a.id,
-      type: a.type,
-      status: a.status,
-      createdAt: a.createdAt!.toISOString(),
-      completedAt: a.completedAt?.toISOString(),
-    })));
+    res.json(
+      rows.map((a) => ({
+        agentId: a.id,
+        type: a.type,
+        status: a.status,
+        createdAt: a.createdAt!.toISOString(),
+        completedAt: a.completedAt?.toISOString(),
+      })),
+    );
   } catch (err) {
     logger.error({ err }, "[agents] list failed");
     res.status(500).json({ error: "Failed to list agents" });

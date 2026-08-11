@@ -13,15 +13,15 @@
  * No mutations. No writes. Suggestion-only governance mode.
  */
 
-import type { FileSymbols } from '../analysis/ast-types.js';
-import type { DependencyGraph } from '../graphs/dependency-graph.js';
-import type { EventFlowGraph } from '../graphs/event-flow-graph.js';
-import type { SkillClusterGraph } from '../graphs/skill-cluster-graph.js';
-import { computeConfidence } from '../analysis/ast-types.js';
+import type { FileSymbols } from "../analysis/ast-types.js";
+import type { DependencyGraph } from "../graphs/dependency-graph.js";
+import type { EventFlowGraph } from "../graphs/event-flow-graph.js";
+import type { SkillClusterGraph } from "../graphs/skill-cluster-graph.js";
+import { computeConfidence } from "../analysis/ast-types.js";
 
 // ─── Finding Types (per spec output spec) ────────────────────────────────────
 
-export type FindingType = 'STATE' | 'EVENT' | 'ARCHITECTURE';
+export type FindingType = "STATE" | "EVENT" | "ARCHITECTURE";
 
 export interface Finding {
   readonly type: FindingType;
@@ -50,9 +50,9 @@ export interface EvaluationResult {
     readonly totalEventsDetected: number;
     readonly totalViolations: number;
     readonly confidenceDistribution: {
-      readonly high: number;   // >= 0.8
+      readonly high: number; // >= 0.8
       readonly medium: number; // 0.5–0.79
-      readonly low: number;    // < 0.5
+      readonly low: number; // < 0.5
     };
   };
 }
@@ -69,8 +69,8 @@ export function evaluate(input: EvaluationInput): EvaluationResult {
 
       if (!isInsideHandler) {
         findings.push({
-          type: 'STATE',
-          subtype: 'IMPLICIT_MUTATION',
+          type: "STATE",
+          subtype: "IMPLICIT_MUTATION",
           file: mutation.file,
           line: mutation.line,
           confidence: computeConfidence({
@@ -80,8 +80,8 @@ export function evaluate(input: EvaluationInput): EvaluationResult {
           }),
           description:
             `Direct state mutation via \`${mutation.pattern}\`` +
-            (mutation.targetSymbol ? ` on \`${mutation.targetSymbol}\`` : '') +
-            ' — not traceable to EventBus emit, Redux dispatch, or explicit state handler.',
+            (mutation.targetSymbol ? ` on \`${mutation.targetSymbol}\`` : "") +
+            " — not traceable to EventBus emit, Redux dispatch, or explicit state handler.",
         });
       }
     }
@@ -89,12 +89,12 @@ export function evaluate(input: EvaluationInput): EvaluationResult {
 
   // ── Rule Set 2: EVENT findings (INVARIANT 2 — No Orphan Events) ────────────
   for (const violation of input.eventFlowGraph.violations) {
-    if (violation.type === 'MISSING_HANDLER') {
+    if (violation.type === "MISSING_HANDLER") {
       const primaryEmit = violation.emits[0];
       findings.push({
-        type: 'EVENT',
-        subtype: 'ORPHAN_EMIT',
-        file: primaryEmit?.file ?? '[unknown]',
+        type: "EVENT",
+        subtype: "ORPHAN_EMIT",
+        file: primaryEmit?.file ?? "[unknown]",
         line: primaryEmit?.line ?? 0,
         confidence: computeConfidence({
           astCertainty: 1.0,
@@ -104,16 +104,16 @@ export function evaluate(input: EvaluationInput): EvaluationResult {
         description:
           `Event "${violation.eventName}" is emitted ` +
           `${violation.emits.length} time(s) but has no registered handler. ` +
-          'Declare an intentional no-op policy or register a handler.',
+          "Declare an intentional no-op policy or register a handler.",
       });
     }
 
-    if (violation.type === 'DUPLICATE_HANDLER') {
+    if (violation.type === "DUPLICATE_HANDLER") {
       const first = violation.handlers[0];
       findings.push({
-        type: 'EVENT',
-        subtype: 'DUPLICATE_HANDLER',
-        file: first?.file ?? '[unknown]',
+        type: "EVENT",
+        subtype: "DUPLICATE_HANDLER",
+        file: first?.file ?? "[unknown]",
         line: first?.line ?? 0,
         confidence: computeConfidence({
           astCertainty: 1.0,
@@ -122,25 +122,25 @@ export function evaluate(input: EvaluationInput): EvaluationResult {
         }),
         description:
           `Event "${violation.eventName}" has ${violation.handlers.length} registered handlers. ` +
-          'Multiple handlers for the same event cause non-deterministic execution order.',
+          "Multiple handlers for the same event cause non-deterministic execution order.",
         relatedFiles: violation.handlers.map((h) => `${h.file}:${h.line}`),
       });
     }
 
-    if (violation.type === 'SILENT_EVENT_DROP') {
-      const noop = violation as import('../graphs/event-flow-graph.js').SilentDropViolation;
+    if (violation.type === "SILENT_EVENT_DROP") {
+      const noop =
+        violation as import("../graphs/event-flow-graph.js").SilentDropViolation;
       findings.push({
-        type: 'EVENT',
-        subtype: 'SILENT_DROP',
-        file: '[multiple]',
+        type: "EVENT",
+        subtype: "SILENT_DROP",
+        file: "[multiple]",
         line: 0,
         confidence: computeConfidence({
           astCertainty: 0.6,
           structuralConsistency: 0.1,
           historicalRecurrence: 0,
         }),
-        description:
-          `Event "${noop.eventName}": ${noop.reason}`,
+        description: `Event "${noop.eventName}": ${noop.reason}`,
       });
     }
   }
@@ -149,9 +149,11 @@ export function evaluate(input: EvaluationInput): EvaluationResult {
   if (!input.dependencyGraph.isDAG) {
     for (const cycle of input.dependencyGraph.cycles) {
       findings.push({
-        type: 'ARCHITECTURE',
-        subtype: cycle.collapseRisk ? 'DEPENDENCY_COLLAPSE_RISK' : 'CIRCULAR_DEPENDENCY',
-        file: cycle.cycle[0] ?? '[unknown]',
+        type: "ARCHITECTURE",
+        subtype: cycle.collapseRisk
+          ? "DEPENDENCY_COLLAPSE_RISK"
+          : "CIRCULAR_DEPENDENCY",
+        file: cycle.cycle[0] ?? "[unknown]",
         line: 0,
         confidence: computeConfidence({
           astCertainty: 1.0,
@@ -161,8 +163,8 @@ export function evaluate(input: EvaluationInput): EvaluationResult {
         description:
           `Circular dependency detected across ${cycle.cycle.length} module(s). ` +
           (cycle.collapseRisk
-            ? 'DEPENDENCY COLLAPSE RISK — cycle spans multiple packages, may cause runtime instability.'
-            : 'Cycle confined to a single package.'),
+            ? "DEPENDENCY COLLAPSE RISK — cycle spans multiple packages, may cause runtime instability."
+            : "Cycle confined to a single package."),
         relatedFiles: cycle.cycle,
       });
     }
@@ -173,12 +175,13 @@ export function evaluate(input: EvaluationInput): EvaluationResult {
     // Detect files with high mutation rate and zero event interaction —
     // a signal of drift away from event-driven design
     const mutationCount = file.mutations.length;
-    const eventInteractionCount = file.emits.length + file.handlers.length + file.dispatches.length;
+    const eventInteractionCount =
+      file.emits.length + file.handlers.length + file.dispatches.length;
 
     if (mutationCount >= 3 && eventInteractionCount === 0) {
       findings.push({
-        type: 'ARCHITECTURE',
-        subtype: 'ARCHITECTURE_DRIFT',
+        type: "ARCHITECTURE",
+        subtype: "ARCHITECTURE_DRIFT",
         file: file.filePath,
         line: 0,
         confidence: computeConfidence({
@@ -188,7 +191,7 @@ export function evaluate(input: EvaluationInput): EvaluationResult {
         }),
         description:
           `File has ${mutationCount} state mutation(s) and zero event-system interaction. ` +
-          'Indicates deviation from the intended event-driven architecture.',
+          "Indicates deviation from the intended event-driven architecture.",
       });
     }
   }
@@ -196,9 +199,9 @@ export function evaluate(input: EvaluationInput): EvaluationResult {
   // ── Rule Set 5: ARCHITECTURE — Skill Redundancy ────────────────────────────
   for (const cluster of input.skillClusterGraph.redundantClusters) {
     findings.push({
-      type: 'ARCHITECTURE',
-      subtype: 'SKILL_REDUNDANCY',
-      file: cluster[0] ?? '[unknown]',
+      type: "ARCHITECTURE",
+      subtype: "SKILL_REDUNDANCY",
+      file: cluster[0] ?? "[unknown]",
       line: 0,
       confidence: computeConfidence({
         astCertainty: 0.8,
@@ -207,15 +210,14 @@ export function evaluate(input: EvaluationInput): EvaluationResult {
       }),
       description:
         `${cluster.length} SKILL.md files appear semantically redundant. ` +
-        'Conflicting skill triggers may produce non-deterministic governance decisions.',
+        "Conflicting skill triggers may produce non-deterministic governance decisions.",
       relatedFiles: cluster,
     });
   }
 
   // ── Metrics ────────────────────────────────────────────────────────────────
   const totalEventsDetected =
-    input.eventFlowGraph.nodes.size +
-    input.eventFlowGraph.dynamicEmits.length;
+    input.eventFlowGraph.nodes.size + input.eventFlowGraph.dynamicEmits.length;
 
   const dist = { high: 0, medium: 0, low: 0 };
   for (const f of findings) {
@@ -244,10 +246,7 @@ export function evaluate(input: EvaluationInput): EvaluationResult {
  */
 function isMutationInHandler(file: FileSymbols, mutationLine: number): boolean {
   for (const handler of file.handlers) {
-    if (
-      handler.line <= mutationLine &&
-      mutationLine - handler.line <= 50
-    ) {
+    if (handler.line <= mutationLine && mutationLine - handler.line <= 50) {
       return true;
     }
   }

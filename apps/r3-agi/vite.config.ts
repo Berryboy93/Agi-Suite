@@ -9,7 +9,10 @@ export default defineConfig({
       name: "treat-js-files-as-jsx",
       async transform(code, id) {
         if (!id.match(/src\/.*\.js$/)) return null;
-        return transformWithEsbuild(code, id, { loader: "jsx", jsx: "automatic" });
+        return transformWithEsbuild(code, id, {
+          loader: "jsx",
+          jsx: "automatic",
+        });
       },
     },
     react(),
@@ -20,7 +23,9 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"),
       "@/components": path.resolve(__dirname, "src/components/ui"),
       "@/tokens": path.resolve(__dirname, "src/ui/tokens"),
-      "@/primitives": path.resolve(__dirname, "src/ui/components"),
+      "@/primitives": path.resolve(__dirname, "src/primitives"),
+      "@/lib": path.resolve(__dirname, "src/lib"),
+      "@/hooks": path.resolve(__dirname, "src/hooks"),
     },
   },
   server: {

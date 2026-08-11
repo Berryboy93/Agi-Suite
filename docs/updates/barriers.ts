@@ -17,32 +17,32 @@
  * reported status — it never performs health checks itself.
  */
 
-import type { Outcome } from './outcomes.js';
+import type { Outcome } from "./outcomes.js";
 
 // ─── Barrier Identifiers ──────────────────────────────────────────────────────
 
 export const BARRIER_IDS = [
-  'cryptographicAuth',
-  'credentialVaultIsolation',
-  'paymentIsolation',
-  'sandboxExecution',
-  'productionDeploymentGate',
+  "cryptographicAuth",
+  "credentialVaultIsolation",
+  "paymentIsolation",
+  "sandboxExecution",
+  "productionDeploymentGate",
 ] as const;
 
-export type BarrierId = typeof BARRIER_IDS[number];
+export type BarrierId = (typeof BARRIER_IDS)[number];
 
 /** The active-state definition for each barrier (from spec). */
 export const BARRIER_ACTIVE_STATE_DEFINITIONS: Record<BarrierId, string> = {
   cryptographicAuth:
-    'Identity verification system reports healthy and all required signatures are valid',
+    "Identity verification system reports healthy and all required signatures are valid",
   credentialVaultIsolation:
-    'Vault reports sealed status; no credential material accessible from build environment',
+    "Vault reports sealed status; no credential material accessible from build environment",
   paymentIsolation:
-    'Payment network segmentation confirmed; no payment system interfaces reachable from build/staging',
+    "Payment network segmentation confirmed; no payment system interfaces reachable from build/staging",
   sandboxExecution:
-    'Sandbox reports enforced boundary; process cannot escape via namespace, seccomp, or hardware isolation',
+    "Sandbox reports enforced boundary; process cannot escape via namespace, seccomp, or hardware isolation",
   productionDeploymentGate:
-    'Deployment gate reports passable; all required approvals and checks satisfied',
+    "Deployment gate reports passable; all required approvals and checks satisfied",
 };
 
 // ─── Barrier State ────────────────────────────────────────────────────────────
@@ -63,19 +63,19 @@ export type BarrierSnapshot = Record<BarrierId, BarrierState>;
 /** Per spec barrier requirements table. */
 export const REQUIRED_BARRIERS: Record<Outcome, readonly BarrierId[]> = {
   ALLOW_RUNTIME: Object.freeze([
-    'cryptographicAuth',
-    'credentialVaultIsolation',
-    'paymentIsolation',
-    'productionDeploymentGate',
+    "cryptographicAuth",
+    "credentialVaultIsolation",
+    "paymentIsolation",
+    "productionDeploymentGate",
   ]),
   ALLOW_STAGING: Object.freeze([
-    'cryptographicAuth',
-    'credentialVaultIsolation',
-    'paymentIsolation',
+    "cryptographicAuth",
+    "credentialVaultIsolation",
+    "paymentIsolation",
   ]),
-  ALLOW_SANDBOX: Object.freeze(['sandboxExecution']),
-  DEFER: Object.freeze([]),   // No barrier requirements for DEFER
-  BLOCK: Object.freeze([]),   // No barriers needed — immediate termination
+  ALLOW_SANDBOX: Object.freeze(["sandboxExecution"]),
+  DEFER: Object.freeze([]), // No barrier requirements for DEFER
+  BLOCK: Object.freeze([]), // No barriers needed — immediate termination
 };
 
 // ─── Barrier Verification ─────────────────────────────────────────────────────
@@ -127,13 +127,15 @@ export function verifyBarriers(
   // Demotion logic
   let demotedOutcome: Outcome;
 
-  if (desiredOutcome === 'ALLOW_RUNTIME') {
-    demotedOutcome = 'BLOCK';
-  } else if (desiredOutcome === 'ALLOW_STAGING') {
+  if (desiredOutcome === "ALLOW_RUNTIME") {
+    demotedOutcome = "BLOCK";
+  } else if (desiredOutcome === "ALLOW_STAGING") {
     // Demote to ALLOW_SANDBOX if sandboxExecution is active, else BLOCK
-    demotedOutcome = barriers.sandboxExecution.active ? 'ALLOW_SANDBOX' : 'BLOCK';
-  } else if (desiredOutcome === 'ALLOW_SANDBOX') {
-    demotedOutcome = 'BLOCK';
+    demotedOutcome = barriers.sandboxExecution.active
+      ? "ALLOW_SANDBOX"
+      : "BLOCK";
+  } else if (desiredOutcome === "ALLOW_SANDBOX") {
+    demotedOutcome = "BLOCK";
   } else {
     demotedOutcome = desiredOutcome;
   }
