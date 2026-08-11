@@ -62,6 +62,13 @@ catalogs:
       version: 3.25.76
 
 overrides:
+  shell-quote: '>=1.8.1'
+  linkify-it: '>=4.0.1'
+  postcss: '>=8.4.32'
+  js-yaml: '>=4.1.0'
+  fast-uri: '>=2.3.0'
+  brace-expansion: '>=2.0.1'
+  body-parser: '>=1.20.2'
   punycode: 2.3.1
 
 importers:
