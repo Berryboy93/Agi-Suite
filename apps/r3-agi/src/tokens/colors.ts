@@ -4,6 +4,7 @@ export const colors = {
       healthy: "var(--success)",
       critical: "var(--danger)",
       warning: "var(--warn)",
+      active: "var(--info)",
     },
     data: {
       series1: "var(--acid)",
@@ -21,9 +22,9 @@ export const colors = {
       subtle: "var(--border)",
       strong: "var(--border)",
     },
-    surface: {
-      base: "var(--surface)",
-      elevated: "var(--surface)",
+    background: {
+      surface: "var(--surface)",
+      elevated: "var(--background)",
     },
   },
   acid: "var(--acid)",

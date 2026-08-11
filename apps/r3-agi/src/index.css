@@ -324,3 +324,31 @@ tr:last-child td {
 .animate-caret-blink {
   animation: caret-blink 1.25s ease-out infinite;
 }
+
+/* ── Bridge: Token variables ── */
+:root {
+  --success: var(--color-status-healthy);
+  --danger: var(--color-status-critical);
+  --warn: var(--color-status-warning);
+  --info: var(--color-interactive-default);
+  --acid: var(--color-acid);
+  --foreground: var(--color-content-primary);
+  --background: var(--color-bg-base);
+  --surface: var(--color-bg-surface);
+  --border: var(--color-border-subtle);
+  --muted: var(--color-content-secondary);
+}
+
+/* ── Bridge: Token variables ── */
+:root {
+  --success: var(--color-status-healthy);
+  --danger: var(--color-status-critical);
+  --warn: var(--color-status-warning);
+  --info: var(--color-interactive-default);
+  --acid: var(--color-acid);
+  --foreground: var(--color-content-primary);
+  --background: var(--color-bg-base);
+  --surface: var(--color-bg-surface);
+  --border: var(--color-border-subtle);
+  --muted: var(--color-content-secondary);
+}
