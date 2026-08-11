@@ -24,7 +24,7 @@ interface PanelProps {
   style?: React.CSSProperties;
 }
 
-export function Panel({
+const PanelComponent = ({
   children,
   variant = "default",
   padding = "md",
@@ -32,7 +32,7 @@ export function Panel({
   className = "",
   as: Component = "div",
   style,
-}: PanelProps) {
+}: PanelProps) => {
   const paddingMap: Record<PanelPadding, string> = {
     none: "0",
     sm: `${spacing.semantic.component.sm} ${spacing.semantic.component.md}`,
@@ -66,7 +66,7 @@ export function Panel({
       {children}
     </Component>
   );
-}
+};
 
 interface PanelHeaderProps {
   title: ReactNode;
@@ -75,12 +75,7 @@ interface PanelHeaderProps {
   action?: ReactNode;
 }
 
-Panel.Header = function PanelHeader({
-  title,
-  subtitle,
-  icon,
-  action,
-}: PanelHeaderProps) {
+const PanelHeader = ({ title, subtitle, icon, action }: PanelHeaderProps) => {
   const style: React.CSSProperties = {
     display: "flex",
     alignItems: "center",
@@ -131,7 +126,7 @@ interface PanelBodyProps {
   className?: string;
 }
 
-Panel.Body = function PanelBody({ children, className = "" }: PanelBodyProps) {
+const PanelBody = ({ children, className = "" }: PanelBodyProps) => {
   const style: React.CSSProperties = {
     padding: `${spacing.semantic.component.md} ${spacing.semantic.component.lg}`,
     color: colors.semantic.content.primary,
@@ -148,7 +143,7 @@ interface PanelFooterProps {
   children: ReactNode;
 }
 
-Panel.Footer = function PanelFooter({ children }: PanelFooterProps) {
+const PanelFooter = ({ children }: PanelFooterProps) => {
   const style: React.CSSProperties = {
     padding: `${spacing.semantic.component.md} ${spacing.semantic.component.lg}`,
     borderTop: `1px solid ${colors.semantic.border.subtle}`,
@@ -162,4 +157,14 @@ Panel.Footer = function PanelFooter({ children }: PanelFooterProps) {
       {children}
     </footer>
   );
+};
+
+export const Panel = Object.assign(PanelComponent, {
+  Header: PanelHeader,
+  Body: PanelBody,
+  Footer: PanelFooter,
+}) as unknown as typeof PanelComponent & {
+  Header: typeof PanelHeader;
+  Body: typeof PanelBody;
+  Footer: typeof PanelFooter;
 };
